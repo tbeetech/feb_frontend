@@ -18,7 +18,7 @@ const productsApi = createApi({
                     page: page.toString(),
                     limit: Limit.toString(),
                 }).toString();
-                return `/?${queryParams}`;
+                return `?${queryParams}`;
             },
             providesTags: ["Products"],
         }),
