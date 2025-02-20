@@ -1,6 +1,6 @@
 export const getBaseUrl = () => {
     const isDevelopment = import.meta.env.MODE === 'development';
     return isDevelopment 
-        ? 'http://localhost:5000'
-        : 'https://feb-luxury.vercel.app';
+        ? import.meta.env.VITE_API_URL
+        : import.meta.env.VITE_PRODUCTION_API_URL;
 };
