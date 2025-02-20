@@ -1,0 +1,107 @@
+[
+    {
+     
+      "name": "Yellow shoes",
+      "category": "accessories",
+      "description": "Stylish Leather shoes",
+      "price": 120000,
+      "oldPrice": 180000,
+      "image": "https://i.pinimg.com/736x/98/62/de/9862de32c2cbcd02927c7aeef058a2c9.jpg",
+      "rating": 4.5
+      
+    },
+    {
+      
+      "name": "Hand wear",
+      "category": "accessories",
+      "description": "Louis vuiton Hand band",
+      "price": 25000,
+      "oldPrice": 35000,
+      "image": "https://i.pinimg.com/736x/35/38/79/3538796d17bd7fe6a623a21e1514a1c0.jpg",
+      
+      "rating": 4.0
+    },
+    {
+      
+      "name": "Pink shoes",
+      "category": "accessories",
+      "description": "Pink ladies classic high heel shoes",
+      "price": 78600,
+      "image": "https://i.pinimg.com/736x/02/98/bb/0298bbb8bcbbe58ba839ef3257fe30fd.jpg",
+      
+      "rating": 4.7
+    },
+    {
+     
+      "name": "Hand wear",
+      "category": "jewerly",
+      "description": "classic hand wear for special occasions.",
+      "price": 48000,
+      "image": "https://i.pinimg.com/736x/75/78/d0/7578d09e44c60a0a9590a7dc47b0b36c.jpg",
+      "rating": 4.2
+    },
+    {
+      
+      "name": "Gold and bead necklace",
+      "category": "jewerly",
+      "description": "Luxurious necklace for special occasions.",
+      "price": 345000,
+      "oldPrice": 450000,
+      "image": "https://i.pinimg.com/736x/45/54/cc/4554cc9c47311a64024a1dd4668cc8ea.jpg",
+      "rating": 4.3
+    },
+    {
+      "name": "Lady Tuxedo",
+      "category": "dress",
+      "description": "Classic coporate ladies formal suit",
+      "price": 266000,
+      "image": "https://i.pinimg.com/736x/dc/5f/26/dc5f269dc24f28a844f07addbf45b431.jpg",
+
+      "rating": 4.4
+    },
+    {
+      "name": "deep red Robe",
+      "category": "dress",
+      "description": "Slick ladies apparel for special occasions.",
+      "price": 600000,
+      "oldPrice": 440000,
+      "image": "https://i.pinimg.com/736x/30/03/f8/3003f8680f296a689aa28cb767b50abd.jpg",
+      "rating": 4.8
+    },
+    {
+
+      "name": "Channel Ladies Bag",
+      "category": "bags",
+      "description": "Black + golden handle channel ladies bag.",
+      "price": 322000,
+      "image": "https://i.pinimg.com/736x/64/fd/c7/64fdc7adca75e47c11717fb8626fe18d.jpg",
+      "rating": 4.1
+    },
+    {
+      "name": "Channel Ladies Bag",
+      "category": "bags",
+      "description": "Pink channel ladies bag",
+      "price": 123000,
+      "image": "https://i.pinimg.com/736x/ab/0f/e5/ab0fe51fd79b6f3f530a770bc9ac8cb1.jpg",
+      "rating": 4.6
+    },
+    {
+      "name": "Pink Robe",
+      "category": "dress",
+      "description": "Comfortable Robe",
+      "price": 200000,
+      "oldPrice": 250000,
+      "image": "https://i.pinimg.com/736x/2a/fa/d6/2afad6bd506a637b7c2d638dc494b08c.jpg",
+      "rating": 4.2
+    },
+    {
+      "name": "Brown-Robe",
+      "category": "clothes",
+      "description": "Comfortable maxi dress for casual outings.",
+      "price": 40,
+      "image": "https://i.pinimg.com/736x/cd/2a/c7/cd2ac7b87d96bf1f7056cfdcfeac6fc9.jpg",
+      "color": "green",
+      "rating": 4.2
+    }
+
+  ]
