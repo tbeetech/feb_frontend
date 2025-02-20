@@ -1,6 +1,7 @@
 import React from "react";
 import { useDispatch } from "react-redux";
-import { addToCart, decrementQuantity, removeFromCart } from "../../redux/features/cart/cartSlice";
+import { addToCart, decrementQuantity, removeFromCart, clearCart } from "../../redux/features/cart/cartSlice";
+import { Link } from "react-router-dom";
 
 const CartModal = ({ products, isOpen, onClose }) => {
     const dispatch = useDispatch();
@@ -16,8 +17,14 @@ const CartModal = ({ products, isOpen, onClose }) => {
     };
 
     const handleRemove = (product) => {
-        dispatch(removeFromCart(product));
+        dispatch(removeFromCart({ id: product._id }));
     };
+
+    const handleClearCart = () => {
+        dispatch(clearCart());
+    };
+
+    const total = products.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
@@ -32,48 +39,65 @@ const CartModal = ({ products, isOpen, onClose }) => {
                 {products.length === 0 ? (
                     <p className="text-center py-4">Your cart is empty</p>
                 ) : (
-                    <div className="space-y-4">
-                        {products.map((product) => (
-                            <div key={product._id} className="flex items-center gap-4 border-b pb-4">
-                                <img
-                                    src={product.image}
-                                    alt={product.name}
-                                    className="w-20 h-20 object-cover rounded"
-                                />
-                                <div className="flex-1">
-                                    <h3 className="font-semibold">{product.name}</h3>
-                                    <p className="text-primary">₦{product.price}</p>
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <button
-                                            onClick={() => handleDecrement(product)}
-                                            className="px-2 py-1 bg-gray-200 rounded"
-                                        >
-                                            -
-                                        </button>
-                                        <span>{product.quantity}</span>
-                                        <button
-                                            onClick={() => handleIncrement(product)}
-                                            className="px-2 py-1 bg-gray-200 rounded"
-                                        >
-                                            +
-                                        </button>
-                                        <button
-                                            onClick={() => handleRemove(product)}
-                                            className="text-red-500 ml-4"
-                                        >
-                                            Remove
-                                        </button>
+                    <>
+                        <div className="space-y-4">
+                            {products.map((product) => (
+                                <div key={product._id} className="flex items-center gap-4 border-b pb-4">
+                                    <img
+                                        src={product.image}
+                                        alt={product.name}
+                                        className="w-20 h-20 object-cover rounded"
+                                    />
+                                    <div className="flex-1">
+                                        <h3 className="font-semibold">{product.name}</h3>
+                                        <p className="text-primary">₦{product.price}</p>
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <button
+                                                onClick={() => handleDecrement(product)}
+                                                className="px-2 py-1 bg-gray-200 rounded"
+                                            >
+                                                -
+                                            </button>
+                                            <span>{product.quantity}</span>
+                                            <button
+                                                onClick={() => handleIncrement(product)}
+                                                className="px-2 py-1 bg-gray-200 rounded"
+                                            >
+                                                +
+                                            </button>
+                                            <button
+                                                onClick={() => handleRemove(product)}
+                                                className="text-red-500 ml-4"
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                        <div className="flex justify-between items-center pt-4">
-                            <span className="font-semibold">Total:</span>
-                            <span className="text-primary font-bold">
-                                ₦{products.reduce((total, item) => total + item.price * item.quantity, 0)}
-                            </span>
+                            ))}
                         </div>
-                    </div>
+                        <div className="mt-4 space-y-4">
+                            <div className="flex justify-between items-center pt-4 border-t">
+                                <span className="font-semibold">Total:</span>
+                                <span className="text-primary font-bold">₦{total}</span>
+                            </div>
+                            <div className="flex justify-between gap-4">
+                                <button
+                                    onClick={handleClearCart}
+                                    className="w-1/2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                >
+                                    Clear Cart
+                                </button>
+                                <Link
+                                    to="/checkout"
+                                    className="w-1/2 px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark text-center"
+                                    onClick={onClose}
+                                >
+                                    Proceed to Checkout
+                                </Link>
+                            </div>
+                        </div>
+                    </>
                 )}
             </div>
         </div>
