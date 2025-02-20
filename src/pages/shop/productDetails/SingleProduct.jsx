@@ -1,20 +1,29 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import RatingStars from '../../../components/RatingStars';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useFetchProductByIdQuery } from '../../../redux/features/products/productsApi';
-import { addToCart } from '../../../redux/features/cart/cartSlice';
+import { addToCart, decrementQuantity } from '../../../redux/features/cart/cartSlice';
+
 const SingleProduct = () => {
     const { id } = useParams();
-
     const dispatch = useDispatch();
     const { data, error, isLoading } = useFetchProductByIdQuery(id);
     const singleProduct = data?.product || {};
     const ProductReviews = data?.reviews || [];
+    
+    // Get cart state to check if product exists
+    const cartProducts = useSelector(state => state.cart.products);
+    const productInCart = cartProducts.find(product => product._id === id);
+    const quantity = productInCart ? productInCart.quantity : 0;
 
-    const handleAddToCart = (product) =>{
-            dispatch(addToCart(product))
-    }
+    const handleAddToCart = (product) => {
+        dispatch(addToCart(product));
+    };
+
+    const handleDecrementQuantity = (product) => {
+        dispatch(decrementQuantity(product));
+    };
 
     if (isLoading) return <p>Loading...</p>
     if (error) return <p>Error loading product</p>
@@ -50,13 +59,28 @@ const SingleProduct = () => {
                         {/* additional product info */}
                         <div className='flex flex-col space-y-2'>
                             <p><strong>Category:</strong> {singleProduct?.category}</p>
-                            <p><strong>Color:</strong> beige</p>
                             <div className='flex gap-1 items-center'>
                                 <strong>Rating: </strong>
                                 <RatingStars rating={singleProduct?.rating} />
 
                             </div>
 
+                        </div>
+                        <div className="flex items-center space-x-4 mt-4">
+                            <button
+                                onClick={() => handleDecrementQuantity(singleProduct)}
+                                className="px-3 py-1 bg-gray-200 rounded-md"
+                                disabled={quantity === 0}
+                            >
+                                -
+                            </button>
+                            <span>{quantity}</span>
+                            <button
+                                onClick={() => handleAddToCart(singleProduct)}
+                                className="px-3 py-1 bg-gray-200 rounded-md"
+                            >
+                                +
+                            </button>
                         </div>
                         <button
                         onClick={(e)=>{
