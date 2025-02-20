@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState } from 'react'
 import ProductCards from '../../pages/shop/ProductCards'
 import ShopFiltering from '../../pages/shop/ShopFiltering'
 import { useFetchAllProductsQuery } from '../../redux/features/products/productsApi'
@@ -37,8 +37,17 @@ const ShopPage = () => {
         priceRange: ''
       })
     }
+
+    const handlePageChange =(pageNumber)=> {
+      if(pageNumber > 0 && pageNumber <= totalPages) {
+        setCurrentPage(pageNumber)
+      }
+    }
     if(isLoading) return <div>Loading...</div>
     if(error) return <div>Error Loading products.</div>
+
+    const startProduct = (currentPage - 1) * ProductsPerPage + 1; 
+    const endProduct = startProduct + products.length - 1;
   return(
     <>
       <section className='section__container bg-primary-light'>
@@ -58,8 +67,36 @@ const ShopPage = () => {
 
           {/* right side */}
           <div>
-            <h3 className='text-x1 font-medium mb-4'>Products available: {products.length}</h3>
+            <h3 className='text-x1 font-medium mb-4'>
+              Showing {startProduct} to {endProduct} of {totalProducts} products
+              </h3>
             <ProductCards products={products} />
+
+            {/* pagination controls */}
+            <div className='mt-6 flex justify-center'>
+                <button
+                disabled={currentPage === 1}
+                onClick={()=> handlePageChange(currentPage -1)} 
+                className='px-4 py-2 bg-gray-300 text-gray-700 rounded-md mr-2'>
+                    previous</button>
+                    {
+                        [...Array(totalPages)].map((_, index)=> (
+                          <button key={index}
+                          onClick={()=> handlePageChange(index + 1)}
+                          className={`px-4 py-2 ${currentPage === index + 1 ?
+                            'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}
+                            rounded-md mx-1
+                            `}
+                          >{index + 1}</button>
+                        ))
+                    }
+                    <button
+                    disabled={currentPage === totalPages}
+                     onClick={()=> handlePageChange(currentPage + 1)} 
+                    className='px-4 py-2 bg-gray-300 text-gray-700 rounded-md ml-2'>
+                        Next
+                    </button>
+            </div>
           </div>
 
         </div>

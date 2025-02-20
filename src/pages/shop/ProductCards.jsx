@@ -34,7 +34,7 @@ const ProductCards = ({products}) => {
 
                     <div className='product__card__content'>
                         <h4>{product.name}</h4>
-                        <p>{product.price} {product.oldPrice ? <s>₦{product?.oldPrice}</s> : null}</p>
+                        <p>₦{product.price} {product.oldPrice ? <s>₦{product?.oldPrice}</s> : null}</p>
                         <RatingStars rating={product.rating}/>
                     </div>
                 </div>
