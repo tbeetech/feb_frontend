@@ -12,9 +12,9 @@ const Home = () => {
     <div className="flex flex-col min-h-screen">
       <InfiniteScrollSection />
       <div className="space-y-8">
-        <Banner />
+        {/* <Banner /> */}
         <Categories />
-        <HeroSection />
+        {/* <HeroSection /> */}
         <TrendingProduct />
         <DealsSection />
         <PromoBanner />

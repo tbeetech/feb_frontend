@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Poppins:wght@400;500;600;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
 
 :root {
   --primary-color: #ed3849;
@@ -68,7 +69,7 @@ a {
 }
 
 body {
-  font-family: "Poppins", sans-serif;
+  font-family: 'Playfair Display', serif;
 }
 
 nav {
@@ -229,7 +230,7 @@ nav {
   margin-bottom: 1rem;
   font-size: 1.25rem;
   font-weight: 800;
-  font-family: var(--header-font);
+  font-family: var (--header-font);
   color: var(--text-dark);
 }
 
@@ -276,11 +277,49 @@ nav {
 .product__card__content p s {
   font-size: 0.9rem;
   font-weight: 400;
-  color: var(--text-light);
+  color: var (--text-light);
 }
 
 .product__btn {
   text-align: center;
+}
+
+.product__card {
+  background-color: var(--white);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.product__card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.product__card button {
+  border-radius: 0;
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.product__card button:hover {
+  background-color: var(--primary-color);
+  color: var(--white);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .deals__container {
@@ -322,7 +361,7 @@ nav {
   font-size: 2rem;
   font-weight: 800;
   font-family: var(--header-font);
-  color: var(--text-dark);
+  color: var (--text-dark);
 }
 
 .deals__content p {
@@ -588,4 +627,24 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .add-product-btn{
   @apply mt-5 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+}
+
+.flex {
+  display: flex;
+}
+
+.overflow-x-auto {
+  overflow-x: auto;
+}
+
+.space-x-4 > * + * {
+  margin-left: 1rem;
+}
+
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+.w-64 {
+  width: 16rem;
 }
