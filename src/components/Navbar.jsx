@@ -43,12 +43,31 @@ const Navbar = () => {
                 console.error("Failed to log out", error)
         }
     }
-   
+
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const handleMobileMenuToggle = () => {
+        setIsMobileMenuOpen(!isMobileMenuOpen);
+    }
+
+    const mobileCategories = [
+        {label: "Shop", path: "/shop", icon: "ri-store-line"},
+        {label: "Accessories", path: "/categories/accessories", icon: "ri-handbag-line"},
+        {label: "Dress", path: "/categories/dress", icon: "ri-t-shirt-line"},
+        {label: "Jewelry", path: "/categories/jewelry", icon: "ri-gem-line"},
+        {label: "Perfumes", path: "/categories/perfumes", icon: "ri-bubble-chart-line"},
+        {label: "Men Accessories", path: "/categories/men-accessories", icon: "ri-men-line"},
+        {label: "Women Accessories", path: "/categories/women-accessories", icon: "ri-women-line"},
+    ];
 
   return (
     <header className='fixed-nav-bar w-nav'>
         <nav className='max-w-screen-2x1 mx-auto px-4 flex justify-between items-center'>
-            <ul className='nav__links'>
+            <span className='md:hidden'>
+                <button onClick={handleMobileMenuToggle} className='hover:text-primary'>
+                    <i className="ri-menu-line"></i>
+                </button>
+            </span>
+            <ul className='nav__links hidden md:flex'>
                 <li className='link'><Link to="/">Home</Link></li>
                 <li className='link'><Link to="/shop">Shop</Link></li>
                 <li className='link'><Link to="/">Pages</Link></li>
@@ -108,6 +127,25 @@ const Navbar = () => {
         </nav>
         {
             isCartOpen && <CartModal products={products} isOpen={isCartOpen} onClose={handleCartToggle}/>
+        }
+        {
+            isMobileMenuOpen && (
+                <div className='absolute top-0 left-0 w-full h-full bg-white z-50'>
+                    <div className='p-4'>
+                        <button onClick={handleMobileMenuToggle} className='hover:text-primary'>
+                            <i className="ri-close-line"></i>
+                        </button>
+                        <ul className='mt-4 space-y-4'>
+                            {mobileCategories.map((category, index) => (
+                                <li key={index} className='flex items-center'>
+                                    <i className={`${category.icon} mr-2`}></i>
+                                    <Link onClick={handleMobileMenuToggle} to={category.path}>{category.label}</Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            )
         }
     </header>
   )

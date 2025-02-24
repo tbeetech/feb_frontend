@@ -10,6 +10,7 @@ const Categories = () => {
     {name: 'Dress Collection', path: 'dress', image: category2},
     {name: 'Jewellery', path: 'jewerly', image: category3},
     {name: 'perfumes', path: 'pefumes', image: category4},
+    
   ]
 return (
   <div className="container mx-auto px-4 py-8">

@@ -31,23 +31,39 @@ const ShopPage = () => {
     limit: ProductsPerPage,
   })
 
-    const clearFilters = () => {
-      setFiltersState({
-        category: 'all',
-        priceRange: ''
-      })
-    }
+  const clearFilters = () => {
+    setFiltersState({
+      category: 'all',
+      priceRange: ''
+    })
+  }
 
-    const handlePageChange =(pageNumber)=> {
-      if(pageNumber > 0 && pageNumber <= totalPages) {
-        setCurrentPage(pageNumber)
-      }
+  const handlePageChange =(pageNumber)=> {
+    if(pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber)
     }
-    if(isLoading) return <div>Loading...</div>
-    if(error) return <div>Error Loading products.</div>
+  }
 
-    const startProduct = (currentPage - 1) * ProductsPerPage + 1; 
-    const endProduct = startProduct + products.length - 1;
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const handleMobileFilterToggle = () => {
+    setIsMobileFilterOpen(!isMobileFilterOpen);
+  }
+
+  const categoryIcons = {
+    all: "ri-apps-line",
+    accessories: "ri-handbag-line",
+    bags: "ri-shopping-bag-line",
+    clothes: "ri-t-shirt-line",
+    jewerly: "ri-gem-line",
+    perfumes: "ri-bubble-chart-line"
+  };
+
+  if(isLoading) return <div>Loading...</div>
+  if(error) return <div>Error Loading products.</div>
+
+  const startProduct = (currentPage - 1) * ProductsPerPage + 1; 
+  const endProduct = startProduct + products.length - 1;
+
   return(
     <>
       <section className='section__container bg-primary-light'>
@@ -58,12 +74,23 @@ const ShopPage = () => {
       <section className='section__container'>
         <div className='flex flex-col md:flex-row md:gap-12 gap-8'>
           {/* left side */}
-          <ShopFiltering
-            filters={{ categories: filters.categories, priceRanges: filters.priceRanges }}
-            filtersState={filtersState}
-            setFiltersState={setFiltersState}
-            clearFilters={clearFilters}
-          />
+          <div className='md:hidden'>
+            <button onClick={handleMobileFilterToggle} className='hover:text-primary'>
+              <i className="ri-filter-line"></i> Filter
+            </button>
+          </div>
+          <div className={`fixed top-0 left-0 w-full h-full bg-white z-50 p-4 md:relative md:w-auto md:h-auto md:p-0 ${isMobileFilterOpen ? 'block' : 'hidden md:block'}`}>
+            <button onClick={handleMobileFilterToggle} className='hover:text-primary md:hidden'>
+              <i className="ri-close-line"></i>
+            </button>
+            <ShopFiltering
+              filters={{ categories: filters.categories, priceRanges: filters.priceRanges }}
+              filtersState={filtersState}
+              setFiltersState={setFiltersState}
+              clearFilters={clearFilters}
+              categoryIcons={categoryIcons}
+            />
+          </div>
 
           {/* right side */}
           <div>
