@@ -15,6 +15,7 @@ element:<App/>,
 children: [
     {path: "/",element: <Home/>},
     {path: "/categories/:categoryName", element: <CategoryPage/>},
+    {path: "/categories/:categoryName/:subcategory", element: <CategoryPage/>},
     {path: "/search", element: <Search/>},
     {path: "/shop", element:<ShopPage/>},
     {path: "/shop/:id", element:<SingleProduct/>},

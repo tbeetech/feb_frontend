@@ -10,9 +10,10 @@ const productsApi = createApi({
     tagTypes: ["Products"],
     endpoints: (builder) => ({
         fetchAllProducts: builder.query({
-            query: ({ category, minPrice, maxPrice, page = 1, Limit = 10, }) => {
+            query: ({ category, subcategory, minPrice, maxPrice, page = 1, Limit = 10, }) => {
                 const queryParams = new URLSearchParams({
                     category: category || '',
+                    subcategory: subcategory || '',
                     minPrice: minPrice || 0,
                     maxPrice: maxPrice || '',
                     page: page.toString(),

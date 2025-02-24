@@ -102,6 +102,23 @@
       "image": "https://i.pinimg.com/736x/cd/2a/c7/cd2ac7b87d96bf1f7056cfdcfeac6fc9.jpg",
       "color": "green",
       "rating": 4.2
+    },
+    {
+      "name": "Designer Sunglasses",
+      "category": "accessories",
+      "subcategory": "sunglasses",
+      "description": "Luxury designer sunglasses",
+      "price": 85000,
+      "image": "https://example.com/sunglasses.jpg",
+      "rating": 4.5
+    },
+    {
+      "name": "Arabian Musk",
+      "category": "fragrance",
+      "subcategory": "arabian",
+      "description": "Luxury Arabian perfume",
+      "price": 125000,
+      "image": "https://example.com/perfume.jpg",
+      "rating": 4.8
     }
-
   ]

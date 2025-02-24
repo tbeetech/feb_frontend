@@ -50,14 +50,43 @@ const Navbar = () => {
     }
 
     const mobileCategories = [
-        {label: "Shop", path: "/shop", icon: "ri-store-line"},
-        {label: "Accessories", path: "/categories/accessories", icon: "ri-handbag-line"},
-        {label: "Dress", path: "/categories/dress", icon: "ri-t-shirt-line"},
-        {label: "Jewelry", path: "/categories/jewelry", icon: "ri-gem-line"},
-        {label: "Perfumes", path: "/categories/perfumes", icon: "ri-bubble-chart-line"},
-        {label: "Men Accessories", path: "/categories/men-accessories", icon: "ri-men-line"},
-        {label: "Women Accessories", path: "/categories/women-accessories", icon: "ri-women-line"},
+        {label: "New", path: "/categories/new", icon: "ri-new-line"},
+        {label: "Clothing", path: "/categories/clothes", icon: "ri-t-shirt-line"},
+        {label: "Corporate Wears", path: "/categories/corporate", icon: "ri-suit-line"},
+        {label: "Dresses", path: "/categories/dress", icon: "ri-dress-line"},
+        {label: "Shoes", path: "/categories/shoes", icon: "ri-shoe-line"},
+        {label: "Bags", path: "/categories/bags", icon: "ri-handbag-line"},
     ];
+
+    const accessoriesCategories = [
+        {label: "Sunglasses", path: "/categories/accessories/sunglasses", icon: "ri-sunglasses-line"},
+        {label: "Wrist Watches", path: "/categories/accessories/wrist-watches", icon: "ri-watch-line"},
+        {label: "Belts", path: "/categories/accessories/belts", icon: "ri-belt-line"},
+        {label: "Bangles & Bracelet", path: "/categories/accessories/bangles-bracelet", icon: "ri-bracelet-line"},
+        {label: "Earrings", path: "/categories/accessories/earrings", icon: "ri-earrings-line"},
+        {label: "Necklace", path: "/categories/accessories/necklace", icon: "ri-necklace-line"},
+        {label: "Pearls", path: "/categories/accessories/pearls", icon: "ri-pearl-line"},
+    ];
+
+    const fragranceCategories = [
+        {label: "Designer Perfumes & Niche", path: "/categories/fragrance/designer-niche", icon: "ri-perfume-line"},
+        {label: "Unboxed Perfume", path: "/categories/fragrance/unboxed", icon: "ri-open-box-line"},
+        {label: "Testers", path: "/categories/fragrance/testers", icon: "ri-test-tube-line"},
+        {label: "Arabian Perfume", path: "/categories/fragrance/arabian", icon: "ri-arabic-line"},
+        {label: "Diffuser", path: "/categories/fragrance/diffuser", icon: "ri-diffuser-line"},
+        {label: "Mist", path: "/categories/fragrance/mist", icon: "ri-mist-line"},
+    ];
+
+    const [isAccessoriesOpen, setIsAccessoriesOpen] = useState(false);
+    const [isFragranceOpen, setIsFragranceOpen] = useState(false);
+
+    const handleAccessoriesToggle = () => {
+        setIsAccessoriesOpen(!isAccessoriesOpen);
+    };
+
+    const handleFragranceToggle = () => {
+        setIsFragranceOpen(!isFragranceOpen);
+    };
 
   return (
     <header className='fixed-nav-bar w-nav'>
@@ -136,12 +165,61 @@ const Navbar = () => {
                             <i className="ri-close-line"></i>
                         </button>
                         <ul className='mt-4 space-y-4'>
+                            <li className='flex items-center'>
+                                <i className="ri-store-2-line mr-2"></i>
+                                <Link onClick={handleMobileMenuToggle} to="/shop">Shop</Link>
+                            </li>
+                            <hr className='my-2 border-gray-200'/>
                             {mobileCategories.map((category, index) => (
-                                <li key={index} className='flex items-center'>
-                                    <i className={`${category.icon} mr-2`}></i>
-                                    <Link onClick={handleMobileMenuToggle} to={category.path}>{category.label}</Link>
-                                </li>
+                                <React.Fragment key={index}>
+                                    <li className='flex items-center'>
+                                        <i className={`${category.icon} mr-2`}></i>
+                                        <Link onClick={handleMobileMenuToggle} to={category.path}>{category.label}</Link>
+                                    </li>
+                                    <hr className='my-2 border-gray-200'/>
+                                </React.Fragment>
                             ))}
+                            <li>
+                                <button onClick={handleAccessoriesToggle} className='flex items-center w-full'>
+                                    <i className="ri-handbag-line mr-2"></i>
+                                    Accessories
+                                    <i className={`ml-2 ${isAccessoriesOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'}`}></i>
+                                </button>
+                                {isAccessoriesOpen && (
+                                    <ul className='ml-4 mt-2 space-y-2'>
+                                        {accessoriesCategories.map((category, index) => (
+                                            <React.Fragment key={index}>
+                                                <li className='flex items-center'>
+                                                    <i className={`${category.icon} mr-2`}></i>
+                                                    <Link onClick={handleMobileMenuToggle} to={category.path}>{category.label}</Link>
+                                                </li>
+                                                <hr className='my-2 border-gray-200'/>
+                                            </React.Fragment>
+                                        ))}
+                                    </ul>
+                                )}
+                            </li>
+                            <hr className='my-2 border-gray-200'/>
+                            <li>
+                                <button onClick={handleFragranceToggle} className='flex items-center w-full'>
+                                    <i className="ri-perfume-line mr-2"></i>
+                                    Fragrance
+                                    <i className={`ml-2 ${isFragranceOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'}`}></i>
+                                </button>
+                                {isFragranceOpen && (
+                                    <ul className='ml-4 mt-2 space-y-2'>
+                                        {fragranceCategories.map((category, index) => (
+                                            <React.Fragment key={index}>
+                                                <li className='flex items-center'>
+                                                    <i className={`${category.icon} mr-2`}></i>
+                                                    <Link onClick={handleMobileMenuToggle} to={category.path}>{category.label}</Link>
+                                                </li>
+                                                <hr className='my-2 border-gray-200'/>
+                                            </React.Fragment>
+                                        ))}
+                                    </ul>
+                                )}
+                            </li>
                         </ul>
                     </div>
                 </div>
