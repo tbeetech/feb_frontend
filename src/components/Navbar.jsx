@@ -56,6 +56,7 @@ const Navbar = () => {
         {label: "Dresses", path: "/categories/dress", icon: "ri-dress-line"},
         {label: "Shoes", path: "/categories/shoes", icon: "ri-shoe-line"},
         {label: "Bags", path: "/categories/bags", icon: "ri-handbag-line"},
+        
     ];
 
     const accessoriesCategories = [

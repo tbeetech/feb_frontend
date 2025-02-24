@@ -297,17 +297,17 @@ nav {
 }
 
 .product__card button {
-  border-radius: 0;
-  background-color: transparent;
-  color: var(--primary-color);
-  border: 1px solid var(--primary-color);
-  transition: background-color 0.3s, color 0.3s;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  will-change: transform;
+  backface-visibility: hidden;
+  color: white;
+  border: 2px solid #FFD700;
 }
 
 .product__card button:hover {
-  background-color: var(--primary-color);
-  color: var(--white);
-  animation: pulse 1s infinite;
+  background-color: #FFD700;
+  color: white;
 }
 
 @keyframes pulse {
@@ -647,4 +647,8 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .w-64 {
   width: 16rem;
+}
+
+.animate-scroll {
+  animation: none; /* Disable the animation */
 }

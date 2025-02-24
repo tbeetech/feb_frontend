@@ -12,7 +12,8 @@ export default {
         'custom-900': '900px', 
       },
       colors: {
-        'primary': '#ed3849',
+        'primary': 'gold',
+        'gold': '#FFD700',  // Add this line
         'primary-dark': "#d23141",
         'primary-light': '#f4e5ec',
         'text-dark': '#0f172a',

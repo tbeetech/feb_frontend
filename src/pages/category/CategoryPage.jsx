@@ -6,17 +6,19 @@ import { useFetchAllProductsQuery } from '../../redux/features/products/products
 const CategoryPage = () => {    
     const {categoryName, subcategory} = useParams();
     
-    // Clean up category names to match database values
+    // Clean up category and subcategory names
     const cleanCategoryName = categoryName?.toLowerCase();
     const cleanSubcategory = subcategory?.toLowerCase().replace(/-/g, ' ');
     
     const { data: { products = [] } = {}, isLoading, error } = useFetchAllProductsQuery({
         category: cleanCategoryName,
-        subcategory: cleanSubcategory || ''
+        subcategory: cleanSubcategory
+    }, {
+        skip: !cleanCategoryName
     });
 
-    useEffect(()=>{
-        window.scrollTo(0,0)
+    useEffect(() => {
+        window.scrollTo(0, 0);
     }, [categoryName, subcategory]);
 
     if (isLoading) return <div>Loading...</div>;
@@ -24,24 +26,24 @@ const CategoryPage = () => {
 
     return (
         <>
-        <section className='section__container bg-primary-light'>
-            <h2 className='section__header capitalize'>
-                {subcategory ? `${categoryName} - ${subcategory}` : categoryName}
-            </h2>
-            <p className='section__subheader'>
-                Browse our collection of {subcategory || categoryName} products
-            </p>
-        </section>
-
-        <div className="section__container">
-            {products.length > 0 ? (
-                <ProductCards products={products}/>
-            ) : (
-                <p className="text-center text-gray-500 py-8">
-                    No products found in this category.
+            <section className='section__container bg-primary-light'>
+                <h2 className='section__header capitalize'>
+                    {subcategory ? `${categoryName} - ${subcategory}` : categoryName}
+                </h2>
+                <p className='section__subheader'>
+                    Browse our collection of {subcategory || categoryName} products
                 </p>
-            )}
-        </div>
+            </section>
+
+            <div className="section__container">
+                {products.length > 0 ? (
+                    <ProductCards products={products}/>
+                ) : (
+                    <p className="text-center text-gray-500 py-8">
+                        No products found in this category.
+                    </p>
+                )}
+            </div>
         </>
     )
 }
