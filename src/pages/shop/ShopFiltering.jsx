@@ -7,18 +7,19 @@ const ShopFiltering = ({filters, filtersState, setFiltersState, clearFilters, cl
     setFiltersState({
       ...filtersState,
       category,
-      subcategory: '' // Reset subcategory when changing main category
-    })
-    setExpandedCategory(category === expandedCategory ? null : category)
+      subcategory: '', // Reset subcategory when changing main category
+      priceRange: '' // Optionally reset price range
+    });
+    setExpandedCategory(category === expandedCategory ? null : category);
   }
 
   const handleSubcategoryClick = (subcategory) => {
-    setFiltersState({
-      ...filtersState,
+    setFiltersState(prev => ({
+      ...prev,
       subcategory
-    })
+    }));
     if (window.innerWidth < 768) {
-      closeMobileFilter()
+      closeMobileFilter();
     }
   }
 

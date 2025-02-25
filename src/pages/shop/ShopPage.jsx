@@ -44,11 +44,12 @@ const ShopPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [ProductsPerPage] = useState(8);
 
-  const { category, priceRange } = filtersState;
+  const { category, subcategory, priceRange } = filtersState;
   const [minPrice, maxPrice] = priceRange.split('-').map(Number);
 
   const { data: { products = [], totalPages, totalProducts } ={}, error, isLoading} = useFetchAllProductsQuery({
     category: category !== 'all' ? category : '',
+    subcategory: subcategory || '',
     minPrice: isNaN(minPrice) ? '' : minPrice,
     maxPrice: isNaN(maxPrice) ? '' : maxPrice,
     page: currentPage,

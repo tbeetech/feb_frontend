@@ -11,15 +11,24 @@ const productsApi = createApi({
     endpoints: (builder) => ({
         fetchAllProducts: builder.query({
             query: ({ category, subcategory, minPrice, maxPrice, page = 1, limit = 10 }) => {
-                const queryParams = new URLSearchParams({
-                    category: category || '',
-                    subcategory: subcategory || '',
-                    minPrice: minPrice || 0,
-                    maxPrice: maxPrice || '',
-                    page: page.toString(),
-                    limit: limit.toString(),
-                }).toString();
-                return `/?${queryParams}`;
+                let queryParams = new URLSearchParams();
+                
+                // Only add category if it's not 'all'
+                if (category && category !== 'all') {
+                    queryParams.append('category', category);
+                }
+                
+                // Only add subcategory if it exists
+                if (subcategory) {
+                    queryParams.append('subcategory', subcategory);
+                }
+                
+                if (minPrice) queryParams.append('minPrice', minPrice);
+                if (maxPrice) queryParams.append('maxPrice', maxPrice);
+                queryParams.append('page', page.toString());
+                queryParams.append('limit', limit.toString());
+                
+                return `/?${queryParams.toString()}`;
             },
             providesTags: ["Products"],
         }),

@@ -14,3 +14,18 @@
 .animate-scroll {
   animation: scroll 30s linear infinite;
 }
+
+/* Bottom Navigation Styles */
+.bottom-nav-link {
+    transition: color 0.3s ease;
+}
+
+.bottom-nav-link:active {
+    transform: scale(0.95);
+}
+
+@media (min-width: 768px) {
+    .fixed-bottom-nav {
+        display: none;
+    }
+}
