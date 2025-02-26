@@ -12,8 +12,8 @@ const InfiniteScrollSection = () => {
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 flex flex-col justify-center items-center">
-          <h1 className="text-5xl font-bold mb-4 text-white">Discover Your Style</h1>
-          <p className="text-xl mb-6 text-white">Unisex fashion for every occasion</p>
+          <h1 className="text-5xl font-bold mb-4 text-white">F.E.B LUXURY</h1>
+          <p className="text-xl mb-6 text-white">Boost Your Confidence</p>
           <Link 
             to="/shop" 
             className="btn bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-lg transition-all"

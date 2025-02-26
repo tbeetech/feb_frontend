@@ -1,147 +1,120 @@
-import React from 'react'
-import instaImg1 from '../assets/instagram-1.jpg'
-import instaImg2 from '../assets/instagram-2.jpg'
-import instaImg3 from '../assets/instagram-3.jpg'
-import instaImg4 from '../assets/instagram-4.jpg'
-import instaImg5 from '../assets/instagram-5.jpg'
-import instaImg6 from '../assets/instagram-6.jpg'
-import { FaTelegram, FaWhatsapp, FaInstagram } from 'react-icons/fa';
+import React from 'react';
+import { FaTelegram, FaWhatsapp, FaInstagram, FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
 
 const Footer = () => {
-  const linkStyle = {
-    color: 'inherit',
-    textDecoration: 'none',
-    transition: 'color 0.3s ease',
-    cursor: 'pointer'
-  };
-
-  const contactLinkStyle = {
-    ...linkStyle,
-    display: 'inline-block',
-    marginLeft: '8px'
-  };
-
-  const socialLinkStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    color: '#333',
-    textDecoration: 'none',
-    transition: 'color 0.3s ease',
-    marginBottom: '0.5rem'
-  };
+  const currentYear = new Date().getFullYear();
 
   return (
-    <>
-    <footer className='section__container footer__container'>
-        <div className='footer__col'>
-            <h4>Contact INFO</h4>
-            <p>
-                <span> <i className='ri-map-pin-2-fill'></i></span>
-                <a 
-                  href="https://maps.google.com/?q=House 4, 7th Avenue, Ocean Palm Estate. Sangotedo Ajah Lagos" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  style={contactLinkStyle}
-                >
-                    House 4, 7th Avenue, Ocean Palm Estate. Sangotedo Ajah Lagos.
-                </a>
+    <footer className="bg-black text-gray-300">
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Brand & Description */}
+          <div>
+            <h3 className="text-2xl font-playfair text-white mb-4">
+              febluxury<span className="text-primary">.</span>
+            </h3>
+            <p className="text-sm mb-4">
+              Your premier destination for luxury fashion, accessories, and fragrances. 
+              Experience elegance redefined.
             </p>
-            <p>
-                <span><i className='ri-mail-fill'></i></span>
-                <a 
-                  href="mailto:ajibikeobembe6@gmail.com"
-                  style={contactLinkStyle}
-                >
-                    ajibikeobembe6@gmail.com
-                </a>
-            </p>
-            <p>
-                <span><i className='ri-phone-fill'></i></span>
-                <a 
-                  href="tel:+2348033825144"
-                  style={contactLinkStyle}
-                >
-                    +2348033825144
-                </a>
-            </p>
-        </div>
-        <div className='footer__col'>
-            <h4>COMPANY</h4>
-            <a href="/">Home</a>
-            <a href="/">About us</a>
-            <a href="/">Terms & Conditions</a>
-
-        </div>
-        <div className='footer__col'>
-            <h4>USEFUL LINK</h4>
-            <a href="/">Help</a>
-            <a href="/">Track your order</a>
-            <a href="/">Dresses</a>
-        </div>
-        <div className='footer__col'>
-            <h4>INSTAGRAM</h4>
-            <div className='instagram__grid'>
-                <img src={instaImg1} alt="" />
-                <img src={instaImg2} alt="" />
-                <img src={instaImg3} alt="" />
-                <img src={instaImg4} alt="" />
-                <img src={instaImg5} alt="" />
-                <img src={instaImg6} alt="" />
-            </div>
-
-        </div>
-        <div className='footer__col'>
-            <h4>CONNECT WITH US</h4>
-            <div className='flex flex-col gap-3'>
-              <a 
-                href="https://t.me/febluxury" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 hover:text-blue-500 transition-colors"
-              >
-                <FaTelegram className="text-xl" />
-                <span>Telegram</span>
+            <div className="grid grid-cols-2 gap-4">
+              <a href="https://t.me/febluxury" 
+                 className="flex items-center gap-2 p-2 border border-gray-700 rounded hover:border-primary hover:text-primary transition-colors">
+                <FaTelegram />
+                <span className="text-sm">Telegram</span>
               </a>
-              
-              <a 
-                href="https://wa.me/message/NP6XO5SXNXG5G1" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 hover:text-green-500 transition-colors"
-              >
-                <FaWhatsapp className="text-xl" />
-                <span>WhatsApp</span>
+              <a href="https://wa.me/message/NP6XO5SXNXG5G1" 
+                 className="flex items-center gap-2 p-2 border border-gray-700 rounded hover:border-green-500 hover:text-green-500 transition-colors">
+                <FaWhatsapp />
+                <span className="text-sm">WhatsApp</span>
               </a>
-              
-              <a 
-                href="https://www.instagram.com/f.e.b_luxurycloset?utm_source=qr&igsh=MWVrYjNoM3Zxcmp5cA==" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 hover:text-pink-500 transition-colors"
-              >
-                <FaInstagram className="text-xl" />
-                <span>F.E.B Luxury Closet</span>
+              <a href="https://www.instagram.com/f.e.b_luxurycloset" 
+                 className="flex items-center gap-2 p-2 border border-gray-700 rounded hover:border-pink-500 hover:text-pink-500 transition-colors">
+                <FaInstagram />
+                <span className="text-sm">F.E.B Luxury</span>
               </a>
-              
-              <a 
-                href="https://www.instagram.com/jumiescent?igsh=MTh1ODZrc3h0ZXhrcg==" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 hover:text-pink-500 transition-colors"
-              >
-                <FaInstagram className="text-xl" />
-                <span>Jumiescent</span>
+              <a href="https://www.instagram.com/jumiescent" 
+                 className="flex items-center gap-2 p-2 border border-gray-700 rounded hover:border-pink-500 hover:text-pink-500 transition-colors">
+                <FaInstagram />
+                <span className="text-sm">Jumiescent</span>
               </a>
             </div>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="text-white font-semibold mb-4">Quick Links</h4>
+            <ul className="space-y-2 text-sm">
+              <li><a href="/shop" className="hover:text-primary transition-colors">Shop</a></li>
+              <li><a href="/about" className="hover:text-primary transition-colors">About Us</a></li>
+              <li><a href="/track-order" className="hover:text-primary transition-colors">Track Order</a></li>
+              <li><a href="/shipping" className="hover:text-primary transition-colors">Shipping Info</a></li>
+              <li><a href="/returns" className="hover:text-primary transition-colors">Returns & Exchange</a></li>
+            </ul>
+          </div>
+
+          {/* Contact Information */}
+          <div>
+            <h4 className="text-white font-semibold mb-4">Contact Us</h4>
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-start gap-3">
+                <FaMapMarkerAlt className="text-primary mt-1 flex-shrink-0" />
+                <span>House 4, 7th Avenue, Ocean Palm Estate. Sangotedo Ajah Lagos</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <FaPhone className="text-primary flex-shrink-0" />
+                <a href="tel:+2348033825144" className="hover:text-primary transition-colors">
+                  +234 803 382 5144
+                </a>
+              </li>
+              <li className="flex items-center gap-3">
+                <FaEnvelope className="text-primary flex-shrink-0" />
+                <a href="mailto:febluxurycloset@gmail.com" className="hover:text-primary transition-colors">
+                febluxurycloset@gmail.com
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Newsletter & Business Hours */}
+          <div>
+            <h4 className="text-white font-semibold mb-4">Newsletter</h4>
+            <form className="mb-4">
+              <div className="flex gap-2">
+                <input 
+                  type="email" 
+                  placeholder="Your email" 
+                  className="bg-gray-800 text-white px-3 py-2 rounded text-sm flex-1 border border-gray-700 focus:border-primary focus:outline-none"
+                />
+                <button 
+                  type="submit" 
+                  className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded text-sm"
+                >
+                  Subscribe
+                </button>
+              </div>
+            </form>
+            <h4 className="text-white font-semibold mb-2">Business Hours</h4>
+            <ul className="text-sm space-y-1">
+              <li>Monday - Friday: 9:00 AM - 6:00 PM</li>
+              <li>Saturday: 10:00 AM - 4:00 PM</li>
+              <li>Sunday: Closed</li>
+            </ul>
+          </div>
         </div>
 
+        {/* Bottom Bar */}
+        <div className="mt-12 pt-4 border-t border-gray-800 text-center text-sm">
+          <p>© {currentYear} febluxury. All rights reserved.</p>
+          <div className="mt-2 space-x-4">
+            <a href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</a>
+            <span>|</span>
+            <a href="/terms" className="hover:text-primary transition-colors">Terms of Service</a>
+          </div>
+        </div>
+      </div>
     </footer>
-    <div className='footer__bar'>
-        Copyright &copy; 2025 febluxury. All rights reserved.
-    </div>
-    </>
-  )
-}
+  );
+};
 
-export default Footer
+export default Footer;

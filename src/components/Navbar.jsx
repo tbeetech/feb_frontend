@@ -50,32 +50,32 @@ const Navbar = () => {
     }
 
     const mobileCategories = [
-        {label: "New", path: "/categories/new", icon: "ri-new-line"},
-        {label: "Clothing", path: "/categories/clothes", icon: "ri-t-shirt-line"},
-        {label: "Corporate Wears", path: "/categories/corporate", icon: "ri-suit-line"},
-        {label: "Dresses", path: "/categories/dress", icon: "ri-dress-line"},
-        {label: "Shoes", path: "/categories/shoes", icon: "ri-shoe-line"},
-        {label: "Bags", path: "/categories/bags", icon: "ri-handbag-line"},
-        
+        {label: "Fragrance", path: "#", icon: "material-icons", iconName: "local_pharmacy", isDropdown: true},
+        {label: "New", path: "/categories/new", icon: "material-icons", iconName: "new_releases"},
+        {label: "Clothing", path: "/categories/clothes", icon: "material-icons", iconName: "checkroom"},
+        {label: "Corporate Wears", path: "/categories/corporate", icon: "material-icons", iconName: "business_center"},
+        {label: "Dresses", path: "/categories/dress", icon: "material-icons", iconName: "dry_cleaning"},
+        {label: "Shoes", path: "/categories/shoes", icon: "material-icons", iconName: "settings_accessibility"},
+        {label: "Bags", path: "/categories/bags", icon: "material-icons", iconName: "shopping_bag"},
     ];
 
     const accessoriesCategories = [
-        {label: "Sunglasses", path: "/categories/accessories/sunglasses", icon: "ri-sunglasses-line"},
-        {label: "Wrist Watches", path: "/categories/accessories/wrist-watches", icon: "ri-watch-line"},
-        {label: "Belts", path: "/categories/accessories/belts", icon: "ri-belt-line"},
-        {label: "Bangles & Bracelet", path: "/categories/accessories/bangles-bracelet", icon: "ri-bracelet-line"},
-        {label: "Earrings", path: "/categories/accessories/earrings", icon: "ri-earrings-line"},
-        {label: "Necklace", path: "/categories/accessories/necklace", icon: "ri-necklace-line"},
-        {label: "Pearls", path: "/categories/accessories/pearls", icon: "ri-pearl-line"},
+        {label: "Sunglasses", path: "/categories/accessories/sunglasses", icon: "material-icons", iconName: "visibility"},
+        {label: "Wrist Watches", path: "/categories/accessories/wrist-watches", icon: "material-icons", iconName: "watch"},
+        {label: "Belts", path: "/categories/accessories/belts", icon: "material-icons", iconName: "no_encryption_gmailerrorred"},
+        {label: "Bangles & Bracelet", path: "/categories/accessories/bangles-bracelet", icon: "material-icons", iconName: "circle"},
+        {label: "Earrings", path: "/categories/accessories/earrings", icon: "material-icons", iconName: "stars"},
+        {label: "Necklace", path: "/categories/accessories/necklace", icon: "material-icons", iconName: "diamond"},
+        {label: "Pearls", path: "/categories/accessories/pearls", icon: "material-icons", iconName: "radio_button_unchecked"},
     ];
 
     const fragranceCategories = [
-        {label: "Designer Perfumes & Niche", path: "/categories/fragrance/designer-niche", icon: "ri-perfume-line"},
-        {label: "Unboxed Perfume", path: "/categories/fragrance/unboxed", icon: "ri-open-box-line"},
-        {label: "Testers", path: "/categories/fragrance/testers", icon: "ri-test-tube-line"},
-        {label: "Arabian Perfume", path: "/categories/fragrance/arabian", icon: "ri-arabic-line"},
-        {label: "Diffuser", path: "/categories/fragrance/diffuser", icon: "ri-diffuser-line"},
-        {label: "Mist", path: "/categories/fragrance/mist", icon: "ri-mist-line"},
+        {label: "Designer Perfumes & Niche", path: "/categories/fragrance/designer-niche", icon: "material-icons", iconName: "spa"},
+        {label: "Unboxed Perfume", path: "/categories/fragrance/unboxed", icon: "material-icons", iconName: "inventory_2"},
+        {label: "Testers", path: "/categories/fragrance/testers", icon: "material-icons", iconName: "science"},
+        {label: "Arabian Perfume", path: "/categories/fragrance/arabian", icon: "material-icons", iconName: "mosque"},
+        {label: "Diffuser", path: "/categories/fragrance/diffuser", icon: "material-icons", iconName: "air"},
+        {label: "Mist", path: "/categories/fragrance/mist", icon: "material-icons", iconName: "water_drop"},
     ];
 
     const [isAccessoriesOpen, setIsAccessoriesOpen] = useState(false);
@@ -160,70 +160,99 @@ const Navbar = () => {
         }
         {
             isMobileMenuOpen && (
-                <div className='absolute top-0 left-0 w-full h-full bg-white z-50'>
-                    <div className='p-4'>
-                        <button onClick={handleMobileMenuToggle} className='hover:text-primary'>
-                            <i className="ri-close-line"></i>
-                        </button>
-                        <ul className='mt-4 space-y-4'>
-                            <li className='flex items-center'>
-                                <i className="ri-store-2-line mr-2"></i>
-                                <Link onClick={handleMobileMenuToggle} to="/shop">Shop</Link>
-                            </li>
-                            <hr className='my-2 border-gray-200'/>
-                            {mobileCategories.map((category, index) => (
-                                <React.Fragment key={index}>
-                                    <li className='flex items-center'>
-                                        <i className={`${category.icon} mr-2`}></i>
-                                        <Link onClick={handleMobileMenuToggle} to={category.path}>{category.label}</Link>
-                                    </li>
-                                    <hr className='my-2 border-gray-200'/>
-                                </React.Fragment>
-                            ))}
-                            <li>
-                                <button onClick={handleAccessoriesToggle} className='flex items-center w-full'>
-                                    <i className="ri-handbag-line mr-2"></i>
-                                    Accessories
-                                    <i className={`ml-2 ${isAccessoriesOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'}`}></i>
-                                </button>
-                                {isAccessoriesOpen && (
-                                    <ul className='ml-4 mt-2 space-y-2'>
-                                        {accessoriesCategories.map((category, index) => (
-                                            <React.Fragment key={index}>
-                                                <li className='flex items-center'>
-                                                    <i className={`${category.icon} mr-2`}></i>
-                                                    <Link onClick={handleMobileMenuToggle} to={category.path}>{category.label}</Link>
-                                                </li>
-                                                <hr className='my-2 border-gray-200'/>
-                                            </React.Fragment>
-                                        ))}
-                                    </ul>
-                                )}
-                            </li>
-                            <hr className='my-2 border-gray-200'/>
-                            <li>
-                                <button onClick={handleFragranceToggle} className='flex items-center w-full'>
-                                    <i className="ri-perfume-line mr-2"></i>
-                                    Fragrance
-                                    <i className={`ml-2 ${isFragranceOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'}`}></i>
-                                </button>
-                                {isFragranceOpen && (
-                                    <ul className='ml-4 mt-2 space-y-2'>
-                                        {fragranceCategories.map((category, index) => (
-                                            <React.Fragment key={index}>
-                                                <li className='flex items-center'>
-                                                    <i className={`${category.icon} mr-2`}></i>
-                                                    <Link onClick={handleMobileMenuToggle} to={category.path}>{category.label}</Link>
-                                                </li>
-                                                <hr className='my-2 border-gray-200'/>
-                                            </React.Fragment>
-                                        ))}
-                                    </ul>
-                                )}
-                            </li>
-                        </ul>
+                <>
+                    <div className="fixed inset-0 bg-black bg-opacity-50 z-40" 
+                         onClick={handleMobileMenuToggle}>
                     </div>
-                </div>
+                    <div className="fixed top-0 left-0 h-full w-[280px] bg-white z-50 mobile-menu-scroll">
+                        <div className="sticky top-0 bg-white p-3 border-b border-gray-200">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-lg font-semibold">Menu</h2>
+                                <button onClick={handleMobileMenuToggle} 
+                                        className="p-1 hover:text-primary">
+                                    <span className="material-icons text-xl">close</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div className="p-3 overflow-y-auto">
+                            <ul className="space-y-2">
+                                {/* Main Categories */}
+                                {mobileCategories.filter(cat => !cat.isDropdown).map((category, index) => (
+                                    <li key={index}>
+                                        <Link to={category.path}
+                                              onClick={handleMobileMenuToggle}
+                                              className="flex items-center py-2 hover:text-primary">
+                                            <span className={`${category.icon} text-xl mr-3`}>
+                                                {category.iconName}
+                                            </span>
+                                            <span className="text-sm">{category.label}</span>
+                                        </Link>
+                                    </li>
+                                ))}
+
+                                {/* Fragrances Section */}
+                                <li className="border-t border-gray-100 pt-2">
+                                    <button onClick={handleFragranceToggle}
+                                            className="flex items-center justify-between w-full py-2">
+                                        <div className="flex items-center">
+                                            <span className="material-icons text-xl mr-3">local_pharmacy</span>
+                                            <span className="text-sm">Fragrances</span>
+                                        </div>
+                                        <span className="material-icons text-xl">
+                                            {isFragranceOpen ? 'expand_less' : 'expand_more'}
+                                        </span>
+                                    </button>
+                                    {isFragranceOpen && (
+                                        <ul className="ml-8 mt-1 space-y-1">
+                                            {fragranceCategories.map((category, index) => (
+                                                <li key={index}>
+                                                    <Link to={category.path}
+                                                          onClick={handleMobileMenuToggle}
+                                                          className="flex items-center py-1.5 text-gray-600 hover:text-primary">
+                                                        <span className={`${category.icon} text-xl mr-3`}>
+                                                            {category.iconName}
+                                                        </span>
+                                                        <span className="text-sm">{category.label}</span>
+                                                    </Link>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </li>
+
+                                {/* Accessories Section */}
+                                <li className="border-t border-gray-100 pt-2">
+                                    <button onClick={handleAccessoriesToggle}
+                                            className="flex items-center justify-between w-full py-2">
+                                        <div className="flex items-center">
+                                            <span className="material-icons text-xl mr-3">diamond</span>
+                                            <span className="text-sm">Accessories</span>
+                                        </div>
+                                        <span className="material-icons text-xl">
+                                            {isAccessoriesOpen ? 'expand_less' : 'expand_more'}
+                                        </span>
+                                    </button>
+                                    {isAccessoriesOpen && (
+                                        <ul className="ml-8 mt-1 space-y-1">
+                                            {accessoriesCategories.map((category, index) => (
+                                                <li key={index}>
+                                                    <Link to={category.path}
+                                                          onClick={handleMobileMenuToggle}
+                                                          className="flex items-center py-1.5 text-gray-600 hover:text-primary">
+                                                        <span className={`${category.icon} text-xl mr-3`}>
+                                                            {category.iconName}
+                                                        </span>
+                                                        <span className="text-sm">{category.label}</span>
+                                                    </Link>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </>
             )
         }
     </header>

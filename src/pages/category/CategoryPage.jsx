@@ -26,13 +26,15 @@ const CategoryPage = () => {
 
     return (
         <>
-            <section className='section__container bg-primary-light'>
-                <h2 className='section__header capitalize'>
-                    {subcategory ? `${categoryName} - ${subcategory}` : categoryName}
-                </h2>
-                <p className='section__subheader'>
-                    Browse our collection of {subcategory || categoryName} products
-                </p>
+            <section className='w-full bg-primary-light py-16 mb-8'>
+                <div className='section__container'>
+                    <h2 className='section__header capitalize text-3xl md:text-4xl'>
+                        {subcategory ? `${categoryName} - ${subcategory}` : categoryName}
+                    </h2>
+                    <p className='section__subheader text-lg'>
+                        Browse our collection of {subcategory || categoryName} products
+                    </p>
+                </div>
             </section>
 
             <div className="section__container">
