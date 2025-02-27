@@ -17,11 +17,11 @@ path: "/",
 element:<App/>,
 children: [
     {path: "/",element: <Home/>},
-    {path: "/categories/:categoryName", element: <CategoryPage/>},
+    {path: "/category/:categoryName", element: <CategoryPage/>},
     {path: "/categories/:categoryName/:subcategory", element: <CategoryPage/>},
     {path: "/search", element: <Search/>},
     {path: "/shop", element:<ShopPage/>},
-    {path: "/shop/:id", element:<SingleProduct/>},
+    {path: "/product/:id", element:<SingleProduct/>}, // Changed from /shop/:id
     {path: "/checkout", element:<Checkout/>},
     {path: "/contact", element: <Contact/>},
     {path: "/about", element: <About/>}
