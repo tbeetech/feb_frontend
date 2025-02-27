@@ -8,6 +8,9 @@ import SingleProduct from "../pages/shop/productDetails/SingleProduct";
 import Login from "../components/Login";
 import Register from "../components/Register";
 import Checkout from "../pages/shop/Checkout";
+import Contact from "../pages/contact/Contact";
+import About from "../pages/about/About";
+
 const router = createBrowserRouter([
 {
 path: "/",
@@ -19,8 +22,9 @@ children: [
     {path: "/search", element: <Search/>},
     {path: "/shop", element:<ShopPage/>},
     {path: "/shop/:id", element:<SingleProduct/>},
-    {path: "/checkout", element:<Checkout/>}
-
+    {path: "/checkout", element:<Checkout/>},
+    {path: "/contact", element: <Contact/>},
+    {path: "/about", element: <About/>}
 ]
 },
 {

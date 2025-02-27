@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ProductCards from './ProductCards'
 import ShopFiltering from './ShopFiltering'
+import ShopHeader from './ShopHeader'
 import { useFetchAllProductsQuery } from '../../redux/features/products/productsApi'
 import { CATEGORIES } from '../../constants/categoryConstants'
 
@@ -33,13 +34,20 @@ const ShopPage = () => {
   const [ProductsPerPage] = useState(8);
 
   const { category, subcategory, priceRange } = filtersState;
-  const [minPrice, maxPrice] = priceRange.split('-').map(Number);
+  
+  // Safely handle price range parsing
+  let minPrice, maxPrice;
+  if (priceRange) {
+      const [min, max] = priceRange.split('-').map(Number);
+      minPrice = !isNaN(min) ? min : undefined;
+      maxPrice = !isNaN(max) ? max : undefined;
+  }
 
   const { data: { products = [], totalPages, totalProducts } ={}, error, isLoading} = useFetchAllProductsQuery({
     category: category !== 'all' ? category : '',
     subcategory: subcategory ? subcategory.replace(/\s+/g, '-').toLowerCase() : '',
-    minPrice: isNaN(minPrice) ? '' : minPrice,
-    maxPrice: isNaN(maxPrice) ? '' : maxPrice,
+    minPrice,
+    maxPrice,
     page: currentPage,
     limit: ProductsPerPage,
   })
@@ -64,11 +72,7 @@ const ShopPage = () => {
     const endProduct = startProduct + products.length - 1;
   return(
     <>
-      <section className='section__container bg-primary-light'>
-        <h2 className='section__header capitalize'>Shop page</h2>
-        <p className='section__subheader'>Discover the hotest picks, Elevate your style with our curated collection of trending women fashion products</p>
-
-      </section>
+      <ShopHeader products={products} />
       <section className='section__container'>
         <div className='md:hidden mb-4'>
           <button 

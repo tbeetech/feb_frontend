@@ -97,12 +97,19 @@ const Navbar = () => {
         navigate(path);
     };
 
+    const navigationLinks = [
+        { label: "Home", path: "/" },
+        { label: "Shop", path: "/shop" },
+        { label: "About", path: "/about" },
+        { label: "Contact", path: "/contact" }
+    ];
+
   return (
     <header className='fixed-nav-bar w-nav'>
         <nav className='max-w-screen-2x1 mx-auto px-4 flex justify-between items-center'>
             <span className='md:hidden'>
-                <button onClick={handleMobileMenuToggle} className='hover:text-primary'>
-                    <i className="ri-menu-line"></i>
+                <button onClick={handleMobileMenuToggle} className='hover:text-primary p-2'>
+                    <i className="ri-menu-line text-2xl"></i> {/* Increased text size */}
                 </button>
             </span>
             <ul className='nav__links hidden md:flex'>
@@ -183,24 +190,32 @@ const Navbar = () => {
                             </div>
                         </div>
                         <div className="p-3 overflow-y-auto">
-                            <ul className="space-y-2">
-                                {/* Main Categories */}
-                                {mobileCategories.filter(cat => !cat.isDropdown).map((category, index) => (
+                            {/* Navigation Links */}
+                            <ul className="space-y-2 mb-4">
+                                {navigationLinks.map((link, index) => (
                                     <li key={index}>
-                                        <button
-                                            onClick={() => handleCategoryClick(category.path.split('/').pop())}
-                                            className='flex items-center py-2 hover:text-primary w-full text-left'
+                                        <Link
+                                            to={link.path}
+                                            onClick={handleMobileMenuToggle}
+                                            className="flex items-center py-2 hover:text-primary"
                                         >
-                                            <span className={`${category.icon} mr-2`}>
-                                                {category.iconName}
+                                            <span className="material-icons mr-3">
+                                                {link.path === "/" ? "home" : 
+                                                 link.path === "/shop" ? "store" :
+                                                 link.path === "/about" ? "info" : "mail"}
                                             </span>
-                                            {category.label}
-                                        </button>
+                                            {link.label}
+                                        </Link>
                                     </li>
                                 ))}
+                            </ul>
 
-                                {/* Fragrances Section */}
-                                <li className="border-t border-gray-100 pt-2">
+                            <div className="border-t border-gray-100 my-4"></div>
+
+                            {/* Categories Section */}
+                            <ul className="space-y-2">
+                                {/* Fragrances Section First */}
+                                <li>
                                     <button onClick={handleFragranceToggle}
                                             className="flex items-center justify-between w-full py-2">
                                         <div className="flex items-center">
@@ -230,8 +245,27 @@ const Navbar = () => {
                                     )}
                                 </li>
 
+                                <div className="border-t border-gray-100 my-2"></div>
+
+                                {/* Main Categories */}
+                                {mobileCategories.filter(cat => !cat.isDropdown).map((category, index) => (
+                                    <li key={index}>
+                                        <button
+                                            onClick={() => handleCategoryClick(category.path.split('/').pop())}
+                                            className='flex items-center py-2 hover:text-primary w-full text-left'
+                                        >
+                                            <span className={`${category.icon} mr-2`}>
+                                                {category.iconName}
+                                            </span>
+                                            {category.label}
+                                        </button>
+                                    </li>
+                                ))}
+
+                                <div className="border-t border-gray-100 my-2"></div>
+
                                 {/* Accessories Section */}
-                                <li className="border-t border-gray-100 pt-2">
+                                <li>
                                     <button onClick={handleAccessoriesToggle}
                                             className="flex items-center justify-between w-full py-2">
                                         <div className="flex items-center">

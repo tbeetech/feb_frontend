@@ -9,10 +9,12 @@ const CategoryHeader = ({ categoryName, subcategory, products = [] }) => {
         : categoryName;
 
     const containerVariants = {
-        hidden: { opacity: 0 },
+        hidden: { opacity: 0, y: -20 },
         visible: {
             opacity: 1,
+            y: 0,
             transition: {
+                duration: 0.6,
                 staggerChildren: 0.1
             }
         }
@@ -22,45 +24,122 @@ const CategoryHeader = ({ categoryName, subcategory, products = [] }) => {
         hidden: { y: 20, opacity: 0 },
         visible: {
             y: 0,
-            opacity: 1
+            opacity: 1,
+            transition: {
+                type: "spring",
+                stiffness: 100
+            }
         }
     };
 
     return (
-        <section className="relative min-h-[400px] bg-gradient-to-r from-primary-light to-white overflow-hidden">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-10">
-                <div className="absolute inset-0 bg-grid-pattern"></div>
-            </div>
+        <section className="relative min-h-[500px] mt-16 mb-8 overflow-hidden">
+            {/* 3D Background with perspective */}
+            <motion.div 
+                className="absolute inset-0 bg-gradient-to-r from-primary-light to-white"
+                initial={{ rotateX: 45, scale: 1.2 }}
+                animate={{ 
+                    rotateX: 0, 
+                    scale: 1,
+                    transition: { duration: 1.5, ease: "easeOut" }
+                }}
+                style={{
+                    transformStyle: "preserve-3d",
+                    perspective: "1000px"
+                }}
+            >
+                {/* Animated grid pattern */}
+                <motion.div 
+                    className="absolute inset-0"
+                    style={{
+                        backgroundImage: `
+                            linear-gradient(0deg, transparent 24%, 
+                            rgba(0, 0, 0, 0.05) 25%, 
+                            rgba(0, 0, 0, 0.05) 26%, 
+                            transparent 27%, transparent 74%, 
+                            rgba(0, 0, 0, 0.05) 75%, 
+                            rgba(0, 0, 0, 0.05) 76%, 
+                            transparent 77%, transparent),
+                            linear-gradient(90deg, transparent 24%, 
+                            rgba(0, 0, 0, 0.05) 25%, 
+                            rgba(0, 0, 0, 0.05) 26%, 
+                            transparent 27%, transparent 74%, 
+                            rgba(0, 0, 0, 0.05) 75%, 
+                            rgba(0, 0, 0, 0.05) 76%, 
+                            transparent 77%, transparent)
+                        `,
+                        backgroundSize: '50px 50px',
+                    }}
+                    animate={{
+                        backgroundPosition: ['0px 0px', '50px 50px'],
+                    }}
+                    transition={{
+                        duration: 20,
+                        repeat: Infinity,
+                        ease: "linear"
+                    }}
+                />
+
+                {/* Floating particles */}
+                <motion.div
+                    className="absolute inset-0"
+                    style={{
+                        background: 'radial-gradient(circle at center, rgba(255,255,255,0.8) 0%, transparent 70%)'
+                    }}
+                    animate={{
+                        scale: [1, 1.2, 1],
+                        opacity: [0.5, 0.8, 0.5]
+                    }}
+                    transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                />
+            </motion.div>
 
             {/* Content */}
-            <div className="relative z-10 section__container py-16">
+            <div className="relative z-10 container mx-auto px-4 pt-24 pb-16">
                 <motion.div
+                    variants={containerVariants}
                     initial="hidden"
                     animate="visible"
-                    variants={containerVariants}
-                    className="text-center mb-8"
+                    className="text-center"
                 >
-                    <motion.h2 
+                    <motion.h1 
                         variants={itemVariants}
-                        className="text-4xl md:text-5xl font-playfair font-bold text-gray-900 mb-4"
+                        className="text-4xl md:text-6xl font-playfair font-bold text-gray-900 mb-6 capitalize"
                     >
                         {displayName}
-                    </motion.h2>
+                    </motion.h1>
+                    <motion.div 
+                        variants={itemVariants}
+                        className="w-24 h-1 bg-primary mx-auto mb-6"
+                    />
                     <motion.p 
                         variants={itemVariants}
-                        className="text-lg text-gray-600"
+                        className="text-xl text-gray-600 max-w-2xl mx-auto mb-8"
                     >
-                        Browse our collection of {displayName} products
+                        Discover our exclusive collection of {displayName.toLowerCase()} products
                     </motion.p>
+                    
+                    {/* Product count and sorting options */}
+                    <motion.div
+                        variants={itemVariants}
+                        className="flex justify-center items-center gap-4 text-gray-600"
+                    >
+                        <span className="text-lg">
+                            {products.length} Products
+                        </span>
+                    </motion.div>
                 </motion.div>
 
-                {/* Sliding Products Preview */}
+                {/* Infinite Scroll Products Preview */}
                 {products.length > 0 && (
                     <motion.div 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="relative mt-8"
+                        className="mt-12 relative"
                     >
                         <div className="flex gap-4 overflow-x-hidden">
                             <motion.div
@@ -81,7 +160,7 @@ const CategoryHeader = ({ categoryName, subcategory, products = [] }) => {
                                         key={`${product._id}-${index}`}
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
-                                        className="w-72 flex-shrink-0 bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer transform transition-transform duration-300"
+                                        className="w-72 flex-shrink-0 bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer transform-gpu hover:shadow-xl transition-all duration-300"
                                         onClick={() => navigate(`/product/${product._id}`)}
                                     >
                                         <div className="relative h-48 overflow-hidden">
@@ -90,9 +169,9 @@ const CategoryHeader = ({ categoryName, subcategory, products = [] }) => {
                                                 alt={product.name}
                                                 className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
                                             />
-                                            {product.oldPrice && (
+                                            {product.discount > 0 && (
                                                 <div className="absolute top-2 right-2 bg-primary text-white px-2 py-1 rounded-md text-sm">
-                                                    Sale!
+                                                    -{product.discount}%
                                                 </div>
                                             )}
                                         </div>
@@ -101,20 +180,9 @@ const CategoryHeader = ({ categoryName, subcategory, products = [] }) => {
                                                 {product.name}
                                             </h3>
                                             <div className="mt-2 flex justify-between items-center">
-                                                <div className="flex flex-col">
-                                                    <span className="text-primary font-bold">
-                                                        ₦{product.price.toLocaleString()}
-                                                    </span>
-                                                    {product.oldPrice && (
-                                                        <span className="text-sm text-gray-500 line-through">
-                                                            ₦{product.oldPrice.toLocaleString()}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <div className="text-yellow-400">
-                                                    {'★'.repeat(Math.floor(product.rating))}
-                                                    {'☆'.repeat(5 - Math.floor(product.rating))}
-                                                </div>
+                                                <span className="text-primary font-bold">
+                                                    ₦{product.price.toLocaleString()}
+                                                </span>
                                             </div>
                                         </div>
                                     </motion.div>

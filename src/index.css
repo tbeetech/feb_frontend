@@ -142,6 +142,33 @@
     background-size: 30px 30px;
 }
 
+/* Category Header 3D Effects */
+.category-header-3d {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+.category-header-3d::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.2) 0%,
+        rgba(255, 255, 255, 0.1) 100%
+    );
+    transform: translateZ(-10px);
+}
+
+@keyframes floatingParticles {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(-20px) translateX(10px); }
+}
+
+.floating-particles {
+    animation: floatingParticles 6s ease-in-out infinite;
+}
+
 /* Add smooth scrolling to the whole page */
 html {
     scroll-behavior: smooth;
@@ -171,4 +198,45 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--primary-color-dark);
+}
+
+/* Scroll to Top Button Styles */
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.scroll-to-top-button {
+    animation: float 2s ease-in-out infinite;
+}
+
+/* Ensure button doesn't conflict with bottom nav on mobile */
+@media (max-width: 768px) {
+    .scroll-to-top-button {
+        bottom: 80px; /* Adjust based on your bottom nav height */
+    }
+}
+
+/* Shop Header Glassmorphism Effects */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.floating-product {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
 }

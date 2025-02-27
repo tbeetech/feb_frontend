@@ -59,7 +59,7 @@ const Footer = () => {
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-3">
                 <FaMapMarkerAlt className="text-primary mt-1 flex-shrink-0" />
-                <span>House 4, 7th Avenue, Ocean Palm Estate. Sangotedo Ajah Lagos</span>
+                <span>Lagos, Nigeria</span>
               </li>
               <li className="flex items-center gap-3">
                 <FaPhone className="text-primary flex-shrink-0" />
