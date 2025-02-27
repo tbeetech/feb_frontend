@@ -1,25 +1,25 @@
 export const CATEGORIES = {
     ACCESSORIES: {
         name: 'accessories',
-        subcategories: {
-            SUNGLASSES: 'sunglasses',
-            WRIST_WATCHES: 'wrist-watches',
-            BELTS: 'belts',
-            BANGLES_BRACELET: 'bangles-bracelet',
-            EARRINGS: 'earrings',
-            NECKLACE: 'necklace',
-            PEARLS: 'pearls'
-        }
+        subcategories: [
+            { value: 'sunglasses', label: 'Sunglasses' },
+            { value: 'wrist-watches', label: 'Wrist Watches' },
+            { value: 'belts', label: 'Belts' },
+            { value: 'bangles-bracelet', label: 'Bangles & Bracelet' },
+            { value: 'earrings', label: 'Earrings' },
+            { value: 'necklace', label: 'Necklace' },
+            { value: 'pearls', label: 'Pearls' }
+        ]
     },
     FRAGRANCE: {
         name: 'fragrance',
-        subcategories: {
-            DESIGNER_NICHE: 'designer-niche',
-            UNBOXED: 'unboxed',
-            TESTERS: 'testers',
-            ARABIAN: 'arabian',
-            DIFFUSER: 'diffuser',
-            MIST: 'mist'
-        }
+        subcategories: [
+            { value: 'designer-niche', label: 'Designer Perfumes & Niche' },
+            { value: 'unboxed', label: 'Unboxed Perfume' },
+            { value: 'testers', label: 'Testers' },
+            { value: 'arabian', label: 'Arabian Perfume' },
+            { value: 'diffuser', label: 'Diffuser' },
+            { value: 'mist', label: 'Mist' }
+        ]
     }
 };

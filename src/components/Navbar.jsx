@@ -89,6 +89,14 @@ const Navbar = () => {
         setIsFragranceOpen(!isFragranceOpen);
     };
 
+    const handleCategoryClick = (category, subcategory = null) => {
+        handleMobileMenuToggle(); // Close mobile menu
+        const path = subcategory 
+            ? `/categories/${category}/${subcategory}`
+            : `/categories/${category}`;
+        navigate(path);
+    };
+
   return (
     <header className='fixed-nav-bar w-nav'>
         <nav className='max-w-screen-2x1 mx-auto px-4 flex justify-between items-center'>
@@ -179,14 +187,15 @@ const Navbar = () => {
                                 {/* Main Categories */}
                                 {mobileCategories.filter(cat => !cat.isDropdown).map((category, index) => (
                                     <li key={index}>
-                                        <Link to={category.path}
-                                              onClick={handleMobileMenuToggle}
-                                              className="flex items-center py-2 hover:text-primary">
-                                            <span className={`${category.icon} text-xl mr-3`}>
+                                        <button
+                                            onClick={() => handleCategoryClick(category.path.split('/').pop())}
+                                            className='flex items-center py-2 hover:text-primary w-full text-left'
+                                        >
+                                            <span className={`${category.icon} mr-2`}>
                                                 {category.iconName}
                                             </span>
-                                            <span className="text-sm">{category.label}</span>
-                                        </Link>
+                                            {category.label}
+                                        </button>
                                     </li>
                                 ))}
 
@@ -206,14 +215,15 @@ const Navbar = () => {
                                         <ul className="ml-8 mt-1 space-y-1">
                                             {fragranceCategories.map((category, index) => (
                                                 <li key={index}>
-                                                    <Link to={category.path}
-                                                          onClick={handleMobileMenuToggle}
-                                                          className="flex items-center py-1.5 text-gray-600 hover:text-primary">
-                                                        <span className={`${category.icon} text-xl mr-3`}>
+                                                    <button
+                                                        onClick={() => handleCategoryClick('fragrance', category.path.split('/').pop())}
+                                                        className='flex items-center py-2 text-gray-600 hover:text-primary w-full text-left'
+                                                    >
+                                                        <span className={`${category.icon} mr-2`}>
                                                             {category.iconName}
                                                         </span>
-                                                        <span className="text-sm">{category.label}</span>
-                                                    </Link>
+                                                        {category.label}
+                                                    </button>
                                                 </li>
                                             ))}
                                         </ul>
@@ -236,14 +246,15 @@ const Navbar = () => {
                                         <ul className="ml-8 mt-1 space-y-1">
                                             {accessoriesCategories.map((category, index) => (
                                                 <li key={index}>
-                                                    <Link to={category.path}
-                                                          onClick={handleMobileMenuToggle}
-                                                          className="flex items-center py-1.5 text-gray-600 hover:text-primary">
+                                                    <button
+                                                        onClick={() => handleCategoryClick('accessories', category.path.split('/').pop())}
+                                                        className='flex items-center py-2 text-gray-600 hover:text-primary w-full text-left'
+                                                    >
                                                         <span className={`${category.icon} text-xl mr-3`}>
                                                             {category.iconName}
                                                         </span>
                                                         <span className="text-sm">{category.label}</span>
-                                                    </Link>
+                                                    </button>
                                                 </li>
                                             ))}
                                         </ul>

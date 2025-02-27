@@ -13,22 +13,33 @@ const productsApi = createApi({
             query: ({ category, subcategory, minPrice, maxPrice, page = 1, limit = 10 }) => {
                 let queryParams = new URLSearchParams();
                 
-                // Only add category if it's not 'all'
-                if (category && category !== 'all') {
-                    queryParams.append('category', category);
+                // Normalize category and subcategory
+                if (category) {
+                    queryParams.append('category', category.toLowerCase());
                 }
                 
-                // Only add subcategory if it exists
                 if (subcategory) {
-                    queryParams.append('subcategory', subcategory);
+                    // Convert url-friendly format to database format
+                    const normalizedSubcategory = subcategory
+                        .toLowerCase()
+                        .replace(/\s+/g, '-');
+                    queryParams.append('subcategory', normalizedSubcategory);
                 }
                 
+                // Handle price filtering
                 if (minPrice) queryParams.append('minPrice', minPrice);
                 if (maxPrice) queryParams.append('maxPrice', maxPrice);
+                
+                // Handle pagination
                 queryParams.append('page', page.toString());
                 queryParams.append('limit', limit.toString());
                 
+                console.log('API Query:', `/?${queryParams.toString()}`); // Debug log
                 return `/?${queryParams.toString()}`;
+            },
+            transformResponse: (response) => {
+                console.log('API Response:', response); // Debug log
+                return response;
             },
             providesTags: ["Products"],
         }),
@@ -65,6 +76,6 @@ const productsApi = createApi({
     }),
 });
 export const { useFetchAllProductsQuery, useFetchProductByIdQuery, useAddProductMutation,
-    useUpdateProductMutation, useDeleteProductMutation, useFetchRelatedProductsQuery } = productsApi;
+    useUpdateProductMutation, useDeleteProductMutation } = productsApi;
 
 export default productsApi;

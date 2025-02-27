@@ -1,49 +1,121 @@
-import React, {useEffect} from 'react'
-import { useParams } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import ProductCards from '../shop/ProductCards'
 import { useFetchAllProductsQuery } from '../../redux/features/products/productsApi'
 
 const CategoryPage = () => {    
-    const {categoryName, subcategory} = useParams();
+    const { categoryName, subcategory } = useParams();
+    const navigate = useNavigate();
+    const [currentPage, setCurrentPage] = useState(1);
+    const productsPerPage = 8;
     
-    // Clean up category and subcategory names
+    // Clean and normalize category and subcategory
     const cleanCategoryName = categoryName?.toLowerCase();
-    const cleanSubcategory = subcategory?.toLowerCase().replace(/-/g, ' ');
-    
-    const { data: { products = [] } = {}, isLoading, error } = useFetchAllProductsQuery({
+    const cleanSubcategory = subcategory?.toLowerCase().replace(/\s+/g, '-');
+
+    const queryParams = {
+        page: currentPage,
+        limit: productsPerPage,
         category: cleanCategoryName,
-        subcategory: cleanSubcategory
-    }, {
+        ...(cleanSubcategory && { subcategory: cleanSubcategory })
+    };
+
+    const { data, isLoading, error } = useFetchAllProductsQuery(queryParams, {
         skip: !cleanCategoryName
     });
 
+    const { products = [], totalPages = 0, totalProducts = 0 } = data || {};
+
     useEffect(() => {
         window.scrollTo(0, 0);
+        setCurrentPage(1);
     }, [categoryName, subcategory]);
 
-    if (isLoading) return <div>Loading...</div>;
-    if (error) return <div>Error loading products</div>;
+    const handlePageChange = (pageNumber) => {
+        if (pageNumber > 0 && pageNumber <= totalPages) {
+            setCurrentPage(pageNumber);
+            window.scrollTo(0, 0);
+        }
+    };
+
+    // Debug logs
+    console.log('Category Page Query:', queryParams);
+    console.log('API Response:', data);
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center min-h-[400px]">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        console.error('API Error:', error);
+        return (
+            <div className="text-center py-8 text-red-500">
+                Error loading products: {error.message}
+            </div>
+        );
+    }
+
+    const displayName = subcategory 
+        ? `${categoryName} - ${subcategory.replace(/-/g, ' ')}` 
+        : categoryName;
 
     return (
         <>
             <section className='w-full bg-primary-light py-16 mb-8'>
                 <div className='section__container'>
                     <h2 className='section__header capitalize text-3xl md:text-4xl'>
-                        {subcategory ? `${categoryName} - ${subcategory}` : categoryName}
+                        {displayName}
                     </h2>
                     <p className='section__subheader text-lg'>
-                        Browse our collection of {subcategory || categoryName} products
+                        Browse our collection of {displayName} products
                     </p>
                 </div>
             </section>
 
             <div className="section__container">
                 {products.length > 0 ? (
-                    <ProductCards products={products}/>
+                    <>
+                        <ProductCards products={products}/>
+                        {totalPages > 1 && (
+                            <div className='mt-8 flex justify-center gap-2'>
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className='px-4 py-2 bg-gray-200 text-gray-700 rounded-md disabled:opacity-50'
+                                >
+                                    Previous
+                                </button>
+                                {[...Array(totalPages)].map((_, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => handlePageChange(idx + 1)}
+                                        className={`px-4 py-2 rounded-md ${
+                                            currentPage === idx + 1
+                                                ? 'bg-primary text-white'
+                                                : 'bg-gray-200 text-gray-700'
+                                        }`}
+                                    >
+                                        {idx + 1}
+                                    </button>
+                                ))}
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className='px-4 py-2 bg-gray-200 text-gray-700 rounded-md disabled:opacity-50'
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        )}
+                    </>
                 ) : (
-                    <p className="text-center text-gray-500 py-8">
+                    <div className="text-center py-8 text-gray-500">
                         No products found in this category.
-                    </p>
+                    </div>
                 )}
             </div>
         </>

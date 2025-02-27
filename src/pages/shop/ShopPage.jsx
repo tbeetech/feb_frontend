@@ -1,27 +1,14 @@
 import { useState } from 'react'
-import ProductCards from '../../pages/shop/ProductCards'
-import ShopFiltering from '../../pages/shop/ShopFiltering'
+import ProductCards from './ProductCards'
+import ShopFiltering from './ShopFiltering'
 import { useFetchAllProductsQuery } from '../../redux/features/products/productsApi'
+import { CATEGORIES } from '../../constants/categoryConstants'
+
 const filters = {
   categories: {
     all: [],
-    accessories: [
-      'sunglasses',
-      'wrist watches',
-      'belts',
-      'bangles-bracelet',
-      'earrings',
-      'necklace',
-      'pearls'
-    ],
-    fragrance: [
-      'designer-niche',
-      'unboxed',
-      'testers',
-      'arabian',
-      'diffuser',
-      'mist'
-    ],
+    accessories: CATEGORIES.ACCESSORIES.subcategories,
+    fragrance: CATEGORIES.FRAGRANCE.subcategories,
     bags: [],
     clothes: [],
     jewerly: []
@@ -33,6 +20,7 @@ const filters = {
     { label: '₦400,000 & above', min: 400000, max: Infinity },
   ]
 }
+
 const ShopPage = () => {
   const [filtersState, setFiltersState] = useState({
     category: 'all',
@@ -49,7 +37,7 @@ const ShopPage = () => {
 
   const { data: { products = [], totalPages, totalProducts } ={}, error, isLoading} = useFetchAllProductsQuery({
     category: category !== 'all' ? category : '',
-    subcategory: subcategory || '',
+    subcategory: subcategory ? subcategory.replace(/\s+/g, '-').toLowerCase() : '',
     minPrice: isNaN(minPrice) ? '' : minPrice,
     maxPrice: isNaN(maxPrice) ? '' : maxPrice,
     page: currentPage,
