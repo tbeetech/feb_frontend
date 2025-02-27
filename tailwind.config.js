@@ -15,7 +15,7 @@ export default {
         'primary': 'gold',
         'gold': '#FFD700',  // Add this line
         'primary-dark': "#d23141",
-        'primary-light': '#f4e5ec',
+        'primary-light': 'grey',
         'text-dark': '#0f172a',
         'text-light': '#64748b',
         'extra-light': '#f8fafc'

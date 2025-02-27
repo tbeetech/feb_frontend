@@ -1,23 +1,70 @@
-import React from 'react'
-import TrendingProductSlider from '../../components/TrendingProductSlider'
-import { useFetchAllProductsQuery } from '../../redux/features/products/productsApi'
+import React from 'react';
+import { motion } from 'framer-motion';
+import TrendingProductSlider from '../../components/TrendingProductSlider';
+import { useFetchAllProductsQuery } from '../../redux/features/products/productsApi';
 
 const TrendingProducts = () => {
-    const { data: { products = [] } = {}, isLoading } = useFetchAllProductsQuery({});
+    const { data: { products = [] } = {}, isLoading } = useFetchAllProductsQuery({
+        limit: 12 // Increased limit for smoother sliding
+    });
 
-    if (isLoading) return <div>Loading...</div>;
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { y: 20, opacity: 0 },
+        visible: {
+            y: 0,
+            opacity: 1
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center min-h-[400px]">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+            </div>
+        );
+    }
 
     return (
-        <section className='section__container'>
-            <h2 className='section__header'>Trending Products</h2>
-            <p className='section__subheader'>
-                Explore our curated collection of trending products
-            </p>
-            <div className="mt-8">
-                <TrendingProductSlider products={products} />
-            </div>
-        </section>
-    )
-}
+        <section className="section__container bg-gradient-to-r from-primary-light/20 to-white">
+            <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={containerVariants}
+                className="text-center mb-8"
+            >
+                <motion.h2 
+                    variants={itemVariants}
+                    className="section__header"
+                >
+                    Trending Products
+                </motion.h2>
+                <motion.p 
+                    variants={itemVariants}
+                    className="section__subheader"
+                >
+                    Discover our most sought-after fashion pieces and accessories
+                </motion.p>
+            </motion.div>
 
-export default TrendingProducts
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+            >
+                <TrendingProductSlider products={products} />
+            </motion.div>
+        </section>
+    );
+};
+
+export default TrendingProducts;

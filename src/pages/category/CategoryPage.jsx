@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import ProductCards from '../shop/ProductCards'
 import { useFetchAllProductsQuery } from '../../redux/features/products/productsApi'
+import CategoryHeader from '../../components/CategoryHeader';
 
 const CategoryPage = () => {    
     const { categoryName, subcategory } = useParams();
@@ -65,16 +66,11 @@ const CategoryPage = () => {
 
     return (
         <>
-            <section className='w-full bg-primary-light py-16 mb-8'>
-                <div className='section__container'>
-                    <h2 className='section__header capitalize text-3xl md:text-4xl'>
-                        {displayName}
-                    </h2>
-                    <p className='section__subheader text-lg'>
-                        Browse our collection of {displayName} products
-                    </p>
-                </div>
-            </section>
+            <CategoryHeader 
+                categoryName={categoryName}
+                subcategory={subcategory}
+                products={products}
+            />
 
             <div className="section__container">
                 {products.length > 0 ? (

@@ -1,26 +1,34 @@
-import React from 'react';
-import InfiniteScrollSection from './InfiniteScrollSection';
-import Banner from './Banner';
-import Categories from './Categories';
-import HeroSection from './HeroSection';
-import TrendingProduct from '../shop/TrendingProducts';
-import DealsSection from './DealsSection';
-import PromoBanner from './PromoBanner';
+import React from 'react'
+import InfiniteScrollSection from './InfiniteScrollSection'
+import NewArrivalsSlider from '../../components/NewArrivalsSlider'
+import TrendingProductSlider from '../../components/TrendingProductSlider'
 
 const Home = () => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <main className="min-h-screen">
       <InfiniteScrollSection />
-      <div className="space-y-8">
-        {/* <Banner /> */}
-        <Categories />
-        {/* <HeroSection /> */}
-        <TrendingProduct />
-        <DealsSection />
-        <PromoBanner />
-      </div>
-    </div>
-  );
-};
+      
+      {/* New Arrivals Section */}
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-playfair font-bold text-center mb-12">
+            New Arrivals
+          </h2>
+          <NewArrivalsSlider />
+        </div>
+      </section>
+      
+      {/* Trending Products Section */}
+      <section className="py-12 bg-gradient-to-r from-primary-light/20 to-white">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-playfair font-bold text-center mb-12">
+            Trending Products
+          </h2>
+          <TrendingProductSlider />
+        </div>
+      </section>
+    </main>
+  )
+}
 
-export default Home;
+export default Home

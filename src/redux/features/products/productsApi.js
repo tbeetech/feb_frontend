@@ -10,38 +10,28 @@ const productsApi = createApi({
     tagTypes: ["Products"],
     endpoints: (builder) => ({
         fetchAllProducts: builder.query({
-            query: ({ category, subcategory, minPrice, maxPrice, page = 1, limit = 10 }) => {
-                let queryParams = new URLSearchParams();
+            query: (params = {}) => {
+                // Debug log
+                console.log('API Query Params:', params);
                 
-                // Normalize category and subcategory
-                if (category) {
-                    queryParams.append('category', category.toLowerCase());
-                }
-                
-                if (subcategory) {
-                    // Convert url-friendly format to database format
-                    const normalizedSubcategory = subcategory
-                        .toLowerCase()
-                        .replace(/\s+/g, '-');
-                    queryParams.append('subcategory', normalizedSubcategory);
-                }
-                
-                // Handle price filtering
-                if (minPrice) queryParams.append('minPrice', minPrice);
-                if (maxPrice) queryParams.append('maxPrice', maxPrice);
-                
-                // Handle pagination
-                queryParams.append('page', page.toString());
-                queryParams.append('limit', limit.toString());
-                
-                console.log('API Query:', `/?${queryParams.toString()}`); // Debug log
-                return `/?${queryParams.toString()}`;
+                return {
+                    url: '/',
+                    method: 'GET',
+                    params: {
+                        limit: params.limit || 10,
+                        page: params.page || 1,
+                        sort: params.sort || '-createdAt',
+                        category: params.category,
+                        subcategory: params.subcategory,
+                        minPrice: params.minPrice,
+                        maxPrice: params.maxPrice
+                    }
+                };
             },
             transformResponse: (response) => {
-                console.log('API Response:', response); // Debug log
+                console.log('API Response:', response);
                 return response;
             },
-            providesTags: ["Products"],
         }),
         fetchProductById: builder.query({
             query: (id) => `/${id}`,

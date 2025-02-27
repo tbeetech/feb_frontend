@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.7",
+    "@react-spring/web": "^9.7.5",
     "@reduxjs/toolkit": "^2.5.1",
     "@tailwindcss/vite": "^4.0.1",
     "framer-motion": "^12.4.7",
