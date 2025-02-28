@@ -32,15 +32,22 @@ const ScrollToTopButton = () => {
         <AnimatePresence>
             {isVisible && (
                 <motion.button
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0 }}
+                    initial={{ opacity: 0, scale: 0, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0, y: 20 }}
+                    transition={{
+                        type: "spring",
+                        stiffness: 260,
+                        damping: 20
+                    }}
                     onClick={scrollToTop}
-                    className="fixed bottom-20 right-4 z-50 bg-primary text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center hover:bg-primary-dark transition-colors duration-300"
+                    className="fixed bottom-20 right-4 z-50 bg-primary/90 text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center backdrop-blur-sm hover:bg-primary transition-all duration-300 animate-float-y"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                 >
-                    <span className="material-icons">arrow_upward</span>
+                    <span className="material-icons transform transition-transform group-hover:-translate-y-1">
+                        arrow_upward
+                    </span>
                 </motion.button>
             )}
         </AnimatePresence>

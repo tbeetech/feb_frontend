@@ -2,11 +2,12 @@ import React from 'react';
 import { FaWhatsapp } from 'react-icons/fa';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 const Checkout = () => {
-  const whatsappNumber = '+2348033825144'; // Replace with actual WhatsApp number
-  const cartItems = useSelector((state) => state.cart.items || []);
-  const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const whatsappNumber = '+2348033825144';
+  const location = useLocation();
+  const cartTotal = location.state?.total || 0;
 
   const handleWhatsAppClick = () => {
     window.open(`https://wa.me/${whatsappNumber}`, '_blank');
@@ -15,7 +16,7 @@ const Checkout = () => {
   return (
     <CheckoutContainer>
       <AccountDetailsCard>
-        <TotalAmount>Total Amount?: see cart total</TotalAmount>
+        <TotalAmount>Total Amount: ₦{cartTotal.toLocaleString()}</TotalAmount>
         <h2>Payment Details</h2>
         <DetailRow>
           <Label>Bank Name:</Label>

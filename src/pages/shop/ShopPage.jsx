@@ -103,29 +103,29 @@ const ShopPage = () => {
             <ProductCards products={products} />
 
             {/* pagination controls */}
-            <div className='mt-6 flex justify-center'>
+            <div className='mt-6 flex justify-center gap-2'>
                 <button
-                disabled={currentPage === 1}
-                onClick={()=> handlePageChange(currentPage -1)} 
-                className='px-4 py-2 bg-gray-300 text-gray-700 rounded-md mr-2'>
-                    previous</button>
+                    disabled={currentPage === 1}
+                    onClick={()=> handlePageChange(currentPage -1)} 
+                    className='px-4 py-2 text-gray-700 border border-gray-300 hover:border-primary disabled:opacity-50 disabled:hover:border-gray-300'>
+                    &#8592;</button>
                     {
                         [...Array(totalPages)].map((_, index)=> (
                           <button key={index}
                           onClick={()=> handlePageChange(index + 1)}
-                          className={`px-4 py-2 ${currentPage === index + 1 ?
-                            'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}
-                            rounded-md mx-1
-                            `}
+                          className={`px-4 py-2 border ${
+                            currentPage === index + 1
+                                ? 'border-primary text-primary'
+                                : 'border-gray-300 text-gray-700 hover:border-primary'
+                          }`}
                           >{index + 1}</button>
                         ))
                     }
                     <button
                     disabled={currentPage === totalPages}
                      onClick={()=> handlePageChange(currentPage + 1)} 
-                    className='px-4 py-2 bg-gray-300 text-gray-700 rounded-md ml-2'>
-                        Next
-                    </button>
+                    className='px-4 py-2 text-gray-700 border border-gray-300 hover:border-primary disabled:opacity-50 disabled:hover:border-gray-300'>
+                    &#8594;</button>
             </div>
           </div>
 

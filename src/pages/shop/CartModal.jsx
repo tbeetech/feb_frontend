@@ -90,6 +90,7 @@ const CartModal = ({ products, isOpen, onClose }) => {
                                 </button>
                                 <Link
                                     to="/checkout"
+                                    state={{ total }}
                                     className="w-1/2 px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark text-center"
                                     onClick={onClose}
                                 >

@@ -81,18 +81,18 @@ const CategoryPage = () => {
                                 <button
                                     onClick={() => handlePageChange(currentPage - 1)}
                                     disabled={currentPage === 1}
-                                    className='px-4 py-2 bg-gray-200 text-gray-700 rounded-md disabled:opacity-50'
+                                    className='px-4 py-2 text-gray-700 border border-gray-300 hover:border-primary disabled:opacity-50 disabled:hover:border-gray-300'
                                 >
-                                    Previous
+                                    &#8592;
                                 </button>
                                 {[...Array(totalPages)].map((_, idx) => (
                                     <button
                                         key={idx}
                                         onClick={() => handlePageChange(idx + 1)}
-                                        className={`px-4 py-2 rounded-md ${
+                                        className={`px-4 py-2 border ${
                                             currentPage === idx + 1
-                                                ? 'bg-primary text-white'
-                                                : 'bg-gray-200 text-gray-700'
+                                                ? 'border-primary text-primary'
+                                                : 'border-gray-300 text-gray-700 hover:border-primary'
                                         }`}
                                     >
                                         {idx + 1}
@@ -101,9 +101,9 @@ const CategoryPage = () => {
                                 <button
                                     onClick={() => handlePageChange(currentPage + 1)}
                                     disabled={currentPage === totalPages}
-                                    className='px-4 py-2 bg-gray-200 text-gray-700 rounded-md disabled:opacity-50'
+                                    className='px-4 py-2 text-gray-700 border border-gray-300 hover:border-primary disabled:opacity-50 disabled:hover:border-gray-300'
                                 >
-                                    Next
+                                    &#8594;
                                 </button>
                             </div>
                         )}

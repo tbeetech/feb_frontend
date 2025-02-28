@@ -38,7 +38,12 @@ const TrendingProductSlider = () => {
 
     return (
         <div className="relative overflow-hidden py-4">
-            <motion.div className="flex gap-4 overflow-x-hidden">
+            <motion.div 
+                className="flex gap-4 overflow-x-hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+            >
                 <motion.div
                     animate={{
                         x: [-100, -(products.length * 320)],
@@ -46,7 +51,7 @@ const TrendingProductSlider = () => {
                     transition={{
                         x: {
                             repeat: Infinity,
-                            duration: 25,
+                            duration: 30,
                             ease: "linear",
                         },
                     }}
@@ -55,9 +60,13 @@ const TrendingProductSlider = () => {
                     {[...products, ...products].map((product, index) => (
                         <motion.div
                             key={`${product._id}-${index}`}
-                            whileHover={{ scale: 1.05 }}
+                            whileHover={{ 
+                                scale: 1.05,
+                                y: -5,
+                                transition: { type: "spring", stiffness: 300 }
+                            }}
                             whileTap={{ scale: 0.95 }}
-                            className="w-72 flex-shrink-0 bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer transform-gpu hover:shadow-xl transition-all duration-300"
+                            className="w-72 flex-shrink-0 bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer glass-morphism hover-lift"
                             onClick={() => navigate(`/product/${product._id}`)}
                         >
                             <div className="relative h-48 overflow-hidden">

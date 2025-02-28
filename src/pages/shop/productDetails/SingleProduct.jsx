@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useFetchProductByIdQuery } from '../../../redux/features/products/productsApi';
 import { addToCart, decrementQuantity } from '../../../redux/features/cart/cartSlice';
 import ReviewsCard from '../reviews/ReviewsCard';
+
 const SingleProduct = () => {
     const { id } = useParams();
     const dispatch = useDispatch();
@@ -17,11 +18,19 @@ const SingleProduct = () => {
     const productInCart = cartProducts.find(product => product._id === id);
     const quantity = productInCart ? productInCart.quantity : 0;
 
+    // Separate add to cart handler
     const handleAddToCart = (product) => {
+        // Add product with current quantity if it's not in cart
+        if (!productInCart) {
+            dispatch(addToCart({ ...product, quantity: 1 }));
+        }
+    };
+
+    const handleIncrement = (product) => {
         dispatch(addToCart(product));
     };
 
-    const handleDecrementQuantity = (product) => {
+    const handleDecrement = (product) => {
         dispatch(decrementQuantity(product));
     };
 
@@ -68,7 +77,7 @@ const SingleProduct = () => {
                         </div>
                         <div className="flex items-center space-x-4 mt-4">
                             <button
-                                onClick={() => handleDecrementQuantity(singleProduct)}
+                                onClick={() => handleDecrement(singleProduct)}
                                 className="px-3 py-1 bg-gray-200 rounded-md"
                                 disabled={quantity === 0}
                             >
@@ -76,19 +85,18 @@ const SingleProduct = () => {
                             </button>
                             <span>{quantity}</span>
                             <button
-                                onClick={() => handleAddToCart(singleProduct)}
+                                onClick={() => handleIncrement(singleProduct)}
                                 className="px-3 py-1 bg-gray-200 rounded-md"
                             >
                                 +
                             </button>
                         </div>
                         <button
-                        onClick={(e)=>{
-                            e.stopPropagation();
-                            handleAddToCart(singleProduct)
-                        }}
-                         className="mt-6 px-6 py-3 bg-primary text-white rounded-md">
-                            Add to Cart
+                            onClick={() => handleAddToCart(singleProduct)}
+                            className="mt-6 px-6 py-3 bg-primary text-white rounded-md"
+                            disabled={productInCart} // Disable if product is already in cart
+                        >
+                            {productInCart ? 'Already in Cart' : 'Add to Cart'}
                         </button>
                     </div>
                 </div>

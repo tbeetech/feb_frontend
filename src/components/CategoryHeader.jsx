@@ -9,25 +9,25 @@ const CategoryHeader = ({ categoryName, subcategory, products = [] }) => {
         : categoryName;
 
     const containerVariants = {
-        hidden: { opacity: 0, y: -20 },
+        hidden: { opacity: 0 },
         visible: {
             opacity: 1,
-            y: 0,
             transition: {
-                duration: 0.6,
-                staggerChildren: 0.1
+                staggerChildren: 0.1,
+                delayChildren: 0.3
             }
         }
     };
 
     const itemVariants = {
-        hidden: { y: 20, opacity: 0 },
+        hidden: { opacity: 0, y: 20 },
         visible: {
-            y: 0,
             opacity: 1,
+            y: 0,
             transition: {
                 type: "spring",
-                stiffness: 100
+                stiffness: 100,
+                damping: 10
             }
         }
     };
