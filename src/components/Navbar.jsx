@@ -134,8 +134,9 @@ const Navbar = () => {
                 <span>
                     <button onClick={handleCartToggle}
                     className='hover:text-primary'>
-
-                        <i className="ri-shopping-bag-line"></i>
+                        <span className="material-icons">
+                            shopping_cart
+                        </span>
                         <sup className='text-sm inline-block px-1.5 text-white rounded-full bg-primary text-center'>
                             {products.length}
                         </sup>
