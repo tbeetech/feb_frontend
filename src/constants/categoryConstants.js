@@ -21,5 +21,29 @@ export const CATEGORIES = {
             { value: 'diffuser', label: 'Diffuser' },
             { value: 'mist', label: 'Mist' }
         ]
+    },
+    BAGS: {
+        name: 'bags',
+        subcategories: []
+    },
+    CLOTHES: {
+        name: 'clothes',
+        subcategories: []
+    },
+    NEW: {
+        name: 'new',
+        subcategories: []
+    },
+    CORPORATE: {
+        name: 'corporate',
+        subcategories: []
+    },
+    DRESS: {
+        name: 'dress',
+        subcategories: []
+    },
+    SHOES: {
+        name: 'shoes',
+        subcategories: []
     }
 };

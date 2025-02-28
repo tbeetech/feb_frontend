@@ -5,6 +5,7 @@ import CartModal from '../pages/shop/CartModal';
 import avatarImg from "../assets/avatar.png"
 import { useLogoutUserMutation } from '../redux/features/auth/authApi';
 import { logout } from '../redux/features/auth/authSlice';
+import { CATEGORIES } from '../constants/categoryConstants';
 
 const Navbar = () => {
     const products = useSelector((state) => state.cart.products);
@@ -50,8 +51,8 @@ const Navbar = () => {
     }
 
     const mobileCategories = [
-        {label: "Fragrance", path: "#", icon: "material-icons", iconName: "local_pharmacy", isDropdown: true},
-        {label: "New", path: "/categories/new", icon: "material-icons", iconName: "new_releases"},
+        {label: "Fragrance", path: "/categories/fragrance", icon: "material-icons", iconName: "local_pharmacy", isDropdown: true},
+        {label: "New Arrivals", path: "/categories/new", icon: "material-icons", iconName: "new_releases"},
         {label: "Clothing", path: "/categories/clothes", icon: "material-icons", iconName: "checkroom"},
         {label: "Corporate Wears", path: "/categories/corporate", icon: "material-icons", iconName: "business_center"},
         {label: "Dresses", path: "/categories/dress", icon: "material-icons", iconName: "dry_cleaning"},
@@ -91,9 +92,10 @@ const Navbar = () => {
 
     const handleCategoryClick = (category, subcategory = null) => {
         handleMobileMenuToggle(); // Close mobile menu
+        const normalizedCategory = category.toLowerCase().replace(/\s+/g, '-');
         const path = subcategory 
-            ? `/categories/${category}/${subcategory}`
-            : `/categories/${category}`;
+            ? `/categories/${normalizedCategory}/${subcategory}`
+            : `/categories/${normalizedCategory}`;
         navigate(path);
     };
 

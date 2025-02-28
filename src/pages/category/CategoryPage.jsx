@@ -10,15 +10,15 @@ const CategoryPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const productsPerPage = 8;
     
-    // Clean and normalize category and subcategory
+    // Clean and normalize category
     const cleanCategoryName = categoryName?.toLowerCase();
-    const cleanSubcategory = subcategory?.toLowerCase().replace(/\s+/g, '-');
 
+    // Only include subcategory in query if it exists
     const queryParams = {
         page: currentPage,
         limit: productsPerPage,
         category: cleanCategoryName,
-        ...(cleanSubcategory && { subcategory: cleanSubcategory })
+        ...(subcategory && { subcategory: subcategory.toLowerCase().replace(/\s+/g, '-') })
     };
 
     const { data, isLoading, error } = useFetchAllProductsQuery(queryParams, {

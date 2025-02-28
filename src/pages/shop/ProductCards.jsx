@@ -16,7 +16,7 @@ const ProductCards = ({products}) => {
             {products.map((product, index)=>( 
                 <div key={index} className='product__card relative group'>
                     <div className='relative aspect-square overflow-hidden'>
-                        <Link to={`/shop/${product._id}`}>
+                        <Link to={`/product/${product._id}`}>
                             <img 
                                 src={product.image} 
                                 alt={product.name} 

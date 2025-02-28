@@ -4,13 +4,13 @@ import RatingStars from '../../../components/RatingStars';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFetchProductByIdQuery } from '../../../redux/features/products/productsApi';
 import { addToCart, decrementQuantity } from '../../../redux/features/cart/cartSlice';
-
+import ReviewsCard from '../reviews/ReviewsCard';
 const SingleProduct = () => {
     const { id } = useParams();
     const dispatch = useDispatch();
     const { data, error, isLoading } = useFetchProductByIdQuery(id);
     const singleProduct = data?.product || {};
-    const ProductReviews = data?.reviews || [];
+    const productReviews = data?.reviews || [];
     
     // Get cart state to check if product exists
     const cartProducts = useSelector(state => state.cart.products);
@@ -96,8 +96,9 @@ const SingleProduct = () => {
             </section>
 
             <section className='section__container mt-8'>
-                Review here
-
+                <ReviewsCard
+                productReviews = {productReviews}
+                 />
             </section>
         </>
     )
