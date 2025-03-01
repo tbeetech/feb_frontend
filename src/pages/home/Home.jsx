@@ -2,6 +2,8 @@ import React from 'react'
 import InfiniteScrollSection from './InfiniteScrollSection'
 import NewArrivalsSlider from '../../components/NewArrivalsSlider'
 import TrendingProductSlider from '../../components/TrendingProductSlider'
+import DealsSection from './DealsSection';
+import PromoBanner from './PromoBanner';
 
 const Home = () => {
   return (
@@ -27,6 +29,9 @@ const Home = () => {
           <TrendingProductSlider />
         </div>
       </section>
+
+      <DealsSection />
+      <PromoBanner />
     </main>
   )
 }
