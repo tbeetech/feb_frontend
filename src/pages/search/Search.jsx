@@ -1,74 +1,78 @@
 import React, { useState, useEffect } from 'react'
-import productsData from "../../data/products.json"
 import ProductCards from '../shop/ProductCards'
+import { useSearchProductsQuery } from '../../redux/features/products/productsApi'
+import { motion } from 'framer-motion';
 
 const Search = () => {
     const [searchQuery, setSearchQuery] = useState('');
-    const [filteredProducts, setFilteredProducts] = useState(productsData);
+    const [debouncedQuery, setDebouncedQuery] = useState('');
 
-    const handleSearch = (query) => {
-        const searchTerm = query.toLowerCase().trim();
-        
-        if (!searchTerm) {
-            setFilteredProducts(productsData);
-            return;
-        }
-
-        const filtered = productsData.filter(product => {
-            // Create an array of searchable fields
-            const searchableFields = [
-                product.name,
-                product.description,
-                product.category,
-                product.subcategory,
-                product.price?.toString()
-            ];
-
-            // Check if any field contains the search term
-            return searchableFields.some(field => 
-                field?.toLowerCase().includes(searchTerm)
-            );
-        });
-
-        setFilteredProducts(filtered);
-    };
-
-    // Handle input change with debouncing
+    // Debounce search query
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            handleSearch(searchQuery);
-        }, 300); // 300ms delay
+            setDebouncedQuery(searchQuery);
+        }, 300);
 
         return () => clearTimeout(timeoutId);
     }, [searchQuery]);
 
+    // Fetch products based on search query
+    const { data, isLoading, error } = useSearchProductsQuery(debouncedQuery, {
+        skip: debouncedQuery === ''
+    });
+
+    const products = data?.products || [];
+
     return (
         <>
             <section className='section__container bg-primary-light'>
-                <h2 className='section__header capitalize'>SearchPage</h2>
-                <p className='section__subheader'>Browse a diverse range of categories, from classic dresses to stylish outfits. Elevate your style today!</p>
+                <h2 className='section__header capitalize'>Search Products</h2>
+                <p className='section__subheader'>Find your perfect style from our diverse collection</p>
             </section>
+
             <section className='section__container'>
-                <div className='w-full mb-12 flex flex-col md:flex-row items-center justify-center gap-4'>
+                <motion.div 
+                    className='w-full mb-12 flex flex-col md:flex-row items-center justify-center gap-4'
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                >
                     <input 
                         type="text" 
                         value={searchQuery}
-                        className='search-bar w-full max-w-4x1 p-2 border rounded'
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder='Search for items...'
+                        className='search-bar w-full max-w-4xl p-4 border rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary'
+                        placeholder='Search for items by name, category, or description...'
                     />
-                </div>
-                {filteredProducts.length === 0 ? (
-                    <div className="text-center text-gray-600">
-                        No products found matching "{searchQuery}"
+                </motion.div>
+
+                {isLoading ? (
+                    <div className="flex justify-center items-center h-64">
+                        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+                    </div>
+                ) : error ? (
+                    <div className="text-center text-red-500">
+                        Error: {error.message}
                     </div>
                 ) : (
-                    <div>
-                        <div className="mb-4 text-gray-600">
-                            Found {filteredProducts.length} products
-                        </div>
-                        <ProductCards products={filteredProducts}/>
-                    </div>
+                    <>
+                        {searchQuery && (
+                            <div className="mb-8 text-gray-600 text-center">
+                                Found {products.length} results for "{searchQuery}"
+                            </div>
+                        )}
+                        
+                        {products.length > 0 ? (
+                            <ProductCards products={products}/>
+                        ) : searchQuery ? (
+                            <div className="text-center text-gray-600">
+                                No products found matching "{searchQuery}"
+                            </div>
+                        ) : (
+                            <div className="text-center text-gray-600">
+                                Start typing to search for products
+                            </div>
+                        )}
+                    </>
                 )}
             </section>
         </>

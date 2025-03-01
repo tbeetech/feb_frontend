@@ -12,7 +12,7 @@ const BottomNav = () => {
     };
 
     return (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-4 z-50">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-200 py-2 px-4 z-50">
             <div className="flex justify-around items-center">
                 <Link to="/" className="flex flex-col items-center">
                     <i className={`ri-home-line text-xl ${isActive('/')}`}></i>

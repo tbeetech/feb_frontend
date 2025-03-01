@@ -476,6 +476,8 @@ nav {
 .footer__container {
   background-color: black;
   color: #f8f8f8;
+  position: relative;
+  z-index: 1;
 }
 
 .footer__col h4 {
@@ -594,6 +596,18 @@ nav {
   .instagram__grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Add padding to footer to prevent content from being hidden */
+  .footer__container {
+    padding-bottom: 80px;  /* Height of bottom nav + extra space */
+    margin-bottom: 60px;
+  }
+
+  .footer__bar {
+    padding-bottom: 1rem;
   }
 }
 

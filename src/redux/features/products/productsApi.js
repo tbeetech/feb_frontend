@@ -63,9 +63,22 @@ const productsApi = createApi({
             }),
             invalidatesTags: (result, error, id) => [{ type: "Products", id }],
         }),
+        searchProducts: builder.query({
+            query: (searchQuery = '') => ({
+                url: '/search',
+                method: 'GET',
+                params: {
+                    query: searchQuery
+                }
+            }),
+            transformResponse: (response) => {
+                console.log('Search Response:', response);
+                return response;
+            },
+        }),
     }),
 });
 export const { useFetchAllProductsQuery, useFetchProductByIdQuery, useAddProductMutation,
-    useUpdateProductMutation, useDeleteProductMutation } = productsApi;
+    useUpdateProductMutation, useDeleteProductMutation, useSearchProductsQuery } = productsApi;
 
 export default productsApi;

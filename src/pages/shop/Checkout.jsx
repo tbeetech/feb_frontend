@@ -1,16 +1,22 @@
-import React from 'react';
-import { FaWhatsapp } from 'react-icons/fa';
+import React, { useState } from 'react';
+import { FaWhatsapp, FaEye, FaEyeSlash } from 'react-icons/fa';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
 const Checkout = () => {
+  const [showAccountNumber, setShowAccountNumber] = useState(false);
   const whatsappNumber = '+2348033825144';
   const location = useLocation();
   const cartTotal = location.state?.total || 0;
+  const accountNumber = '0038685089';
 
   const handleWhatsAppClick = () => {
     window.open(`https://wa.me/${whatsappNumber}`, '_blank');
+  };
+
+  const toggleAccountNumber = () => {
+    setShowAccountNumber(!showAccountNumber);
   };
 
   return (
@@ -20,15 +26,20 @@ const Checkout = () => {
         <h2>Payment Details</h2>
         <DetailRow>
           <Label>Bank Name:</Label>
-          <Value>StanbicIBTC Bank</Value>
+          <Value>Stanbic IBTC Bank</Value>
         </DetailRow>
         <DetailRow>
           <Label>Account Name:</Label>
-          <Value>febluxury Fashion Store</Value>
+          <Value>Jumoke Obembe</Value>
         </DetailRow>
         <DetailRow>
           <Label>Account Number:</Label>
-          <Value>1234567890</Value>
+          <AccountNumberContainer>
+            <Value>{showAccountNumber ? accountNumber : '••••••••••'}</Value>
+            <ToggleButton onClick={toggleAccountNumber}>
+              {showAccountNumber ? <FaEyeSlash /> : <FaEye />}
+            </ToggleButton>
+          </AccountNumberContainer>
         </DetailRow>
         <WhatsAppButton onClick={handleWhatsAppClick}>
           <FaWhatsapp size={24} />
@@ -43,9 +54,15 @@ const CheckoutContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 80vh;
+  min-height: calc(100vh - 180px); /* Adjust for header and footer */
   padding: 2rem;
+  margin-top: 80px; /* Add space below header */
+  margin-bottom: 80px; /* Add space above footer/bottom nav */
   background: #f8f9fa;
+
+  @media (max-width: 768px) {
+    margin-bottom: 100px; /* Additional space for bottom nav on mobile */
+  }
 `;
 
 const AccountDetailsCard = styled.div`
@@ -120,6 +137,27 @@ const TotalAmount = styled.div`
   color: #1a1a1a;
   margin-bottom: 2rem;
   border: 2px solid #e9ecef;
+`;
+
+const AccountNumberContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+const ToggleButton = styled.button`
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: var(--primary-color);
+  }
 `;
 
 export default Checkout;
