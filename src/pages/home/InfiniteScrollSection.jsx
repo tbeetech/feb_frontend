@@ -28,8 +28,8 @@ const InfiniteScrollSection = () => {
   }, []);
 
   return (
-    <section className="relative h-[90vh] mb-0 overflow-hidden">
-      <div className="h-full relative">
+    <section className="relative h-screen overflow-hidden -mt-[60px]"> {/* Add negative margin to compensate for navbar height */}
+      <div className="h-full w-full relative">
         {images.map((img, index) => (
           <motion.div
             key={index}
@@ -39,12 +39,12 @@ const InfiniteScrollSection = () => {
               scale: currentImage === index ? 1 : 1.1 
             }}
             transition={{ duration: 1 }}
-            className="absolute inset-0"
+            className="absolute inset-0 w-full h-full"
           >
             <img 
               src={img} 
               alt={`Slide ${index + 1}`} 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-center"
             />
           </motion.div>
         ))}

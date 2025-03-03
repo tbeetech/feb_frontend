@@ -11,7 +11,7 @@ function App() {
   return (
     <div className="flex flex-col min-h-screen"> {/* Add flex container */}
       <Navbar/>
-      <main className="flex-grow pt-16"> {/* Add flex-grow */}
+      <main className="flex-grow"> {/* Remove pt-0 completely */}
         <Outlet/>
       </main>
       <Footer/>

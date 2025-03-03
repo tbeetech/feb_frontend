@@ -656,7 +656,7 @@ body.menu-open {
 
 /* Add margin to main content to prevent overlap with fixed navbar */
 main {
-    margin-top: 70px; /* Adjust this value based on your navbar height */
+    margin-top: 0;
 }
 
 /* Mobile menu animation */
