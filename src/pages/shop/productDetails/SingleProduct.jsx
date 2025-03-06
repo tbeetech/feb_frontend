@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useFetchProductByIdQuery } from '../../../redux/features/products/productsApi';
 import { addToCart, decrementQuantity } from '../../../redux/features/cart/cartSlice';
 import ReviewsCard from '../reviews/ReviewsCard';
+import SocialContactButtons from '../../../components/SocialContactButtons';
 
 const SingleProduct = () => {
     const { id } = useParams();
@@ -75,29 +76,39 @@ const SingleProduct = () => {
                             </div>
 
                         </div>
-                        <div className="flex items-center space-x-4 mt-4">
-                            <button
-                                onClick={() => handleDecrement(singleProduct)}
-                                className="px-3 py-1 bg-gray-200 rounded-md"
-                                disabled={quantity === 0}
-                            >
-                                -
-                            </button>
-                            <span>{quantity}</span>
-                            <button
-                                onClick={() => handleIncrement(singleProduct)}
-                                className="px-3 py-1 bg-gray-200 rounded-md"
-                            >
-                                +
-                            </button>
-                        </div>
-                        <button
-                            onClick={() => handleAddToCart(singleProduct)}
-                            className="mt-6 px-6 py-3 bg-primary text-white rounded-md"
-                            disabled={productInCart} // Disable if product is already in cart
-                        >
-                            {productInCart ? 'Already in Cart' : 'Add to Cart'}
-                        </button>
+                        
+                        {singleProduct.orderType === 'contact-to-order' ? (
+                            <div className="mt-6">
+                                <p className="text-lg font-semibold mb-4">Contact us to order this product:</p>
+                                <SocialContactButtons productName={singleProduct.name} />
+                            </div>
+                        ) : (
+                            <>
+                                <div className="flex items-center space-x-4 mt-4">
+                                    <button
+                                        onClick={() => handleDecrement(singleProduct)}
+                                        className="px-3 py-1 bg-gray-200 rounded-md"
+                                        disabled={quantity === 0}
+                                    >
+                                        -
+                                    </button>
+                                    <span>{quantity}</span>
+                                    <button
+                                        onClick={() => handleIncrement(singleProduct)}
+                                        className="px-3 py-1 bg-gray-200 rounded-md"
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                                <button
+                                    onClick={() => handleAddToCart(singleProduct)}
+                                    className="mt-6 px-6 py-3 bg-primary text-white rounded-md"
+                                    disabled={productInCart} // Disable if product is already in cart
+                                >
+                                    {productInCart ? 'Already in Cart' : 'Add to Cart'}
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
 

@@ -181,7 +181,10 @@ const CategoryHeader = ({ categoryName, subcategory, products = [] }) => {
                                             </h3>
                                             <div className="mt-2 flex justify-between items-center">
                                                 <span className="text-primary font-bold">
-                                                    ₦{product.price.toLocaleString()}
+                                                    {product.orderType === 'contact-to-order' 
+                                                        ? 'Price on Request'
+                                                        : `₦${product.price?.toLocaleString() || '0'}`
+                                                    }
                                                 </span>
                                             </div>
                                         </div>

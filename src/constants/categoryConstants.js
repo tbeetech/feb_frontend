@@ -32,18 +32,34 @@ export const CATEGORIES = {
     },
     NEW: {
         name: 'new',
-        subcategories: []
+        subcategories: [
+            { value: 'this-week', label: 'This Week' },
+            { value: 'this-month', label: 'This Month' }
+        ]
     },
     CORPORATE: {
         name: 'corporate',
-        subcategories: []
+        subcategories: [
+            { value: 'suits', label: 'Suits' },
+            { value: 'blazers', label: 'Blazers' },
+            { value: 'office-wear', label: 'Office Wear' }
+        ]
     },
     DRESS: {
         name: 'dress',
-        subcategories: []
+        subcategories: [
+            { value: 'casual', label: 'Casual Dresses' },
+            { value: 'formal', label: 'Formal Dresses' },
+            { value: 'party', label: 'Party Dresses' }
+        ]
     },
     SHOES: {
         name: 'shoes',
-        subcategories: []
+        subcategories: [
+            { value: 'heels', label: 'Heels' },
+            { value: 'flats', label: 'Flats' },
+            { value: 'sandals', label: 'Sandals' },
+            { value: 'sneakers', label: 'Sneakers' }
+        ]
     }
 };

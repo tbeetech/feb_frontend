@@ -10,15 +10,17 @@ import Register from "../components/Register";
 import Checkout from "../pages/shop/Checkout";
 import Contact from "../pages/contact/Contact";
 import About from "../pages/about/About";
+import ErrorBoundary from '../components/ErrorBoundary';
 
 const router = createBrowserRouter([
 {
 path: "/",
 element:<App/>,
+errorElement: <ErrorBoundary />,
 children: [
     {path: "/",element: <Home/>},
-    {path: "/categories/:categoryName", element: <CategoryPage/>},
-    {path: "/categories/:categoryName/:subcategory", element: <CategoryPage/>},
+    {path: "/categories/:categoryName", element: <CategoryPage/>, errorElement: <ErrorBoundary />},
+    {path: "/categories/:categoryName/:subcategory", element: <CategoryPage/>, errorElement: <ErrorBoundary />},
     {path: "/category/:categoryName", element: <CategoryPage/>}, // Legacy support
     {path: "/search", element: <Search/>},
     {path: "/shop", element:<ShopPage/>},
