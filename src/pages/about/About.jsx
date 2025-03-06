@@ -50,7 +50,7 @@ const About = () => {
                         className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-xl"
                     >
                         <img 
-                            src="/about-image.jpg" 
+                            src="https://i.pinimg.com/474x/36/11/fa/3611fafdeb4fdcd0a130c185ebb77dd0.jpg" 
                             alt="Luxury Fashion Collection"
                             className="object-cover w-full h-full"
                         />
