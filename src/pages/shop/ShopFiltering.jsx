@@ -2,18 +2,24 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom';
 import { CATEGORIES } from '../../constants/categoryConstants';
 
-const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, closeMobileFilter }) => {
+const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, onPriceRangeChange, closeMobileFilter }) => {
     const navigate = useNavigate();
 
     const handleCategoryChange = (category) => {
         setFiltersState(prev => ({
             ...prev,
             category,
-            subcategory: '', // Reset subcategory when category changes
+            subcategory: '' // Reset subcategory when category changes
         }));
+        // Remove immediate navigation - let user select subcategory first
+    };
 
-        // Navigate to the appropriate route
-        navigate(`/categories/${category}`);
+    const handleSubcategoryChange = (subcategory) => {
+        setFiltersState(prev => ({
+            ...prev,
+            subcategory
+        }));
+        navigate(`/categories/${filtersState.category}/${subcategory}`);
     };
 
     // Create an array of all categories including the new ones
@@ -29,8 +35,31 @@ const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, c
         { value: 'clothes', label: 'Clothes' },
     ];
 
+    // Get subcategories based on selected category
+    const getSubcategories = () => {
+        if (filtersState.category === 'accessories') {
+            return CATEGORIES.ACCESSORIES.subcategories.map(sub => ({
+                value: sub,
+                label: sub.split('-').map(word => 
+                    word.charAt(0).toUpperCase() + word.slice(1)
+                ).join(' ')
+            }));
+        }
+        if (filtersState.category === 'fragrance') {
+            return CATEGORIES.FRAGRANCE.subcategories.map(sub => ({
+                value: sub,
+                label: sub.split('-').map(word => 
+                    word.charAt(0).toUpperCase() + word.slice(1)
+                ).join(' ')
+            }));
+        }
+        return [];
+    };
+
+    const subcategories = getSubcategories();
+
     return (
-        <div className='w-64 flex-shrink-0'>
+        <div className="bg-white p-4 rounded-lg shadow-md">
             <div className='mb-8'>
                 <h3 className='font-medium mb-4'>Categories</h3>
                 <div className='space-y-2'>
@@ -49,31 +78,36 @@ const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, c
                 </div>
             </div>
 
-            {filtersState.category !== 'all' && 
-             CATEGORIES[filtersState.category.toUpperCase()]?.subcategories?.length > 0 && (
-                <div className='mb-8'>
-                    <h3 className='font-medium mb-4'>Subcategories</h3>
+            {/* Show subcategories immediately after selecting main category */}
+            {(filtersState.category === 'accessories' || filtersState.category === 'fragrance') && (
+                <motion.div 
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className='mb-8 overflow-hidden'
+                >
+                    <h3 className='font-medium mb-4'>Select Subcategory</h3>
                     <div className='space-y-2'>
-                        {CATEGORIES[filtersState.category.toUpperCase()].subcategories.map((subcategory) => (
-                            <label key={subcategory.value} className='flex items-center'>
+                        {subcategories.map((sub) => (
+                            <label key={sub.value} className='flex items-center'>
                                 <input
                                     type='radio'
                                     name='subcategory'
-                                    checked={filtersState.subcategory === subcategory.value}
+                                    checked={filtersState.subcategory === sub.value}
                                     onChange={() => {
                                         setFiltersState(prev => ({
                                             ...prev,
-                                            subcategory: subcategory.value
+                                            subcategory: sub.value
                                         }));
-                                        navigate(`/categories/${filtersState.category}/${subcategory.value}`);
+                                        navigate(`/categories/${filtersState.category}/${sub.value}`);
                                     }}
                                     className='mr-2'
                                 />
-                                {subcategory.label}
+                                {sub.label}
                             </label>
                         ))}
                     </div>
-                </div>
+                </motion.div>
             )}
 
             <div className='mb-8'>
@@ -84,8 +118,8 @@ const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, c
                             <input
                                 type='radio'
                                 name='priceRange'
-                                checked={filtersState.priceRange === `${range.min}-${range.max}`}
-                                onChange={() => handlePriceRangeChange(range)}
+                                checked={filtersState.priceRange === `${range.min}-${range.max === Infinity ? 'Infinity' : range.max}`}
+                                onChange={() => onPriceRangeChange(range)}
                                 className='mr-2'
                             />
                             {range.label}

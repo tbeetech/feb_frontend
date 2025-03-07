@@ -35,12 +35,17 @@ const ShopPage = () => {
 
   const { category, subcategory, priceRange } = filtersState;
   
-  // Safely handle price range parsing
+  // Update price range parsing logic
   let minPrice, maxPrice;
   if (priceRange) {
+    if (priceRange === '400000-Infinity') {
+      minPrice = 400000;
+      maxPrice = undefined;
+    } else {
       const [min, max] = priceRange.split('-').map(Number);
       minPrice = !isNaN(min) ? min : undefined;
-      maxPrice = !isNaN(max) ? max : undefined;
+      maxPrice = !isNaN(max) && isFinite(max) ? max : undefined;
+    }
   }
 
   const { data: { products = [], totalPages, totalProducts } ={}, error, isLoading} = useFetchAllProductsQuery({
@@ -65,6 +70,16 @@ const ShopPage = () => {
         setCurrentPage(pageNumber)
       }
     }
+
+    // Add handler for price range changes
+    const handlePriceRangeChange = (range) => {
+      setFiltersState(prev => ({
+        ...prev,
+        priceRange: `${range.min}-${range.max === Infinity ? 'Infinity' : range.max}`
+      }));
+      setCurrentPage(1);
+    };
+
     if(isLoading) return <div>Loading...</div>
     if(error) return <div>Error Loading products.</div>
 
@@ -91,6 +106,7 @@ const ShopPage = () => {
               filtersState={filtersState}
               setFiltersState={setFiltersState}
               clearFilters={clearFilters}
+              onPriceRangeChange={handlePriceRangeChange}
               closeMobileFilter={() => setIsMobileFilterOpen(false)}
             />
           </div>

@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { getBanners } from '../constants/bannerConstants';
 
-const CategoryHeader = ({ categoryName, subcategory, products = [] }) => {
+const CategoryHeader = ({ categoryName, subcategory, products = [], categoryImage }) => {
     const navigate = useNavigate();
     const displayName = subcategory 
         ? `${categoryName} - ${subcategory.replace(/-/g, ' ')}` 
@@ -32,8 +33,79 @@ const CategoryHeader = ({ categoryName, subcategory, products = [] }) => {
         }
     };
 
+    const currentBanners = getBanners(categoryName?.toLowerCase(), subcategory);
+
     return (
         <section className="relative min-h-[500px] mt-16 mb-8 overflow-hidden">
+            {/* Category Banners */}
+            <div className="grid md:grid-cols-2 gap-8 mb-12">
+                <motion.div 
+                    className="relative h-[300px] overflow-hidden rounded-lg"
+                    initial={{ opacity: 0, x: -50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <img 
+                        src={currentBanners.banner1.image} 
+                        alt={currentBanners.banner1.title}
+                        className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/40 p-8 flex flex-col justify-end">
+                        <h3 className="text-white text-2xl font-bold mb-2">
+                            {currentBanners.banner1.title}
+                        </h3>
+                        <p className="text-white/90">
+                            {currentBanners.banner1.description}
+                        </p>
+                    </div>
+                </motion.div>
+
+                <motion.div 
+                    className="relative h-[300px] overflow-hidden rounded-lg"
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                    <img 
+                        src={currentBanners.banner2.image} 
+                        alt={currentBanners.banner2.title}
+                        className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/40 p-8 flex flex-col justify-end">
+                        <h3 className="text-white text-2xl font-bold mb-2">
+                            {currentBanners.banner2.title}
+                        </h3>
+                        <p className="text-white/90">
+                            {currentBanners.banner2.description}
+                        </p>
+                    </div>
+                </motion.div>
+            </div>
+
+            <motion.section 
+                className="relative h-[60vh] overflow-hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+            >
+                <motion.div
+                    className="absolute inset-0"
+                    style={{
+                        backgroundImage: `url(${categoryImage})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                    }}
+                    animate={{
+                        scale: [1, 1.1, 1],
+                        y: [0, -20, 0]
+                    }}
+                    transition={{
+                        duration: 20,
+                        repeat: Infinity,
+                        ease: "linear"
+                    }}
+                />
+                <div className="absolute inset-0 bg-black/50" />
+            </motion.section>
             {/* 3D Background with perspective */}
             <motion.div 
                 className="absolute inset-0 bg-gradient-to-r from-primary-light to-white"

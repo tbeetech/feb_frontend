@@ -6,6 +6,7 @@ import { useFetchProductByIdQuery } from '../../../redux/features/products/produ
 import { addToCart, decrementQuantity } from '../../../redux/features/cart/cartSlice';
 import ReviewsCard from '../reviews/ReviewsCard';
 import SocialContactButtons from '../../../components/SocialContactButtons';
+import { motion } from 'framer-motion';
 
 const SingleProduct = () => {
     const { id } = useParams();
@@ -35,12 +36,25 @@ const SingleProduct = () => {
         dispatch(decrementQuantity(product));
     };
 
+    // Add zoom state
+    const [isZoomed, setIsZoomed] = useState(false);
+    const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+
+    const handleMouseMove = (e) => {
+        if (isZoomed) {
+            const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+            const x = (e.clientX - left) / width * 100;
+            const y = (e.clientY - top) / height * 100;
+            setZoomPosition({ x, y });
+        }
+    };
+
     if (isLoading) return <p>Loading...</p>
     if (error) return <p>Error loading product</p>
     console.log(id)
     return (
         <>
-            <section className='section__container bg-primary-light'>
+            <section className='section__container bg-primary-light pt-28 pb-8'>
                 <h2 className='section__header capitalize'>Single Product Page</h2>
                 <div>
                     <span className='hover:text-primary'><Link to="/">home</Link></span>
@@ -52,13 +66,52 @@ const SingleProduct = () => {
                 </div>
             </section>
 
-            <section className="section__container mt-8">
-                <div>
-                    {/* product image */}
-                    <div>
-                        <img className="rounded-md w-full h-auto" src={singleProduct.image} alt="" />
-                    </div>
-                    <div className="md:w-1/2 w-full">
+            <motion.section 
+                className="section__container mt-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+            >
+                <div className="grid md:grid-cols-2 gap-8">
+                    {/* Enhanced product image with zoom */}
+                    <motion.div 
+                        className="relative overflow-hidden rounded-lg"
+                        whileHover={{ scale: 1.02 }}
+                        transition={{ duration: 0.3 }}
+                        onHoverStart={() => setIsZoomed(true)}
+                        onHoverEnd={() => setIsZoomed(false)}
+                        onMouseMove={handleMouseMove}
+                    >
+                        <motion.img
+                            src={singleProduct.image}
+                            alt={singleProduct.name}
+                            className="w-full h-auto transform hover:scale-150"
+                            style={{ 
+                                transformOrigin: 'center',
+                                cursor: 'zoom-in'
+                            }}
+                        />
+                        {/* Thumbnail Gallery */}
+                        <div className="flex gap-2 mt-4">
+                            {singleProduct.gallery?.map((img, idx) => (
+                                <motion.div
+                                    key={idx}
+                                    whileHover={{ y: -5 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="w-20 h-20 border rounded cursor-pointer"
+                                >
+                                    <img src={img} alt="" className="w-full h-full object-cover" />
+                                </motion.div>
+                            ))}
+                        </div>
+                    </motion.div>
+                    
+                    {/* Product details with animations */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}
+                    >
                         <h3 className='text-2xl font-semibold mb-4'>{singleProduct?.name}</h3>
                         <p className='text-x1 text-primary mb-4'>
                             ₦{singleProduct?.price}
@@ -109,10 +162,9 @@ const SingleProduct = () => {
                                 </button>
                             </>
                         )}
-                    </div>
+                    </motion.div>
                 </div>
-
-            </section>
+            </motion.section>
 
             <section className='section__container mt-8'>
                 <ReviewsCard
