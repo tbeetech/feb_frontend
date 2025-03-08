@@ -88,6 +88,7 @@ const ProductUpload = () => {
       
       if (response) {
         toast.success('Product uploaded successfully!');
+        alert("Product uploaded");
         setFormData(initialState);
         setSelectedCategory('');
       }
