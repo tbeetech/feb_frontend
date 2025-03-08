@@ -38,7 +38,7 @@ const CategoryHeader = ({ categoryName, subcategory, products = [], categoryImag
     return (
         <section className="relative min-h-[500px] mt-16 mb-8 overflow-hidden">
             {/* Category Banners */}
-            <div className="grid md:grid-cols-2 gap-8 mb-12">
+            <div className="grid md:grid-cols-2 gap-8 mb-12 relative z-10">
                 <motion.div 
                     className="relative h-[300px] overflow-hidden rounded-lg"
                     initial={{ opacity: 0, x: -50 }}
@@ -82,96 +82,8 @@ const CategoryHeader = ({ categoryName, subcategory, products = [], categoryImag
                 </motion.div>
             </div>
 
-            <motion.section 
-                className="relative h-[60vh] overflow-hidden"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-            >
-                <motion.div
-                    className="absolute inset-0"
-                    style={{
-                        backgroundImage: `url(${categoryImage})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center'
-                    }}
-                    animate={{
-                        scale: [1, 1.1, 1],
-                        y: [0, -20, 0]
-                    }}
-                    transition={{
-                        duration: 20,
-                        repeat: Infinity,
-                        ease: "linear"
-                    }}
-                />
-                <div className="absolute inset-0 bg-black/50" />
-            </motion.section>
-            {/* 3D Background with perspective */}
-            <motion.div 
-                className="absolute inset-0 bg-gradient-to-r from-primary-light to-white"
-                initial={{ rotateX: 45, scale: 1.2 }}
-                animate={{ 
-                    rotateX: 0, 
-                    scale: 1,
-                    transition: { duration: 1.5, ease: "easeOut" }
-                }}
-                style={{
-                    transformStyle: "preserve-3d",
-                    perspective: "1000px"
-                }}
-            >
-                {/* Animated grid pattern */}
-                <motion.div 
-                    className="absolute inset-0"
-                    style={{
-                        backgroundImage: `
-                            linear-gradient(0deg, transparent 24%, 
-                            rgba(0, 0, 0, 0.05) 25%, 
-                            rgba(0, 0, 0, 0.05) 26%, 
-                            transparent 27%, transparent 74%, 
-                            rgba(0, 0, 0, 0.05) 75%, 
-                            rgba(0, 0, 0, 0.05) 76%, 
-                            transparent 77%, transparent),
-                            linear-gradient(90deg, transparent 24%, 
-                            rgba(0, 0, 0, 0.05) 25%, 
-                            rgba(0, 0, 0, 0.05) 26%, 
-                            transparent 27%, transparent 74%, 
-                            rgba(0, 0, 0, 0.05) 75%, 
-                            rgba(0, 0, 0, 0.05) 76%, 
-                            transparent 77%, transparent)
-                        `,
-                        backgroundSize: '50px 50px',
-                    }}
-                    animate={{
-                        backgroundPosition: ['0px 0px', '50px 50px'],
-                    }}
-                    transition={{
-                        duration: 20,
-                        repeat: Infinity,
-                        ease: "linear"
-                    }}
-                />
-
-                {/* Floating particles */}
-                <motion.div
-                    className="absolute inset-0"
-                    style={{
-                        background: 'radial-gradient(circle at center, rgba(255,255,255,0.8) 0%, transparent 70%)'
-                    }}
-                    animate={{
-                        scale: [1, 1.2, 1],
-                        opacity: [0.5, 0.8, 0.5]
-                    }}
-                    transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                    }}
-                />
-            </motion.div>
-
             {/* Content */}
-            <div className="relative z-10 container mx-auto px-4 pt-24 pb-16">
+            <div className="relative z-10 container mx-auto px-4 pt-8 pb-16">
                 <motion.div
                     variants={containerVariants}
                     initial="hidden"
@@ -195,7 +107,7 @@ const CategoryHeader = ({ categoryName, subcategory, products = [], categoryImag
                         Discover our exclusive collection of {displayName.toLowerCase()} products
                     </motion.p>
                     
-                    {/* Product count and sorting options */}
+                    {/* Product count */}
                     <motion.div
                         variants={itemVariants}
                         className="flex justify-center items-center gap-4 text-gray-600"
@@ -208,63 +120,124 @@ const CategoryHeader = ({ categoryName, subcategory, products = [], categoryImag
 
                 {/* Infinite Scroll Products Preview */}
                 {products.length > 0 && (
-                    <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="mt-12 relative"
-                    >
-                        <div className="flex gap-4 overflow-x-hidden">
+                    <div className="relative mt-12 perspective-1000 transform-gpu">
+                        {/* 3D Container */}
+                        <div className="relative h-[300px] category-header-3d">
+                            {/* Geometric Shapes Layer */}
                             <motion.div
+                                className="absolute inset-0 overflow-hidden"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                            >
+                                {[...Array(5)].map((_, i) => (
+                                    <motion.div
+                                        key={i}
+                                        className="absolute rounded-full bg-gradient-to-r from-primary/10 to-white/20"
+                                        style={{
+                                            width: Math.random() * 300 + 100,
+                                            height: Math.random() * 300 + 100,
+                                            left: `${Math.random() * 100}%`,
+                                            top: `${Math.random() * 100}%`,
+                                            filter: 'blur(50px)',
+                                            transform: 'translateZ(-50px)',
+                                        }}
+                                        animate={{
+                                            scale: [1, 1.2, 1],
+                                            rotate: [0, 180, 360],
+                                            opacity: [0.3, 0.5, 0.3],
+                                        }}
+                                        transition={{
+                                            duration: 15,
+                                            repeat: Infinity,
+                                            ease: "linear"
+                                        }}
+                                    />
+                                ))}
+                            </motion.div>
+
+                            {/* Grid Pattern */}
+                            <motion.div
+                                className="absolute inset-0 bg-grid-pattern"
+                                style={{
+                                    transform: 'translateZ(-30px) rotateX(60deg)',
+                                }}
                                 animate={{
-                                    x: [-100, -(products.length * 320)],
+                                    backgroundPosition: ['0px 0px', '50px 50px'],
+                                }}
+                                transition={{
+                                    duration: 20,
+                                    repeat: Infinity,
+                                    ease: "linear"
+                                }}
+                            />
+
+                            {/* Products Scroll */}
+                            <motion.div
+                                className="absolute inset-0 flex gap-4"
+                                style={{
+                                    transform: 'translateZ(0px)',
+                                }}
+                                animate={{
+                                    x: [0, -(products.length * 320)],
                                 }}
                                 transition={{
                                     x: {
                                         repeat: Infinity,
-                                        duration: 20,
+                                        duration: 30,
                                         ease: "linear",
                                     },
                                 }}
-                                className="flex gap-4"
                             >
                                 {[...products, ...products].map((product, index) => (
                                     <motion.div
                                         key={`${product._id}-${index}`}
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        className="w-72 flex-shrink-0 bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer transform-gpu hover:shadow-xl transition-all duration-300"
-                                        onClick={() => navigate(`/product/${product._id}`)}
+                                        className="w-80 flex-shrink-0 glass-effect rounded-lg overflow-hidden"
+                                        whileHover={{ scale: 1.05, translateZ: 20 }}
                                     >
-                                        <div className="relative h-48 overflow-hidden">
+                                        {/* Product content */}
+                                        <div className="relative h-48">
                                             <img
                                                 src={product.image}
                                                 alt={product.name}
-                                                className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                                                className="w-full h-full object-cover"
                                             />
-                                            {product.discount > 0 && (
-                                                <div className="absolute top-2 right-2 bg-primary text-white px-2 py-1 rounded-md text-sm">
-                                                    -{product.discount}%
-                                                </div>
-                                            )}
                                         </div>
-                                        <div className="p-4">
-                                            <h3 className="text-lg font-semibold text-gray-800 truncate">
+                                        <div className="p-4 backdrop-blur-sm">
+                                            <h3 className="text-lg font-semibold text-white">
                                                 {product.name}
                                             </h3>
-                                            <div className="mt-2 flex justify-between items-center">
-                                                <span className="text-primary font-bold">
-                                                    {product.orderType === 'contact-to-order' 
-                                                        ? 'Price on Request'
-                                                        : `₦${product.price?.toLocaleString() || '0'}`
-                                                    }
-                                                </span>
-                                            </div>
+                                            <p className="text-white/90">
+                                                ₦{product.price?.toLocaleString()}
+                                            </p>
                                         </div>
                                     </motion.div>
                                 ))}
                             </motion.div>
+
+                            {/* Floating Particles */}
+                            <div className="absolute inset-0">
+                                {[...Array(20)].map((_, i) => (
+                                    <motion.div
+                                        key={i}
+                                        className="absolute w-1 h-1 bg-white rounded-full"
+                                        style={{
+                                            left: `${Math.random() * 100}%`,
+                                            top: `${Math.random() * 100}%`,
+                                        }}
+                                        animate={{
+                                            y: [0, -30, 0],
+                                            opacity: [0, 1, 0],
+                                        }}
+                                        transition={{
+                                            duration: 3 + Math.random() * 2,
+                                            repeat: Infinity,
+                                            delay: Math.random() * 2,
+                                        }}
+                                    />
+                                ))}
+                            </div>
                         </div>
-                    </motion.div>
+                    </div>
                 )}
             </div>
         </section>
