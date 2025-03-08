@@ -1,6 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom';
 import { CATEGORIES } from '../../constants/categoryConstants';
+import { motion } from 'framer-motion';
 
 const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, onPriceRangeChange, closeMobileFilter }) => {
     const navigate = useNavigate();
@@ -36,27 +37,42 @@ const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, o
     ];
 
     // Get subcategories based on selected category
-    const getSubcategories = () => {
-        if (filtersState.category === 'accessories') {
-            return CATEGORIES.ACCESSORIES.subcategories.map(sub => ({
-                value: sub,
-                label: sub.split('-').map(word => 
+    const getSubcategories = (category) => {
+        if (!category || category === 'all') return [];
+        
+        // Check if the category exists in CATEGORIES
+        const categoryData = CATEGORIES[category?.toUpperCase()];
+        if (!categoryData) return [];
+        
+        // Make sure subcategories is an array before mapping
+        const subcategoryList = categoryData.subcategories || [];
+        
+        // Map subcategories with type checking
+        return subcategoryList.map(sub => {
+            // Check if sub is a string before using split
+            if (typeof sub === 'string') {
+                const formatted = sub.split('-').map(word => 
                     word.charAt(0).toUpperCase() + word.slice(1)
-                ).join(' ')
-            }));
-        }
-        if (filtersState.category === 'fragrance') {
-            return CATEGORIES.FRAGRANCE.subcategories.map(sub => ({
-                value: sub,
-                label: sub.split('-').map(word => 
-                    word.charAt(0).toUpperCase() + word.slice(1)
-                ).join(' ')
-            }));
-        }
-        return [];
+                ).join(' ');
+                
+                return {
+                    value: sub,
+                    label: formatted
+                };
+            } else if (sub && typeof sub === 'object') {
+                // If subcategory is already an object with value/label
+                return sub;
+            } else {
+                // Fallback for unexpected data types
+                return {
+                    value: String(sub),
+                    label: String(sub)
+                };
+            }
+        });
     };
 
-    const subcategories = getSubcategories();
+    const subcategories = getSubcategories(filtersState.category);
 
     return (
         <div className="bg-white p-4 rounded-lg shadow-md">
