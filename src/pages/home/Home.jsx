@@ -4,6 +4,7 @@ import NewArrivalsSlider from '../../components/NewArrivalsSlider'
 import TrendingProductSlider from '../../components/TrendingProductSlider'
 import DealsSection from './DealsSection';
 import PromoBanner from './PromoBanner';
+import TestimonialsSlider from '../../components/TestimonialsSlider'
 
 const Home = () => {
   return (
@@ -29,7 +30,8 @@ const Home = () => {
           <TrendingProductSlider />
         </div>
       </section>
-
+{/* Testimonials Section */}
+<TestimonialsSlider />
       <DealsSection />
       <PromoBanner />
     </main>
