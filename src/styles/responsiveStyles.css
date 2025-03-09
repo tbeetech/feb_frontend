@@ -1,0 +1,72 @@
+/* src/styles/responsiveStyles.css */
+
+/* Global font size reduction for mobile */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px; /* Reduce base font size on mobile */
+  }
+  
+  /* Compact buttons */
+  button, .btn {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Compact form inputs */
+  input, select, textarea {
+    padding: 0.5rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Reduce heading sizes */
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  h3 { font-size: 1.125rem !important; }
+  
+  /* Make SVG icons smaller */
+  svg {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+  }
+  
+  /* Add more space efficiency to card layouts */
+  .product__card {
+    margin-bottom: 0.75rem !important;
+  }
+  
+  .product__card__content {
+    padding: 0.75rem !important;
+  }
+  
+  /* Tighter padding in containers */
+  .section__container {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+}
+
+/* Premium/Classic styling enhancements */
+.glass-effect {
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Add subtle text shadow to headings for premium look */
+h1, h2, h3, h4 {
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Refined button style */
+.btn-premium {
+  @apply bg-gradient-to-r from-primary to-primary-dark text-white font-medium shadow-md;
+  letter-spacing: 0.02em;
+  transition: all 0.3s ease;
+}
+
+.btn-premium:hover {
+  @apply shadow-lg transform-gpu scale-[1.02];
+}
