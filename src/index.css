@@ -426,3 +426,62 @@ html {
     from { clipPath: polygon(0 0, 0 0, 0 100%, 0% 100%); }
     to { clipPath: polygon(0 0, 100% 0, 100% 100%, 0% 100%); }
 }
+
+/* Enhanced product image hover effect */
+.product-image-hover {
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+.product-image-hover:hover {
+  transform: scale(1.05);
+}
+
+/* Animated search input */
+.search-input-focus {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-input-focus:focus {
+  box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.3);
+  transform: translateY(-2px);
+}
+
+/* Shimmer loading effect */
+.shimmer-loading {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Fade-in gallery effect */
+.gallery-fade-in {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.gallery-item {
+  animation-delay: calc(var(--index) * 0.1s);
+}
