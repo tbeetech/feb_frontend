@@ -24,7 +24,8 @@ const Navbar = () => {
     }
     const adminDropDownMenus = [
         {label: "Dashboard", path: "/dashboard/admin"},
-        {label: "Manage Items", path: "/dashboard/manage-products"},
+        {label: "Upload Product", path: "/admin/upload-product"},
+        {label: "Manage Products", path: "/admin/manage-products"},
         {label: "All Orders", path: "/dashboard/manage-orders"},
         {label: "Add New Post", path: "/dashboard/add-new-post"},
     ]

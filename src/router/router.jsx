@@ -1,5 +1,7 @@
 import {createBrowserRouter} from "react-router-dom";
 import ProductUpload from "../pages/admin/ProductUpload";
+import ProductManagement from "../pages/admin/ProductManagement";
+import EditProduct from "../pages/admin/EditProduct";
 import App from "../App";
 import Home from "../pages/home/Home";
 import CategoryPage from "../pages/category/CategoryPage";
@@ -29,7 +31,9 @@ children: [
     {path: "/checkout", element:<Checkout/>},
     {path: "/contact", element: <Contact/>},
     {path: "/about", element: <About/>},
-    {path: "/admin/upload-product", element: <ProductUpload />}
+    {path: "/admin/upload-product", element: <ProductUpload />},
+    {path: "/admin/manage-products", element: <ProductManagement />},
+    {path: "/admin/edit-product/:id", element: <EditProduct />}
 ]
 },
 {
