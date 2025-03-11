@@ -52,6 +52,9 @@ const productsApi = createApi({
                 method: "PATCH",
                 body: rest,
                 credentials: "include",
+                headers: {
+                    'Content-Type': 'application/json',
+                }
             }),
             invalidatesTags: ["Products"],
         }),

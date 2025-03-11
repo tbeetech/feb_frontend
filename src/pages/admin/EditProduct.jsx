@@ -95,12 +95,13 @@ const EditProduct = () => {
     }
     
     try {
+      console.log('Submitting update with data:', { id, ...formData });
       const resultAction = await updateProduct({ 
         id,
         ...formData
       }).unwrap();
       
-      if (resultAction.success) {
+      if (resultAction.success || resultAction.message === 'Product updated successfully') {
         toast.success('Product updated successfully!');
         navigate('/admin/manage-products');
       } else {
@@ -108,7 +109,7 @@ const EditProduct = () => {
       }
     } catch (error) {
       console.error('Update failed:', error);
-      toast.error(error.data?.message || 'Failed to update product');
+      toast.error(`Update failed: ${error.data?.message || error.message || 'Unknown error'}`);
     }
   };
   
