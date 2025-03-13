@@ -22,6 +22,12 @@ const SingleProduct = () => {
     const productInCart = cartProducts.find(product => product._id === id);
     const quantity = productInCart ? productInCart.quantity : 0;
 
+    // Check if the product is in stock and if there's inventory available for more purchases
+    const isOutOfStock = singleProduct?.stockStatus === 'Out of Stock';
+    const hasReachedStockLimit = singleProduct?.stockStatus === 'In Stock' && 
+        singleProduct?.stockQuantity > 0 && 
+        quantity >= singleProduct.stockQuantity;
+
     // Enhanced image states
     const [selectedImage, setSelectedImage] = useState('');
     const [previewOpen, setPreviewOpen] = useState(false);
@@ -63,7 +69,7 @@ const SingleProduct = () => {
 
     // Handlers
     const handleAddToCart = (product) => {
-        if (!productInCart) {
+        if (!productInCart && !isOutOfStock && !hasReachedStockLimit) {
             const productWithSize = {
                 ...product,
                 selectedSize: selectedSize,
@@ -74,11 +80,14 @@ const SingleProduct = () => {
     };
 
     const handleIncrement = (product) => {
-        const productWithSize = {
-            ...product,
-            selectedSize: selectedSize
-        };
-        dispatch(addToCart(productWithSize));
+        // Only allow increment if we haven't reached stock limit
+        if (!hasReachedStockLimit) {
+            const productWithSize = {
+                ...product,
+                selectedSize: selectedSize
+            };
+            dispatch(addToCart(productWithSize));
+        }
     };
 
     const handleDecrement = (product) => {
@@ -268,6 +277,43 @@ const SingleProduct = () => {
                             )}
                         </motion.div>
                         
+                        {/* Stock Information */}
+                        <motion.div 
+                            className="py-3 border-t border-b border-gray-200 my-4"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.45 }}
+                        >
+                            <div className="flex items-center mb-2">
+                                <span className="font-medium mr-2">Availability:</span>
+                                {singleProduct?.stockStatus === 'In Stock' ? (
+                                    <span className="text-green-600 flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                        </svg>
+                                        In Stock
+                                    </span>
+                                ) : (
+                                    <span className="text-red-600 flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                        </svg>
+                                        Out of Stock
+                                    </span>
+                                )}
+                            </div>
+
+                            {singleProduct?.stockStatus === 'In Stock' && singleProduct?.stockQuantity > 0 && (
+                                <div className="flex items-center">
+                                    <span className="font-medium mr-2">Quantity Left:</span>
+                                    <span className={`${singleProduct.stockQuantity < 5 ? 'text-orange-600' : 'text-gray-700'}`}>
+                                        {singleProduct.stockQuantity} {singleProduct.stockQuantity === 1 ? 'item' : 'items'}
+                                        {singleProduct.stockQuantity < 5 && ' (Low Stock)'}
+                                    </span>
+                                </div>
+                            )}
+                        </motion.div>
+                        
                         <motion.div 
                             className="prose text-gray-600 max-w-none"
                             initial={{ opacity: 0 }}
@@ -319,7 +365,8 @@ const SingleProduct = () => {
                                             <span className="px-4 py-2 font-medium">{quantity}</span>
                                             <motion.button
                                                 onClick={() => handleIncrement(singleProduct)}
-                                                className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                                                className={`px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors ${hasReachedStockLimit ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                disabled={hasReachedStockLimit}
                                                 whileTap={{ scale: 0.95 }}
                                             >
                                                 +
@@ -330,14 +377,15 @@ const SingleProduct = () => {
                                     {quantity === 0 ? (
                                         <motion.button
                                             onClick={() => handleAddToCart(singleProduct)}
-                                            className="w-full py-3 bg-primary text-white rounded-lg flex items-center justify-center hover:bg-primary-dark transition-colors"
-                                            whileHover={{ scale: 1.02 }}
-                                            whileTap={{ scale: 0.98 }}
+                                            className={`w-full py-3 bg-primary text-white rounded-lg flex items-center justify-center hover:bg-primary-dark transition-colors ${(isOutOfStock || hasReachedStockLimit) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            disabled={isOutOfStock || hasReachedStockLimit}
+                                            whileHover={{ scale: isOutOfStock || hasReachedStockLimit ? 1 : 1.02 }}
+                                            whileTap={{ scale: isOutOfStock || hasReachedStockLimit ? 1 : 0.98 }}
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                                                 <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
                                             </svg>
-                                            Add to Cart
+                                            {isOutOfStock ? 'Out of Stock' : hasReachedStockLimit ? 'Stock Limit Reached' : 'Add to Cart'}
                                         </motion.button>
                                     ) : (
                                         <div className="text-green-600 py-2 text-center">

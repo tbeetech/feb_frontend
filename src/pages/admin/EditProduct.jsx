@@ -33,7 +33,9 @@ const EditProduct = () => {
     rating: 0,
     orderType: 'regular',
     sizeType: 'none',
-    sizes: []
+    sizes: [],
+    stockStatus: 'In Stock',
+    stockQuantity: 0
   };
   
   const [formData, setFormData] = useState(initialState);
@@ -56,7 +58,9 @@ const EditProduct = () => {
         rating: product.rating || 0,
         orderType: product.orderType || 'regular',
         sizeType: product.sizeType || 'none',
-        sizes: product.sizes || []
+        sizes: product.sizes || [],
+        stockStatus: product.stockStatus || 'In Stock',
+        stockQuantity: product.stockQuantity || 0
       });
       
       if (product.category) {
@@ -333,6 +337,40 @@ const EditProduct = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
             />
+          </div>
+          
+          {/* Stock Information */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+              <label htmlFor="stockStatus" className="block text-sm font-medium text-gray-700 mb-1">
+                Stock Status
+              </label>
+              <select
+                id="stockStatus"
+                name="stockStatus"
+                value={formData.stockStatus}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="In Stock">In Stock</option>
+                <option value="Out of Stock">Out of Stock</option>
+              </select>
+            </div>
+            
+            <div>
+              <label htmlFor="stockQuantity" className="block text-sm font-medium text-gray-700 mb-1">
+                Stock Quantity
+              </label>
+              <input
+                type="number"
+                id="stockQuantity"
+                name="stockQuantity"
+                value={formData.stockQuantity}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                min="0"
+              />
+            </div>
           </div>
           
           {/* Description */}

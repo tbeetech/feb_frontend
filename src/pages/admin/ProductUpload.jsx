@@ -26,7 +26,9 @@ const ProductUpload = () => {
     rating: 0,
     orderType: 'regular',
     sizeType: 'none',
-    sizes: []
+    sizes: [],
+    stockStatus: 'In Stock',
+    stockQuantity: 0
   };
   
   const [formData, setFormData] = useState(initialState);
@@ -272,6 +274,41 @@ const ProductUpload = () => {
                 />
               </div>
             )}
+          </div>
+          
+          {/* Stock Information */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="form-group">
+              <label htmlFor="stockStatus" className="block mb-2 font-medium">
+                Stock Status
+              </label>
+              <select
+                id="stockStatus"
+                name="stockStatus"
+                value={formData.stockStatus}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="In Stock">In Stock</option>
+                <option value="Out of Stock">Out of Stock</option>
+              </select>
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="stockQuantity" className="block mb-2 font-medium">
+                Stock Quantity
+              </label>
+              <input
+                type="number"
+                id="stockQuantity"
+                name="stockQuantity"
+                value={formData.stockQuantity}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                min="0"
+                placeholder="Enter stock quantity"
+              />
+            </div>
           </div>
           
           {/* Rating and Order Type */}
