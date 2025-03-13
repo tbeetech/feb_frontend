@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import RatingStars from '../../../components/RatingStars';
 import { useDispatch, useSelector } from 'react-redux';
@@ -6,8 +6,9 @@ import { useFetchProductByIdQuery } from '../../../redux/features/products/produ
 import { addToCart, decrementQuantity } from '../../../redux/features/cart/cartSlice';
 import ReviewsCard from '../reviews/ReviewsCard';
 import SocialContactButtons from '../../../components/SocialContactButtons';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import ImagePreviewModal from '../../../components/ImagePreviewModal';
+import SizeSelectionWheel from '../../../components/SizeSelectionWheel';
 
 const SingleProduct = () => {
     const { id } = useParams();
@@ -25,10 +26,20 @@ const SingleProduct = () => {
     const [selectedImage, setSelectedImage] = useState('');
     const [previewOpen, setPreviewOpen] = useState(false);
     
-    // Set initial selected image when product loads
+    // Size selection state
+    const [selectedSize, setSelectedSize] = useState(null);
+    
+    // Set initial selected image and size when product loads
     useEffect(() => {
         if (singleProduct?.image) {
             setSelectedImage(singleProduct.image);
+        }
+        
+        // Set the first available size as default if sizes exist
+        if (singleProduct?.sizes?.length > 0) {
+            setSelectedSize(singleProduct.sizes[0]);
+        } else {
+            setSelectedSize(null);
         }
     }, [singleProduct]);
 
@@ -53,12 +64,21 @@ const SingleProduct = () => {
     // Handlers
     const handleAddToCart = (product) => {
         if (!productInCart) {
-            dispatch(addToCart({ ...product, quantity: 1 }));
+            const productWithSize = {
+                ...product,
+                selectedSize: selectedSize,
+                quantity: 1
+            };
+            dispatch(addToCart(productWithSize));
         }
     };
 
     const handleIncrement = (product) => {
-        dispatch(addToCart(product));
+        const productWithSize = {
+            ...product,
+            selectedSize: selectedSize
+        };
+        dispatch(addToCart(productWithSize));
     };
 
     const handleDecrement = (product) => {
@@ -68,6 +88,11 @@ const SingleProduct = () => {
     const openPreview = (image) => {
         setSelectedImage(image);
         setPreviewOpen(true);
+    };
+
+    // Handler for size selection
+    const handleSizeSelect = (size) => {
+        setSelectedSize(size);
     };
 
     // Loading state
@@ -252,6 +277,21 @@ const SingleProduct = () => {
                             <p>{singleProduct?.description}</p>
                         </motion.div>
                         
+                        {/* Size Selection Wheel */}
+                        {singleProduct?.sizeType !== 'none' && singleProduct?.sizes?.length > 0 && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.55 }}
+                            >
+                                <SizeSelectionWheel 
+                                    sizes={singleProduct.sizes} 
+                                    sizeType={singleProduct.sizeType}
+                                    onSizeSelect={handleSizeSelect}
+                                />
+                            </motion.div>
+                        )}
+                        
                         <motion.div 
                             className="pt-6 border-t border-gray-200"
                             initial={{ opacity: 0 }}
@@ -287,29 +327,27 @@ const SingleProduct = () => {
                                         </div>
                                     </div>
                                     
-                                    <motion.button
-                                        onClick={() => handleAddToCart(singleProduct)}
-                                        className={`w-full md:w-auto px-8 py-3 rounded-lg text-white font-medium transition-all ${productInCart 
-                                            ? 'bg-green-500 hover:bg-green-600'
-                                            : 'bg-primary hover:bg-primary-dark'}`}
-                                        disabled={productInCart}
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
-                                    >
-                                        {productInCart ? (
-                                            <span className="flex items-center justify-center gap-2">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                </svg>
-                                                Added to Cart
-                                            </span>
-                                        ) : 'Add to Cart'}
-                                    </motion.button>
+                                    {quantity === 0 ? (
+                                        <motion.button
+                                            onClick={() => handleAddToCart(singleProduct)}
+                                            className="w-full py-3 bg-primary text-white rounded-lg flex items-center justify-center hover:bg-primary-dark transition-colors"
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+                                            </svg>
+                                            Add to Cart
+                                        </motion.button>
+                                    ) : (
+                                        <div className="text-green-600 py-2 text-center">
+                                            ✓ Product added to cart
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </motion.div>
                         
-                        {/* Product meta info */}
                         <motion.div 
                             className="pt-6 border-t border-gray-200 text-sm text-gray-600 space-y-2"
                             initial={{ opacity: 0 }}
@@ -320,6 +358,9 @@ const SingleProduct = () => {
                             <p><span className="font-medium">Category:</span> {singleProduct?.category}</p>
                             {singleProduct?.subcategory && (
                                 <p><span className="font-medium">Subcategory:</span> {singleProduct?.subcategory}</p>
+                            )}
+                            {selectedSize && (
+                                <p><span className="font-medium">Selected Size:</span> {selectedSize}</p>
                             )}
                             <p><span className="font-medium">Tags:</span> {singleProduct?.tags?.join(', ') || 'None'}</p>
                         </motion.div>

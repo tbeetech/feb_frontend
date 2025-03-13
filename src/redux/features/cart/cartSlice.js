@@ -10,13 +10,18 @@ const cartSlice = createSlice({
     initialState,
     reducers: {
         addToCart: (state, action) => {
-            const existingProduct = state.products.find(
-                (product) => product._id === action.payload._id
+            // Check if product with same ID and size exists
+            const existingProductIndex = state.products.findIndex(
+                (product) => 
+                    product._id === action.payload._id && 
+                    product.selectedSize === action.payload.selectedSize
             );
             
-            if (existingProduct) {
-                existingProduct.quantity += 1;
+            if (existingProductIndex >= 0) {
+                // If product exists, increment quantity
+                state.products[existingProductIndex].quantity += 1;
             } else {
+                // Otherwise add new product
                 state.products.push({ ...action.payload, quantity: 1 });
             }
             
@@ -26,17 +31,22 @@ const cartSlice = createSlice({
             );
         },
         decrementQuantity: (state, action) => {
-            const existingProduct = state.products.find(
-                (product) => product._id === action.payload._id
+            // Find product with same ID and size
+            const existingProductIndex = state.products.findIndex(
+                (product) => 
+                    product._id === action.payload._id && 
+                    product.selectedSize === action.payload.selectedSize
             );
             
-            if (existingProduct) {
-                if (existingProduct.quantity === 1) {
+            if (existingProductIndex >= 0) {
+                if (state.products[existingProductIndex].quantity === 1) {
+                    // Remove if quantity is 1
                     state.products = state.products.filter(
-                        (product) => product._id !== action.payload._id
+                        (_, index) => index !== existingProductIndex
                     );
                 } else {
-                    existingProduct.quantity -= 1;
+                    // Otherwise decrement quantity
+                    state.products[existingProductIndex].quantity -= 1;
                 }
             }
             

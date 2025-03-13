@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAddProductMutation } from '../../redux/features/products/productsApi';
 import { CATEGORIES } from '../../constants/categoryConstants';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
+import ProductSizeInput from '../../components/ProductSizeInput';
 
 const ProductUpload = () => {
   const [addProduct, { isLoading }] = useAddProductMutation();
@@ -23,7 +24,9 @@ const ProductUpload = () => {
     oldPrice: '',
     image: '',
     rating: 0,
-    orderType: 'regular'
+    orderType: 'regular',
+    sizeType: 'none',
+    sizes: []
   };
   
   const [formData, setFormData] = useState(initialState);
@@ -42,6 +45,14 @@ const ProductUpload = () => {
         [name]: value,
         subcategory: ''
       });
+    } else if (name === 'sizeType') {
+      // Reset sizes when size type changes
+      const updatedFormData = {
+        ...formData,
+        [name]: value,
+        sizes: [] // Clear sizes when changing size type
+      };
+      setFormData(updatedFormData);
     } else {
       setFormData({
         ...formData,
@@ -50,6 +61,14 @@ const ProductUpload = () => {
           : value
       });
     }
+  };
+  
+  const handleSizesChange = (sizes) => {
+    // Just update the form data
+    setFormData({
+      ...formData,
+      sizes
+    });
   };
   
   const togglePreview = () => {
@@ -71,7 +90,9 @@ const ProductUpload = () => {
         price: Number(formData.price),
         oldPrice: formData.oldPrice ? Number(formData.oldPrice) : undefined,
         rating: Number(formData.rating) || 0,
-        author: user._id  // Add the author ID from the current user
+        author: user._id,  // Add the author ID from the current user
+        sizeType: formData.sizeType || 'none',
+        sizes: formData.sizes || []
       };
       
       // Remove empty fields
@@ -288,6 +309,32 @@ const ProductUpload = () => {
                 <option value="contact-to-order">Contact to Order</option>
               </select>
             </div>
+          </div>
+          
+          {/* Size Selection */}
+          <div className="form-group mt-6">
+            <label htmlFor="sizeType" className="block mb-2 font-medium">
+              Size Type
+            </label>
+            <select
+              id="sizeType"
+              name="sizeType"
+              value={formData.sizeType}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="none">No Size (Not Applicable)</option>
+              <option value="roman">Roman (XS, S, M, L, XL)</option>
+              <option value="numeric">Numeric (1-20)</option>
+            </select>
+            
+            {formData.sizeType !== 'none' && (
+              <ProductSizeInput 
+                sizeType={formData.sizeType} 
+                sizes={formData.sizes} 
+                onChange={handleSizesChange} 
+              />
+            )}
           </div>
           
           {/* Preview Button */}

@@ -8,6 +8,7 @@ import {
 import { CATEGORIES } from '../../constants/categoryConstants';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
+import ProductSizeInput from '../../components/ProductSizeInput';
 
 const EditProduct = () => {
   const { id } = useParams();
@@ -30,7 +31,9 @@ const EditProduct = () => {
     oldPrice: '',
     image: '',
     rating: 0,
-    orderType: 'regular'
+    orderType: 'regular',
+    sizeType: 'none',
+    sizes: []
   };
   
   const [formData, setFormData] = useState(initialState);
@@ -51,7 +54,9 @@ const EditProduct = () => {
         oldPrice: product.oldPrice || '',
         image: product.image || '',
         rating: product.rating || 0,
-        orderType: product.orderType || 'regular'
+        orderType: product.orderType || 'regular',
+        sizeType: product.sizeType || 'none',
+        sizes: product.sizes || []
       });
       
       if (product.category) {
@@ -71,6 +76,14 @@ const EditProduct = () => {
         [name]: value,
         subcategory: ''
       });
+    } else if (name === 'sizeType') {
+      // Reset sizes when size type changes
+      const updatedFormData = {
+        ...formData,
+        [name]: value,
+        sizes: [] // Clear sizes when changing size type
+      };
+      setFormData(updatedFormData);
     } else {
       setFormData({
         ...formData,
@@ -79,6 +92,14 @@ const EditProduct = () => {
           : value
       });
     }
+  };
+  
+  const handleSizesChange = (sizes) => {
+    // Just update the form data
+    setFormData({
+      ...formData,
+      sizes
+    });
   };
   
   const togglePreview = () => {
@@ -95,21 +116,42 @@ const EditProduct = () => {
     }
     
     try {
-      console.log('Submitting update with data:', { id, ...formData });
-      const resultAction = await updateProduct({ 
-        id,
-        ...formData
+      // Format product data
+      const productData = {
+        ...formData,
+        price: Number(formData.price),
+        oldPrice: formData.oldPrice ? Number(formData.oldPrice) : undefined,
+        rating: Number(formData.rating) || 0,
+        sizeType: formData.sizeType || 'none',
+        sizes: formData.sizes || []
+      };
+      
+      // Remove empty fields
+      Object.keys(productData).forEach(key => {
+        if (productData[key] === '' || productData[key] === undefined) {
+          delete productData[key];
+        }
+      });
+      
+      console.log('Updating product with data:', productData, 'Product ID:', id);
+      
+      // Show immediate feedback to user
+      alert("Product updated");
+      
+      // The RTK Query hook expects { id, ...productData } where productData goes in the body
+      // and id is used to construct the URL
+      const response = await updateProduct({ 
+        id, 
+        productData // This will be spread into the body parameter
       }).unwrap();
       
-      if (resultAction.success || resultAction.message === 'Product updated successfully') {
+      if (response) {
         toast.success('Product updated successfully!');
         navigate('/admin/manage-products');
-      } else {
-        toast.error(resultAction.message || 'Failed to update product');
       }
     } catch (error) {
-      console.error('Update failed:', error);
-      toast.error(`Update failed: ${error.data?.message || error.message || 'Unknown error'}`);
+      console.error('Error updating product:', error);
+      toast.error(error?.data?.message || 'Failed to update product');
     }
   };
   
@@ -215,6 +257,32 @@ const EditProduct = () => {
                 ))}
               </select>
             </div>
+          </div>
+          
+          {/* Size Selection */}
+          <div className="form-group mb-4">
+            <label htmlFor="sizeType" className="block mb-2 font-medium">
+              Size Type
+            </label>
+            <select
+              id="sizeType"
+              name="sizeType"
+              value={formData.sizeType}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="none">No Size (Not Applicable)</option>
+              <option value="roman">Roman (XS, S, M, L, XL)</option>
+              <option value="numeric">Numeric (1-20)</option>
+            </select>
+            
+            {formData.sizeType !== 'none' && (
+              <ProductSizeInput 
+                sizeType={formData.sizeType} 
+                sizes={formData.sizes} 
+                onChange={handleSizesChange} 
+              />
+            )}
           </div>
           
           {/* Price */}
@@ -400,6 +468,18 @@ const EditProduct = () => {
                       {formData.orderType === 'preorder' ? 'Pre-Order' : 'Regular'}
                     </span>
                   </div>
+                  {formData.sizeType !== 'none' && (
+                    <div className="mt-2">
+                      <span className="text-sm font-medium text-gray-700">Available Sizes: </span>
+                      <span className="text-sm text-gray-600">
+                        {formData.sizes.map(size => (
+                          <span key={size} className="px-2 py-1 bg-gray-200 rounded-full text-sm">
+                            {size}
+                          </span>
+                        ))}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.div>

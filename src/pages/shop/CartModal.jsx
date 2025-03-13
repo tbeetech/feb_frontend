@@ -18,7 +18,7 @@ const CartModal = ({ products, isOpen, onClose }) => {
     };
 
     const handleRemove = (product) => {
-        dispatch(removeFromCart({ id: product._id }));
+        dispatch(removeFromCart({ _id: product._id }));
     };
 
     const handleClearCart = () => {
@@ -73,6 +73,14 @@ const CartModal = ({ products, isOpen, onClose }) => {
                                                 <div className="flex-1">
                                                     <h3 className="font-semibold">{product.name}</h3>
                                                     <p className="text-primary">₦{product.price}</p>
+                                                    
+                                                    {/* Display selected size if available */}
+                                                    {product.selectedSize && (
+                                                        <p className="text-sm text-gray-600">
+                                                            Size: <span className="font-medium">{product.selectedSize}</span>
+                                                        </p>
+                                                    )}
+                                                    
                                                     <div className="flex items-center gap-2 mt-2">
                                                         <button
                                                             onClick={() => handleDecrement(product)}

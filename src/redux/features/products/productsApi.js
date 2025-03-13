@@ -47,10 +47,10 @@ const productsApi = createApi({
             invalidatesTags: ["Products"]
         }),
         updateProduct: builder.mutation({
-            query: ({ id, ...rest }) => ({
+            query: ({ id, productData }) => ({
                 url: `update-product/${id}`,
                 method: "PATCH",
-                body: rest,
+                body: productData,
                 credentials: "include",
                 headers: {
                     'Content-Type': 'application/json',
