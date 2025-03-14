@@ -35,7 +35,11 @@ const EditProduct = () => {
     sizeType: 'none',
     sizes: [],
     stockStatus: 'In Stock',
-    stockQuantity: 0
+    stockQuantity: 0,
+    deliveryTimeFrame: {
+      startDate: '',
+      endDate: ''
+    }
   };
   
   const [formData, setFormData] = useState(initialState);
@@ -60,7 +64,11 @@ const EditProduct = () => {
         sizeType: product.sizeType || 'none',
         sizes: product.sizes || [],
         stockStatus: product.stockStatus || 'In Stock',
-        stockQuantity: product.stockQuantity || 0
+        stockQuantity: product.stockQuantity || 0,
+        deliveryTimeFrame: product.deliveryTimeFrame || {
+          startDate: '',
+          endDate: ''
+        }
       });
       
       if (product.category) {
@@ -369,6 +377,57 @@ const EditProduct = () => {
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 min="0"
+              />
+            </div>
+          </div>
+          
+          {/* Delivery Time Frame */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+              <label htmlFor="deliveryStartDate" className="block text-sm font-medium text-gray-700 mb-1">
+                Delivery Start Date *
+              </label>
+              <input
+                type="date"
+                id="deliveryStartDate"
+                name="deliveryTimeFrame.startDate"
+                value={formData.deliveryTimeFrame.startDate}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    deliveryTimeFrame: {
+                      ...formData.deliveryTimeFrame,
+                      startDate: e.target.value
+                    }
+                  });
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+                min={new Date().toISOString().split('T')[0]}
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="deliveryEndDate" className="block text-sm font-medium text-gray-700 mb-1">
+                Delivery End Date *
+              </label>
+              <input
+                type="date"
+                id="deliveryEndDate"
+                name="deliveryTimeFrame.endDate"
+                value={formData.deliveryTimeFrame.endDate}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    deliveryTimeFrame: {
+                      ...formData.deliveryTimeFrame,
+                      endDate: e.target.value
+                    }
+                  });
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+                min={formData.deliveryTimeFrame.startDate || new Date().toISOString().split('T')[0]}
               />
             </div>
           </div>

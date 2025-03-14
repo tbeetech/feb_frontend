@@ -312,6 +312,24 @@ const SingleProduct = () => {
                                     </span>
                                 </div>
                             )}
+
+                            {/* Delivery Time Frame */}
+                            {singleProduct?.deliveryTimeFrame && (
+                                <div className="flex items-center mt-2">
+                                    <span className="font-medium mr-2">Delivery Time:</span>
+                                    <span className="text-gray-700">
+                                        {new Date(singleProduct.deliveryTimeFrame.startDate).toLocaleDateString('en-US', {
+                                            month: 'long',
+                                            day: 'numeric',
+                                            year: 'numeric'
+                                        })} - {new Date(singleProduct.deliveryTimeFrame.endDate).toLocaleDateString('en-US', {
+                                            month: 'long',
+                                            day: 'numeric',
+                                            year: 'numeric'
+                                        })}
+                                    </span>
+                                </div>
+                            )}
                         </motion.div>
                         
                         <motion.div 

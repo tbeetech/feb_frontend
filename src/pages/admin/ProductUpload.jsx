@@ -28,7 +28,11 @@ const ProductUpload = () => {
     sizeType: 'none',
     sizes: [],
     stockStatus: 'In Stock',
-    stockQuantity: 0
+    stockQuantity: 0,
+    deliveryTimeFrame: {
+      startDate: '',
+      endDate: ''
+    }
   };
   
   const [formData, setFormData] = useState(initialState);
@@ -307,6 +311,57 @@ const ProductUpload = () => {
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 min="0"
                 placeholder="Enter stock quantity"
+              />
+            </div>
+          </div>
+          
+          {/* Delivery Time Frame */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="form-group">
+              <label htmlFor="deliveryStartDate" className="block mb-2 font-medium">
+                Delivery Start Date *
+              </label>
+              <input
+                type="date"
+                id="deliveryStartDate"
+                name="deliveryTimeFrame.startDate"
+                value={formData.deliveryTimeFrame.startDate}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    deliveryTimeFrame: {
+                      ...formData.deliveryTimeFrame,
+                      startDate: e.target.value
+                    }
+                  });
+                }}
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                required
+                min={new Date().toISOString().split('T')[0]}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="deliveryEndDate" className="block mb-2 font-medium">
+                Delivery End Date *
+              </label>
+              <input
+                type="date"
+                id="deliveryEndDate"
+                name="deliveryTimeFrame.endDate"
+                value={formData.deliveryTimeFrame.endDate}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    deliveryTimeFrame: {
+                      ...formData.deliveryTimeFrame,
+                      endDate: e.target.value
+                    }
+                  });
+                }}
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                required
+                min={formData.deliveryTimeFrame.startDate || new Date().toISOString().split('T')[0]}
               />
             </div>
           </div>
