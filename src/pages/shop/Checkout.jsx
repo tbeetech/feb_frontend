@@ -45,6 +45,13 @@ const Checkout = () => {
         // Dynamic import as a backup to ensure the library is properly loaded
         const jspdfModule = await import('jspdf');
         const autotableModule = await import('jspdf-autotable');
+        
+        // Verify the library is loaded correctly
+        if (typeof jsPDF !== 'function') {
+          console.warn('jsPDF is not available as a global function, trying to use the imported module');
+          window.jsPDF = jspdfModule.jsPDF; // Make it globally available
+        }
+        
         console.log('PDF libraries loaded successfully');
       } catch (err) {
         console.error('Error loading PDF libraries:', err);
@@ -129,6 +136,11 @@ const Checkout = () => {
         console.warn('Cart is empty or invalid. Will create receipt with placeholder data.');
       }
       
+      // Sanitize cart data to ensure it's valid
+      const validatedCartItems = Array.isArray(cartItems) ? cartItems.filter(item => 
+        item && typeof item === 'object' && (item.name || item._id)
+      ) : [];
+      
       // Create a new jsPDF instance
       const doc = new jsPDF({
         orientation: 'portrait',
@@ -143,7 +155,7 @@ const Checkout = () => {
       // Set up the document
       doc.setFontSize(20);
       doc.setTextColor(33, 33, 33);
-      doc.text('FEBRUARY LUXURY', 105, 30, { align: 'center' });
+      doc.text('F.E.B LUXURY', 105, 30, { align: 'center' });
       doc.setFontSize(12);
       doc.text('Receipt / Invoice', 105, 40, { align: 'center' });
       doc.setLineWidth(0.5);
@@ -163,8 +175,8 @@ const Checkout = () => {
       const tableRows = [];
       
       // Ensure cartItems exists and is an array
-      if (Array.isArray(cartItems) && cartItems.length > 0) {
-        cartItems.forEach(item => {
+      if (validatedCartItems.length > 0) {
+        validatedCartItems.forEach(item => {
           const itemData = [
             (item.name || 'Unnamed Product').substring(0, 30), // Limit name length to avoid overflow
             item.selectedSize || 'N/A',
@@ -179,41 +191,78 @@ const Checkout = () => {
         tableRows.push(['No items in cart', 'N/A', '0', '0', '0']);
       }
       
-      try {
-        doc.autoTable({
-          head: [tableColumn],
-          body: tableRows,
-          startY: 80,
-          theme: 'striped',
-          headStyles: { fillColor: [33, 150, 243], textColor: [255, 255, 255] },
-          styles: { overflow: 'linebreak', cellWidth: 'auto' },
-          columnStyles: { 
-            0: { cellWidth: 60 }, // Item name - wider
-            1: { cellWidth: 30 }, // Size
-            2: { cellWidth: 15 }, // Quantity
-            3: { cellWidth: 40 }, // Unit price
-            4: { cellWidth: 40 }  // Total price
-          },
-          margin: { top: 80 }
+      // Create a manual table instead of using autoTable to avoid compatibility issues
+      // Set up table styles
+      const startY = 80;
+      const cellPadding = 5;
+      const tableWidth = 180;
+      // Adjust column widths to provide more space for the price columns
+      const colWidths = [60, 25, 15, 35, 45]; // Column widths that sum to tableWidth
+      
+      // Draw table header with background
+      doc.setFillColor(33, 150, 243);
+      doc.setTextColor(255, 255, 255);
+      doc.rect(15, startY, tableWidth, 10, 'F');
+      
+      // Draw header text
+      doc.setFontSize(9);
+      let currentX = 15;
+      tableColumn.forEach((col, index) => {
+        // Align price columns to the right
+        if (index >= 3) {
+          doc.text(col, currentX + colWidths[index] - cellPadding, startY + 7, { align: 'right' });
+        } else {
+          doc.text(col, currentX + cellPadding, startY + 7);
+        }
+        currentX += colWidths[index];
+      });
+      
+      // Draw table rows
+      doc.setTextColor(0, 0, 0);
+      let currentY = startY + 10;
+      let isGray = false;
+      
+      tableRows.forEach(row => {
+        // Alternate row colors
+        if (isGray) {
+          doc.setFillColor(240, 240, 240);
+          doc.rect(15, currentY, tableWidth, 10, 'F');
+        }
+        isGray = !isGray;
+        
+        // Draw cell text
+        currentX = 15;
+        row.forEach((cell, index) => {
+          // Right align price columns
+          if (index >= 3) {
+            doc.text(String(cell), currentX + colWidths[index] - cellPadding, currentY + 7, { align: 'right' });
+          } else {
+            doc.text(String(cell), currentX + cellPadding, currentY + 7);
+          }
+          currentX += colWidths[index];
         });
-      } catch (tableError) {
-        console.error('Error creating table in PDF:', tableError);
-        // Continue without table if it fails
-        doc.text('Error generating item table', 105, 100, { align: 'center' });
+        
+        currentY += 10;
+      });
+      
+      // Draw table border
+      doc.setLineWidth(0.1);
+      doc.rect(15, startY, tableWidth, currentY - startY, 'S');
+      
+      // Draw column dividers
+      currentX = 15;
+      for (let i = 0; i < colWidths.length - 1; i++) {
+        currentX += colWidths[i];
+        doc.line(currentX, startY, currentX, currentY);
       }
       
       // Calculate the Y position after the table
-      let finalY = 150; // Default if autotable fails
-      try {
-        finalY = doc.lastAutoTable?.finalY + 10 || 150;
-      } catch (positionError) {
-        console.warn('Could not determine table position:', positionError);
-      }
+      let finalY = currentY + 10;
       
       // Add total
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
-      doc.text(`Total Amount: ₦${cartTotal.toLocaleString()}`, 195, finalY, { align: 'right' });
+      doc.text(`Total Amount: ₦${cartTotal.toLocaleString()}`, 180, finalY, { align: 'right' });
       
       // Payment details
       doc.setFontSize(10);
@@ -225,9 +274,9 @@ const Checkout = () => {
       
       // Footer
       doc.setFontSize(8);
-      doc.text('Thank you for shopping with February Luxury!', 105, finalY + 50, { align: 'center' });
+      doc.text('Thank you for shopping with F.E.B Luxury!', 105, finalY + 50, { align: 'center' });
       doc.text('For inquiries, please contact us at +2348033825144', 105, finalY + 55, { align: 'center' });
-      doc.text('Visit us at: feb-frontend.vercel.app', 105, finalY + 60, { align: 'center' });
+      doc.text('Visit us at: www.febluxury.com', 105, finalY + 60, { align: 'center' });
       
       // Generate a blob for the PDF
       let pdfBlob;
@@ -246,7 +295,7 @@ const Checkout = () => {
       }
       
       // Try different download methods
-      const filename = `February_Luxury_Receipt_${receiptNumber}.pdf`;
+      const filename = `FEB_Luxury_Receipt_${receiptNumber}.pdf`;
       try {
         const method = await downloadWithFallbacks(doc, pdfBlob, filename);
         console.log(`Successfully downloaded PDF using ${method} method`);
@@ -262,7 +311,23 @@ const Checkout = () => {
         
         return true;
       } catch (downloadError) {
-        throw new Error('Failed to download using any method: ' + downloadError.message);
+        console.warn('Primary download methods failed:', downloadError);
+        
+        // Don't throw an error here, try to recover
+        // Create a direct download link as a fallback
+        try {
+          const fallbackUrl = URL.createObjectURL(pdfBlob);
+          setPdfUrl(fallbackUrl);
+          
+          setIsGenerating(false);
+          // Show a different success message prompting to use the direct download link
+          setErrorDetails('Direct download failed. Please use the "Direct Download" button below.');
+          setShowErrorMessage(true);
+          
+          return false;
+        } catch (fallbackError) {
+          throw new Error('All download methods failed. Please try again later.');
+        }
       }
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -276,10 +341,11 @@ const Checkout = () => {
           unit: 'mm',
           format: 'a4'
         });
-        doc.text('FEBRUARY LUXURY RECEIPT', 105, 20, { align: 'center' });
+        doc.text('F.E.B LUXURY RECEIPT', 105, 20, { align: 'center' });
         doc.text(`Total Amount: ₦${cartTotal.toLocaleString()}`, 105, 40, { align: 'center' });
         doc.text(`Receipt No: ${receiptNumber}`, 105, 50, { align: 'center' });
         doc.text(`Date: ${currentDate}`, 105, 60, { align: 'center' });
+        doc.text('Visit us at: www.febluxury.com', 105, 70, { align: 'center' });
         
         const simplePdfBlob = doc.output('blob');
         const objectUrl = URL.createObjectURL(simplePdfBlob);
@@ -315,7 +381,7 @@ const Checkout = () => {
         {/* Receipt Preview */}
         <ReceiptCard ref={receiptRef}>
           <ReceiptHeader>
-            <h1>FEBRUARY LUXURY</h1>
+            <h1>F.E.B LUXURY</h1>
             <p>Receipt / Invoice</p>
           </ReceiptHeader>
           
@@ -366,8 +432,9 @@ const Checkout = () => {
           </TotalRow>
           
           <ReceiptFooter>
-            <p>Thank you for shopping with February Luxury!</p>
+            <p>Thank you for shopping with F.E.B Luxury!</p>
             <p>For inquiries, please contact us at +2348033825144</p>
+            <p>Visit us at: www.febluxury.com</p>
           </ReceiptFooter>
           
           <ButtonsContainer>
@@ -377,7 +444,7 @@ const Checkout = () => {
             </DownloadButton>
             
             {pdfUrl && (
-              <DirectDownloadLink href={pdfUrl} download={`February_Luxury_Receipt_${receiptNumber}.pdf`} target="_blank" rel="noopener noreferrer">
+              <DirectDownloadLink href={pdfUrl} download={`FEB_Luxury_Receipt_${receiptNumber}.pdf`} target="_blank" rel="noopener noreferrer">
                 <FaExternalLinkAlt />
                 <span>Direct Download</span>
               </DirectDownloadLink>
