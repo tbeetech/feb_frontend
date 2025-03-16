@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import RatingStars from '../../../components/RatingStars';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFetchProductByIdQuery } from '../../../redux/features/products/productsApi';
 import { addToCart, decrementQuantity } from '../../../redux/features/cart/cartSlice';
 import ReviewsCard from '../reviews/ReviewsCard';
-import SocialContactButtons from '../../../components/SocialContactButtons';
 import { motion } from 'framer-motion';
 import ImagePreviewModal from '../../../components/ImagePreviewModal';
 import SizeSelectionWheel from '../../../components/SizeSelectionWheel';
@@ -13,6 +12,7 @@ import SizeSelectionWheel from '../../../components/SizeSelectionWheel';
 const SingleProduct = () => {
     const { id } = useParams();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { data, error, isLoading } = useFetchProductByIdQuery(id);
     const singleProduct = data?.product || {};
     const productReviews = data?.reviews || [];
@@ -24,6 +24,7 @@ const SingleProduct = () => {
 
     // Check if the product is in stock and if there's inventory available for more purchases
     const isOutOfStock = singleProduct?.stockStatus === 'Out of Stock';
+    const isPreOrder = singleProduct?.stockStatus === 'Pre Order';
     const hasReachedStockLimit = singleProduct?.stockStatus === 'In Stock' && 
         singleProduct?.stockQuantity > 0 && 
         quantity >= singleProduct.stockQuantity;
@@ -77,6 +78,22 @@ const SingleProduct = () => {
             };
             dispatch(addToCart(productWithSize));
         }
+    };
+
+    const handlePreOrder = (product) => {
+        const productWithSize = {
+            ...product,
+            selectedSize: selectedSize,
+            quantity: 1
+        };
+        dispatch(addToCart(productWithSize));
+        navigate('/billing-details', { 
+            state: { 
+                cartItems: [productWithSize],
+                total: product.price,
+                isPreOrder: true 
+            } 
+        });
     };
 
     const handleIncrement = (product) => {
@@ -284,24 +301,26 @@ const SingleProduct = () => {
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.45 }}
                         >
-                            <div className="flex items-center mb-2">
-                                <span className="font-medium mr-2">Availability:</span>
-                                {singleProduct?.stockStatus === 'In Stock' ? (
-                                    <span className="text-green-600 flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                        </svg>
-                                        In Stock
-                                    </span>
-                                ) : (
-                                    <span className="text-red-600 flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                                        </svg>
-                                        Out of Stock
-                                    </span>
-                                )}
-                            </div>
+                            {!isPreOrder && (
+                                <div className="flex items-center mb-2">
+                                    <span className="font-medium mr-2">Availability:</span>
+                                    {singleProduct?.stockStatus === 'In Stock' ? (
+                                        <span className="text-green-600 flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                            </svg>
+                                            In Stock
+                                        </span>
+                                    ) : (
+                                        <span className="text-red-600 flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                            </svg>
+                                            Out of Stock
+                                        </span>
+                                    )}
+                                </div>
+                            )}
 
                             {singleProduct?.stockStatus === 'In Stock' && singleProduct?.stockQuantity > 0 && (
                                 <div className="flex items-center">
@@ -309,24 +328,6 @@ const SingleProduct = () => {
                                     <span className={`${singleProduct.stockQuantity < 5 ? 'text-orange-600' : 'text-gray-700'}`}>
                                         {singleProduct.stockQuantity} {singleProduct.stockQuantity === 1 ? 'item' : 'items'}
                                         {singleProduct.stockQuantity < 5 && ' (Low Stock)'}
-                                    </span>
-                                </div>
-                            )}
-
-                            {/* Delivery Time Frame */}
-                            {singleProduct?.deliveryTimeFrame && (
-                                <div className="flex items-center mt-2">
-                                    <span className="font-medium mr-2">Delivery Time:</span>
-                                    <span className="text-gray-700">
-                                        {new Date(singleProduct.deliveryTimeFrame.startDate).toLocaleDateString('en-US', {
-                                            month: 'long',
-                                            day: 'numeric',
-                                            year: 'numeric'
-                                        })} - {new Date(singleProduct.deliveryTimeFrame.endDate).toLocaleDateString('en-US', {
-                                            month: 'long',
-                                            day: 'numeric',
-                                            year: 'numeric'
-                                        })}
                                     </span>
                                 </div>
                             )}
@@ -362,10 +363,21 @@ const SingleProduct = () => {
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.6 }}
                         >
-                            {singleProduct.orderType === 'contact-to-order' ? (
+                            {isPreOrder ? (
                                 <div className="space-y-4">
-                                    <h3 className="text-lg font-semibold">Contact us to order this product</h3>
-                                    <SocialContactButtons productName={singleProduct.name} />
+                                    <h3 className="text-lg font-semibold">This is a pre-order product</h3>
+                                    <p className="text-gray-600">Pre-order products will be delivered within 14 days.</p>
+                                    <motion.button
+                                        onClick={() => handlePreOrder(singleProduct)}
+                                        className="w-full py-3 bg-primary text-white rounded-lg flex items-center justify-center hover:bg-primary-dark transition-colors"
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+                                        </svg>
+                                        Pre Order Now
+                                    </motion.button>
                                 </div>
                             ) : (
                                 <div className="space-y-6">

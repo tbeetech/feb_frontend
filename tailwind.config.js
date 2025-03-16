@@ -12,22 +12,22 @@ export default {
         'custom-900': '900px', 
       },
       colors: {
-        'primary': 'gold',
-        'gold': '#FFD700',  // Add this line
-        'primary-dark': "#d23141",
-        'primary-light': 'grey',
+        'primary': '#D4AF37',
+        'primary-dark': '#B38728',
+        'primary-light': '#E5C76B',
         'text-dark': '#0f172a',
         'text-light': '#64748b',
         'extra-light': '#f8fafc',
-        primary: {
-          DEFAULT: '#916d03',
-          dark: '#6a5002',
-        },
-        gold: '#c9a64b',
+        gold: {
+          DEFAULT: '#D4AF37',
+          light: '#E5C76B',
+          dark: '#B38728',
+        }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        playfair: ['"Playfair Display"', 'serif'],
+        sans: ['Montserrat', 'system-ui', 'sans-serif'],
+        serif: ['"Cormorant Garamond"', 'Times New Roman', 'serif'],
+        display: ['"Playfair Display"', 'serif'],
       },
       spacing: {
         '0.5': '0.125rem',

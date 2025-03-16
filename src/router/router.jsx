@@ -11,6 +11,7 @@ import SingleProduct from "../pages/shop/productDetails/SingleProduct";
 import Login from "../components/Login";
 import Register from "../components/Register";
 import Checkout from "../pages/shop/Checkout";
+import BillingDetails from "../components/BillingDetails";
 import Contact from "../pages/contact/Contact";
 import About from "../pages/about/About";
 import ErrorBoundary from '../components/ErrorBoundary';
@@ -29,6 +30,7 @@ children: [
     {path: "/shop", element:<ShopPage/>},
     {path: "/product/:id", element:<SingleProduct/>},
     {path: "/checkout", element:<Checkout/>},
+    {path: "/billing-details", element:<BillingDetails/>},
     {path: "/contact", element: <Contact/>},
     {path: "/about", element: <About/>},
     {path: "/admin/upload-product", element: <ProductUpload />},

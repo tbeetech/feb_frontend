@@ -1,6 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --gold: #D4AF37;
+  --gold-light: #E5C76B;
+  --gold-dark: #B38728;
+}
+
+@layer base {
+  html {
+    font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+  }
+  
+  button, a, input, select, textarea {
+    font-family: 'Montserrat', sans-serif;
+  }
+}
+
+/* Luxury styling classes */
+.font-serif {
+  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+}
+
+.font-display {
+  font-family: 'Playfair Display', serif;
+}
+
+.font-sans {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.text-gold {
+  color: var(--gold);
+}
+
+.bg-gold {
+  background-color: var(--gold);
+}
+
+.border-gold {
+  border-color: var(--gold);
+}
+
+.hover\:bg-gold:hover {
+  background-color: var(--gold);
+}
+
+.hover\:text-gold:hover {
+  color: var(--gold);
+}
+
+.focus\:ring-gold:focus {
+  --tw-ring-color: var(--gold);
+}
 
 @keyframes scroll {
   0% {
@@ -43,7 +104,7 @@
 .trending-slider .slick-next {
     width: 40px;
     height: 40px;
-    background-color: var(--primary-color);
+    background-color: var(--gold);
     border-radius: 50%;
     z-index: 1;
 }
@@ -58,7 +119,7 @@
 
 .trending-slider .slick-prev:hover,
 .trending-slider .slick-next:hover {
-    background-color: var(--primary-color-dark);
+    background-color: var(--gold-dark);
 }
 
 .trending-slider .slick-prev:before,
@@ -71,11 +132,11 @@
 }
 
 .trending-slider .slick-dots li button:before {
-    color: var(--primary-color);
+    color: var(--gold);
 }
 
 .trending-slider .slick-dots li.slick-active button:before {
-    color: var(--primary-color-dark);
+    color: var(--gold-dark);
 }
 
 @media (max-width: 640px) {
@@ -116,7 +177,7 @@
 .slick-prev:before,
 .slick-next:before {
     font-size: 24px;
-    color: var(--primary-color);
+    color: var(--gold);
 }
 
 .slick-dots {
@@ -125,11 +186,11 @@
 
 .slick-dots li button:before {
     font-size: 10px;
-    color: var(--primary-color);
+    color: var(--gold);
 }
 
 .slick-dots li.slick-active button:before {
-    color: var(--primary-color);
+    color: var(--gold);
 }
 
 .slick-track {
@@ -192,12 +253,12 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
+    background: var(--gold);
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--primary-color-dark);
+    background: var(--gold-dark);
 }
 
 /* Scroll to Top Button Styles */
@@ -443,7 +504,7 @@ html {
 }
 
 .search-input-focus:focus {
-  box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.3);
+  box-shadow: 0 0 0 3px rgba(var(--gold-rgb), 0.3);
   transform: translateY(-2px);
 }
 

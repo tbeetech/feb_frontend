@@ -18,11 +18,15 @@ const Checkout = () => {
   const whatsappNumber = '+2348033825144';
   const location = useLocation();
   const cartTotal = location.state?.total || 0;
+  const isPreOrder = location.state?.isPreOrder || false;
+  const billingDetails = location.state?.billingDetails || null;
+  const orderDate = location.state?.orderDate || new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+  const deliveryDate = location.state?.deliveryDate || '';
   const accountNumber = '0038685089';
   const receiptRef = useRef(null);
   
-  // Get cart items from Redux store
-  const cartItems = useSelector((state) => state.cart.products);
+  // Get cart items from Redux store or from location state
+  const cartItems = location.state?.cartItems || useSelector((state) => state.cart.products);
   
   // Generate a receipt number
   const receiptNumber = formatReceiptNumber();
@@ -169,6 +173,23 @@ const Checkout = () => {
       
       // Customer section
       doc.text('BILL TO:', 140, 55);
+      if (billingDetails) {
+        doc.text(`${billingDetails.firstName} ${billingDetails.lastName}`, 140, 62);
+        doc.text(`${billingDetails.email}`, 140, 69);
+        doc.text(`${billingDetails.phoneNumber}`, 140, 76);
+        doc.text(`${billingDetails.address}`, 140, 83);
+        doc.text(`${billingDetails.city}, ${billingDetails.state}`, 140, 90);
+      } else {
+        doc.text('Customer', 140, 62);
+      }
+      
+      // Delivery information
+      doc.text('DELIVERY INFO:', 15, 76);
+      doc.text(`Order Date: ${orderDate}`, 15, 83);
+      doc.text(`Expected Delivery: ${deliveryDate}`, 15, 90);
+      if (isPreOrder) {
+        doc.text('(Pre-Order Item)', 15, 97);
+      }
       
       // Items table
       const tableColumn = ["Item", "Size", "Qty", "Unit Price (₦)", "Total (₦)"];
@@ -390,10 +411,23 @@ const Checkout = () => {
               <p><strong>Receipt No:</strong> {receiptNumber}</p>
               <p><strong>Date:</strong> {currentDate}</p>
               <p><strong>Payment Method:</strong> Bank Transfer</p>
+              <p><strong>Order Date:</strong> {orderDate}</p>
+              <p><strong>Expected Delivery:</strong> {deliveryDate}</p>
+              {isPreOrder && <p><strong>Order Type:</strong> Pre-Order</p>}
             </div>
             <div>
               <p><strong>BILL TO:</strong></p>
-              <p>Customer</p>
+              {billingDetails ? (
+                <>
+                  <p>{billingDetails.firstName} {billingDetails.lastName}</p>
+                  <p>{billingDetails.email}</p>
+                  <p>{billingDetails.phoneNumber}</p>
+                  <p>{billingDetails.address}</p>
+                  <p>{billingDetails.city}, {billingDetails.state}</p>
+                </>
+              ) : (
+                <p>Customer</p>
+              )}
             </div>
           </ReceiptDetails>
           

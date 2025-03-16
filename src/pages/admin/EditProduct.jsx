@@ -31,15 +31,10 @@ const EditProduct = () => {
     oldPrice: '',
     image: '',
     rating: 0,
-    orderType: 'regular',
     sizeType: 'none',
     sizes: [],
     stockStatus: 'In Stock',
-    stockQuantity: 0,
-    deliveryTimeFrame: {
-      startDate: '',
-      endDate: ''
-    }
+    stockQuantity: 0
   };
   
   const [formData, setFormData] = useState(initialState);
@@ -60,15 +55,10 @@ const EditProduct = () => {
         oldPrice: product.oldPrice || '',
         image: product.image || '',
         rating: product.rating || 0,
-        orderType: product.orderType || 'regular',
         sizeType: product.sizeType || 'none',
         sizes: product.sizes || [],
         stockStatus: product.stockStatus || 'In Stock',
-        stockQuantity: product.stockQuantity || 0,
-        deliveryTimeFrame: product.deliveryTimeFrame || {
-          startDate: '',
-          endDate: ''
-        }
+        stockQuantity: product.stockQuantity || 0
       });
       
       if (product.category) {
@@ -362,6 +352,7 @@ const EditProduct = () => {
               >
                 <option value="In Stock">In Stock</option>
                 <option value="Out of Stock">Out of Stock</option>
+                <option value="Pre Order">Pre Order</option>
               </select>
             </div>
             
@@ -381,57 +372,6 @@ const EditProduct = () => {
             </div>
           </div>
           
-          {/* Delivery Time Frame */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <div>
-              <label htmlFor="deliveryStartDate" className="block text-sm font-medium text-gray-700 mb-1">
-                Delivery Start Date *
-              </label>
-              <input
-                type="date"
-                id="deliveryStartDate"
-                name="deliveryTimeFrame.startDate"
-                value={formData.deliveryTimeFrame.startDate}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    deliveryTimeFrame: {
-                      ...formData.deliveryTimeFrame,
-                      startDate: e.target.value
-                    }
-                  });
-                }}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-                min={new Date().toISOString().split('T')[0]}
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="deliveryEndDate" className="block text-sm font-medium text-gray-700 mb-1">
-                Delivery End Date *
-              </label>
-              <input
-                type="date"
-                id="deliveryEndDate"
-                name="deliveryTimeFrame.endDate"
-                value={formData.deliveryTimeFrame.endDate}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    deliveryTimeFrame: {
-                      ...formData.deliveryTimeFrame,
-                      endDate: e.target.value
-                    }
-                  });
-                }}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-                min={formData.deliveryTimeFrame.startDate || new Date().toISOString().split('T')[0]}
-              />
-            </div>
-          </div>
-          
           {/* Description */}
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
@@ -446,23 +386,6 @@ const EditProduct = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
             ></textarea>
-          </div>
-          
-          {/* Order Type */}
-          <div>
-            <label htmlFor="orderType" className="block text-sm font-medium text-gray-700 mb-1">
-              Order Type
-            </label>
-            <select
-              id="orderType"
-              name="orderType"
-              value={formData.orderType}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="regular">Regular</option>
-              <option value="preorder">Pre-Order</option>
-            </select>
           </div>
           
           {/* Preview Toggle */}
@@ -559,24 +482,16 @@ const EditProduct = () => {
                       <span className="text-sm text-gray-600">{formData.subcategory}</span>
                     </div>
                   )}
-                  <div className="mt-1">
-                    <span className="text-sm font-medium text-gray-700">Order Type: </span>
+                  <div className="mt-2">
+                    <span className="text-sm font-medium text-gray-700">Available Sizes: </span>
                     <span className="text-sm text-gray-600">
-                      {formData.orderType === 'preorder' ? 'Pre-Order' : 'Regular'}
+                      {formData.sizes.map(size => (
+                        <span key={size} className="px-2 py-1 bg-gray-200 rounded-full text-sm">
+                          {size}
+                        </span>
+                      ))}
                     </span>
                   </div>
-                  {formData.sizeType !== 'none' && (
-                    <div className="mt-2">
-                      <span className="text-sm font-medium text-gray-700">Available Sizes: </span>
-                      <span className="text-sm text-gray-600">
-                        {formData.sizes.map(size => (
-                          <span key={size} className="px-2 py-1 bg-gray-200 rounded-full text-sm">
-                            {size}
-                          </span>
-                        ))}
-                      </span>
-                    </div>
-                  )}
                 </div>
               </div>
             </motion.div>

@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import RatingStars from '../../components/RatingStars';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../../redux/features/cart/cartSlice';
-import SocialContactButtons from '../../components/SocialContactButtons';
 import { motion } from 'framer-motion';
 import { springAnimation } from '../../utils/animations';
 import ImagePreviewModal from '../../components/ImagePreviewModal';
 
 const ProductCards = ({products}) => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [previewImage, setPreviewImage] = useState({
         isOpen: false,
         url: '',
@@ -19,6 +19,11 @@ const ProductCards = ({products}) => {
     const handleAddToCart = (product) => {
         dispatch(addToCart(product));
         alert("Item added to cart");
+    };
+
+    const handlePreOrder = (product) => {
+        dispatch(addToCart(product));
+        navigate('/checkout', { state: { total: product.price, isPreOrder: true } });
     };
 
     const openPreview = (e, imageUrl, productName) => {
@@ -77,7 +82,23 @@ const ProductCards = ({products}) => {
                                   </svg>
                                 </div>
                                 
-                                {product.orderType !== 'contact-to-order' ? (
+                                {product.stockStatus === 'Pre Order' ? (
+                                    <button
+                                        onClick={(e)=>{
+                                            e.stopPropagation();
+                                            handlePreOrder(product);
+                                        }}
+                                        className='absolute left-1/2 -translate-x-1/2 bottom-2 md:bottom-4 
+                                                 px-4 py-1 md:px-6 md:py-2 bg-primary text-white
+                                                 text-xs md:text-sm
+                                                 transition-colors duration-300 
+                                                 hover:bg-primary-dark rounded-md
+                                                 whitespace-nowrap
+                                                 border border-gold md:border-2'
+                                    >
+                                        Pre Order
+                                    </button>
+                                ) : (
                                     <button
                                         onClick={(e)=>{
                                             e.stopPropagation();
@@ -93,36 +114,18 @@ const ProductCards = ({products}) => {
                                     >
                                         Add to Cart
                                     </button>
-                                ) : (
-                                    <div className='absolute left-1/2 -translate-x-1/2 bottom-2 md:bottom-4 
-                                                  px-4 py-1 md:px-6 md:py-2 bg-primary text-white rounded-md
-                                                  text-xs md:text-sm
-                                                  whitespace-nowrap text-center'>
-                                        Contact to Order
-                                    </div>
                                 )}
                             </div>
                             
                             <div className='product__card__content p-2 md:p-4'>
                                 <h3 className='text-sm md:text-base font-semibold truncate'>{product.name}</h3>
                                 <p className='text-primary text-sm md:text-base font-medium'>
-                                    {product.orderType === 'contact-to-order' ? (
-                                        'Price on Request'
-                                    ) : (
-                                        <>
-                                            ₦{product.price?.toLocaleString()} 
-                                            {product.oldPrice && 
-                                                <s className='ml-1 md:ml-2 text-gray-500 text-xs md:text-sm'>₦{product.oldPrice.toLocaleString()}
-                                            }
-                                        </>
-                                    )}
+                                    ₦{product.price?.toLocaleString()} 
+                                    {product.oldPrice && 
+                                        <s className='ml-1 md:ml-2 text-gray-500 text-xs md:text-sm'>₦{product.oldPrice.toLocaleString()}</s>
+                                    }
                                 </p>
                                 <RatingStars rating={product.rating}/>
-                                {product.orderType === 'contact-to-order' && (
-                                    <div className="scale-90 origin-left md:scale-100">
-                                        <SocialContactButtons productName={product.name} />
-                                    </div>
-                                )}
                             </div>
                         </div>
                     </motion.div>
