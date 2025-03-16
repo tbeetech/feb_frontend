@@ -109,7 +109,7 @@ const Navbar = () => {
 
   return (
     <header className='fixed-nav-bar w-nav'>
-        <nav className='max-w-screen-2x1 mx-auto px-4 flex justify-between items-center'>
+        <nav className='max-w-screen-2x1 mx-auto px-4 flex justify-between items-center h-20'>
             <span className='md:hidden'>
                 <button onClick={handleMobileMenuToggle} className='hover:text-primary p-2'>
                     <i className="ri-menu-line text-2xl"></i> {/* Increased text size */}

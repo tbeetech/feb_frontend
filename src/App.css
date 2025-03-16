@@ -24,7 +24,7 @@
 .section__container {
   max-width: var(--max-width-1400);
   margin: auto;
-  padding: 5rem 1rem;
+  padding: 2rem 1rem 5rem 1rem;
 }
 
 .section__header {
@@ -648,15 +648,16 @@ input[type="number"]::-webkit-outer-spin-button {
     background: white;
     z-index: 30;
     border-bottom: 1px solid #eee;
+    height: 80px; /* Define a fixed height for the navbar */
 }
 
 body.menu-open {
     overflow: hidden;
 }
 
-/* Add margin to main content to prevent overlap with fixed navbar */
+/* Add padding to main content to prevent overlap with fixed navbar */
 main {
-    margin-top: 0;
+    padding-top: 80px; /* Match the height of the navbar */
 }
 
 /* Mobile menu animation */

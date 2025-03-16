@@ -546,3 +546,18 @@ html {
 .gallery-item {
   animation-delay: calc(var(--index) * 0.1s);
 }
+
+/* Layout classes */
+.content-wrapper {
+  padding-top: 80px; /* Match the height of the navbar */
+}
+
+/* Ensure all pages have proper spacing */
+.section__container {
+  padding-top: 2rem; /* Reduced from 5rem to account for the navbar padding */
+}
+
+/* Specific page header adjustments */
+.bg-primary-light {
+  padding-top: 2rem !important;
+}

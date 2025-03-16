@@ -156,7 +156,7 @@ const SingleProduct = () => {
         <>
             {/* Enhanced breadcrumb with animation */}
             <motion.section 
-                className='section__container bg-primary-light pt-28 pb-8'
+                className='section__container bg-primary-light pb-8'
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
