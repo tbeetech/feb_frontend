@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import ProductCards from '../shop/ProductCards'
 import { useSearchProductsQuery } from '../../redux/features/products/productsApi'
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const Search = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -10,6 +11,19 @@ const Search = () => {
     const [showHistory, setShowHistory] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
     const searchInputRef = useRef(null);
+    const location = useLocation();
+    const navigate = useNavigate();
+    
+    // Extract query parameter from URL
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const queryFromUrl = queryParams.get('q');
+        
+        if (queryFromUrl) {
+            setSearchQuery(queryFromUrl);
+            setDebouncedQuery(queryFromUrl);
+        }
+    }, [location.search]);
 
     // Load search history from localStorage
     useEffect(() => {
@@ -40,14 +54,34 @@ const Search = () => {
     const selectFromHistory = (query) => {
         setSearchQuery(query);
         setShowHistory(false);
+        updateUrlWithQuery(query);
     };
 
-    // Debounce search query
+    // Update URL when search query changes
+    const updateUrlWithQuery = (query) => {
+        if (query.trim()) {
+            navigate(`/search?q=${encodeURIComponent(query.trim())}`, { replace: true });
+        } else {
+            navigate('/search', { replace: true });
+        }
+    };
+
+    // Handle search input change
+    const handleSearchChange = (e) => {
+        const newQuery = e.target.value;
+        setSearchQuery(newQuery);
+    };
+
+    // Debounce search query and update URL
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             setDebouncedQuery(searchQuery);
             if (searchQuery.trim()) {
                 saveToHistory(searchQuery);
+                updateUrlWithQuery(searchQuery);
+            } else if (location.search) {
+                // Clear URL if search is empty
+                navigate('/search', { replace: true });
             }
         }, 500);
 
@@ -152,7 +186,7 @@ const Search = () => {
                             <input 
                                 type="text" 
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={handleSearchChange}
                                 onFocus={() => {
                                     setShowHistory(true);
                                     setIsFocused(true);

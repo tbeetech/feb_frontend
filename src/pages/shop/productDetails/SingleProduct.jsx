@@ -67,6 +67,46 @@ const SingleProduct = () => {
             }
         }
     };
+    
+    // Helper function to format delivery info
+    const getDeliveryInfo = () => {
+        if (isPreOrder) {
+            return {
+                icon: "timer",
+                title: "Pre-order Item",
+                message: "This item will be delivered within 14 working days from your order date.",
+                color: "blue"
+            };
+        } else if (singleProduct?.stockStatus === 'In Stock') {
+            return {
+                icon: "local_shipping",
+                title: "Fast Delivery",
+                message: "This item will be delivered within 74 hours (3 days) from your order date.",
+                color: "green"
+            };
+        } else {
+            // For Out of Stock or custom delivery times
+            const startDate = singleProduct?.deliveryTimeFrame?.startDate ? new Date(singleProduct.deliveryTimeFrame.startDate) : null;
+            const endDate = singleProduct?.deliveryTimeFrame?.endDate ? new Date(singleProduct.deliveryTimeFrame.endDate) : null;
+            
+            if (startDate && endDate) {
+                const options = { year: 'numeric', month: 'short', day: 'numeric' };
+                return {
+                    icon: "date_range",
+                    title: "Custom Delivery",
+                    message: `This item is expected to be available between ${startDate.toLocaleDateString(undefined, options)} and ${endDate.toLocaleDateString(undefined, options)}.`,
+                    color: "gray"
+                };
+            }
+            
+            return {
+                icon: "info",
+                title: "Delivery Information",
+                message: "Please contact us for delivery information about this item.",
+                color: "gray"
+            };
+        }
+    };
 
     // Handlers
     const handleAddToCart = (product) => {
@@ -151,6 +191,9 @@ const SingleProduct = () => {
     // Gallery setup
     const gallery = singleProduct.gallery || [];
     const allImages = [singleProduct.image, ...gallery].filter(Boolean);
+    
+    // Get delivery information
+    const deliveryInfo = getDeliveryInfo();
 
     return (
         <>
@@ -243,6 +286,24 @@ const SingleProduct = () => {
                                 ))}
                             </motion.div>
                         )}
+                        
+                        {/* Delivery Information Card */}
+                        <motion.div 
+                            className={`mt-6 p-4 rounded-lg border bg-${deliveryInfo.color}-50 border-${deliveryInfo.color}-200`}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5 }}
+                        >
+                            <div className="flex items-start space-x-3">
+                                <span className={`material-icons text-${deliveryInfo.color}-500 text-xl`}>
+                                    {deliveryInfo.icon}
+                                </span>
+                                <div>
+                                    <h3 className={`font-medium text-${deliveryInfo.color}-700`}>{deliveryInfo.title}</h3>
+                                    <p className="text-gray-600 text-sm mt-1">{deliveryInfo.message}</p>
+                                </div>
+                            </div>
+                        </motion.div>
                     </motion.div>
                     
                     {/* Enhanced product details with animations */}
@@ -301,26 +362,31 @@ const SingleProduct = () => {
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.45 }}
                         >
-                            {!isPreOrder && (
-                                <div className="flex items-center mb-2">
-                                    <span className="font-medium mr-2">Availability:</span>
-                                    {singleProduct?.stockStatus === 'In Stock' ? (
-                                        <span className="text-green-600 flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                            </svg>
-                                            In Stock
-                                        </span>
-                                    ) : (
-                                        <span className="text-red-600 flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                                            </svg>
-                                            Out of Stock
-                                        </span>
-                                    )}
-                                </div>
-                            )}
+                            <div className="flex items-center mb-2">
+                                <span className="font-medium mr-2">Availability:</span>
+                                {singleProduct?.stockStatus === 'In Stock' ? (
+                                    <span className="text-green-600 flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                        </svg>
+                                        In Stock
+                                    </span>
+                                ) : isPreOrder ? (
+                                    <span className="text-blue-600 flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                                        </svg>
+                                        Pre Order
+                                    </span>
+                                ) : (
+                                    <span className="text-red-600 flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                        </svg>
+                                        Out of Stock
+                                    </span>
+                                )}
+                            </div>
 
                             {singleProduct?.stockStatus === 'In Stock' && singleProduct?.stockQuantity > 0 && (
                                 <div className="flex items-center">
@@ -366,7 +432,7 @@ const SingleProduct = () => {
                             {isPreOrder ? (
                                 <div className="space-y-4">
                                     <h3 className="text-lg font-semibold">This is a pre-order product</h3>
-                                    <p className="text-gray-600">Pre-order products will be delivered within 14 days.</p>
+                                    <p className="text-gray-600">Pre-order products will be delivered within 14 working days.</p>
                                     <motion.button
                                         onClick={() => handlePreOrder(singleProduct)}
                                         className="w-full py-3 bg-primary text-white rounded-lg flex items-center justify-center hover:bg-primary-dark transition-colors"

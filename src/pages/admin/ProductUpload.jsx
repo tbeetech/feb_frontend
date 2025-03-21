@@ -28,7 +28,11 @@ const ProductUpload = () => {
     sizeType: 'none',
     sizes: [],
     stockStatus: 'In Stock',
-    stockQuantity: 0
+    stockQuantity: 0,
+    deliveryTimeFrame: {
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0]
+    }
   };
   
   const [formData, setFormData] = useState(initialState);
@@ -94,8 +98,46 @@ const ProductUpload = () => {
         rating: Number(formData.rating) || 0,
         author: user._id,  // Add the author ID from the current user
         sizeType: formData.sizeType || 'none',
-        sizes: formData.sizes || []
+        sizes: formData.sizes || [],
       };
+      
+      // Set delivery time frame based on stock status
+      if (formData.stockStatus === 'In Stock') {
+        // For In Stock items: Delivery in 74 hours (3 days)
+        const startDate = new Date();
+        const endDate = new Date();
+        endDate.setHours(endDate.getHours() + 74);
+        
+        productData.deliveryTimeFrame = {
+          startDate: startDate,
+          endDate: endDate
+        };
+      } else if (formData.stockStatus === 'Pre Order') {
+        // For Pre Order items: Delivery in 14 working days
+        const startDate = new Date();
+        const endDate = new Date();
+        
+        // Add 14 working days (excluding weekends)
+        let workingDaysAdded = 0;
+        while (workingDaysAdded < 14) {
+          endDate.setDate(endDate.getDate() + 1);
+          // Skip weekends (0 = Sunday, 6 = Saturday)
+          if (endDate.getDay() !== 0 && endDate.getDay() !== 6) {
+            workingDaysAdded++;
+          }
+        }
+        
+        productData.deliveryTimeFrame = {
+          startDate: startDate,
+          endDate: endDate
+        };
+      } else {
+        // For Out of Stock or any other status, use the form's delivery time frame
+        productData.deliveryTimeFrame = {
+          startDate: new Date(formData.deliveryTimeFrame.startDate),
+          endDate: new Date(formData.deliveryTimeFrame.endDate)
+        };
+      }
       
       // Remove empty fields
       Object.keys(productData).forEach(key => {
@@ -311,6 +353,69 @@ const ProductUpload = () => {
               />
             </div>
           </div>
+          
+          {/* Add Delivery Time Frame fields - Only show for Out of Stock */}
+          {formData.stockStatus === 'Out of Stock' && (
+            <div className="mt-6">
+              <h3 className="font-medium mb-3">Delivery Time Frame</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="form-group">
+                  <label htmlFor="startDate" className="block mb-2 font-medium">
+                    Start Date *
+                  </label>
+                  <input
+                    type="date"
+                    id="startDate"
+                    name="deliveryTimeFrame.startDate"
+                    value={formData.deliveryTimeFrame.startDate}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        deliveryTimeFrame: {
+                          ...formData.deliveryTimeFrame,
+                          startDate: e.target.value
+                        }
+                      });
+                    }}
+                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    required
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="endDate" className="block mb-2 font-medium">
+                    End Date *
+                  </label>
+                  <input
+                    type="date"
+                    id="endDate"
+                    name="deliveryTimeFrame.endDate"
+                    value={formData.deliveryTimeFrame.endDate}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        deliveryTimeFrame: {
+                          ...formData.deliveryTimeFrame,
+                          endDate: e.target.value
+                        }
+                      });
+                    }}
+                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    required
+                    min={formData.deliveryTimeFrame.startDate}
+                  />
+                </div>
+              </div>
+              
+              {formData.stockStatus !== 'Out of Stock' && (
+                <p className="mt-2 text-sm text-gray-500 italic">
+                  {formData.stockStatus === 'In Stock' 
+                    ? 'In Stock products will be delivered within 74 hours (3 days).' 
+                    : 'Pre Order products will be delivered within 14 working days.'}
+                </p>
+              )}
+            </div>
+          )}
           
           {/* Rating and Order Type */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

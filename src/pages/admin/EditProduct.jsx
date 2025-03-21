@@ -34,7 +34,11 @@ const EditProduct = () => {
     sizeType: 'none',
     sizes: [],
     stockStatus: 'In Stock',
-    stockQuantity: 0
+    stockQuantity: 0,
+    deliveryTimeFrame: {
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0]
+    }
   };
   
   const [formData, setFormData] = useState(initialState);
@@ -58,7 +62,15 @@ const EditProduct = () => {
         sizeType: product.sizeType || 'none',
         sizes: product.sizes || [],
         stockStatus: product.stockStatus || 'In Stock',
-        stockQuantity: product.stockQuantity || 0
+        stockQuantity: product.stockQuantity || 0,
+        deliveryTimeFrame: {
+          startDate: product.deliveryTimeFrame?.startDate 
+            ? new Date(product.deliveryTimeFrame.startDate).toISOString().split('T')[0] 
+            : new Date().toISOString().split('T')[0],
+          endDate: product.deliveryTimeFrame?.endDate 
+            ? new Date(product.deliveryTimeFrame.endDate).toISOString().split('T')[0]
+            : new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0]
+        }
       });
       
       if (product.category) {
@@ -125,8 +137,46 @@ const EditProduct = () => {
         oldPrice: formData.oldPrice ? Number(formData.oldPrice) : undefined,
         rating: Number(formData.rating) || 0,
         sizeType: formData.sizeType || 'none',
-        sizes: formData.sizes || []
+        sizes: formData.sizes || [],
       };
+      
+      // Set delivery time frame based on stock status
+      if (formData.stockStatus === 'In Stock') {
+        // For In Stock items: Delivery in 74 hours (3 days)
+        const startDate = new Date();
+        const endDate = new Date();
+        endDate.setHours(endDate.getHours() + 74);
+        
+        productData.deliveryTimeFrame = {
+          startDate: startDate,
+          endDate: endDate
+        };
+      } else if (formData.stockStatus === 'Pre Order') {
+        // For Pre Order items: Delivery in 14 working days
+        const startDate = new Date();
+        const endDate = new Date();
+        
+        // Add 14 working days (excluding weekends)
+        let workingDaysAdded = 0;
+        while (workingDaysAdded < 14) {
+          endDate.setDate(endDate.getDate() + 1);
+          // Skip weekends (0 = Sunday, 6 = Saturday)
+          if (endDate.getDay() !== 0 && endDate.getDay() !== 6) {
+            workingDaysAdded++;
+          }
+        }
+        
+        productData.deliveryTimeFrame = {
+          startDate: startDate,
+          endDate: endDate
+        };
+      } else {
+        // For Out of Stock or any other status, use the form's delivery time frame
+        productData.deliveryTimeFrame = {
+          startDate: new Date(formData.deliveryTimeFrame.startDate),
+          endDate: new Date(formData.deliveryTimeFrame.endDate)
+        };
+      }
       
       // Remove empty fields
       Object.keys(productData).forEach(key => {
@@ -371,6 +421,79 @@ const EditProduct = () => {
               />
             </div>
           </div>
+          
+          {/* Add Delivery Time Frame fields - Only show for Out of Stock */}
+          {formData.stockStatus === 'Out of Stock' && (
+            <div className="mt-6">
+              <h3 className="text-lg font-medium mb-3">Delivery Time Frame</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
+                    Start Date *
+                  </label>
+                  <input
+                    type="date"
+                    id="startDate"
+                    name="deliveryTimeFrame.startDate"
+                    value={formData.deliveryTimeFrame.startDate}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        deliveryTimeFrame: {
+                          ...formData.deliveryTimeFrame,
+                          startDate: e.target.value
+                        }
+                      });
+                    }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
+                    End Date *
+                  </label>
+                  <input
+                    type="date"
+                    id="endDate"
+                    name="deliveryTimeFrame.endDate"
+                    value={formData.deliveryTimeFrame.endDate}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        deliveryTimeFrame: {
+                          ...formData.deliveryTimeFrame,
+                          endDate: e.target.value
+                        }
+                      });
+                    }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                    min={formData.deliveryTimeFrame.startDate}
+                  />
+                </div>
+              </div>
+              
+              {formData.stockStatus !== 'Out of Stock' && (
+                <p className="mt-2 text-sm text-gray-500 italic">
+                  {formData.stockStatus === 'In Stock' 
+                    ? 'In Stock products will be delivered within 74 hours (3 days).' 
+                    : 'Pre Order products will be delivered within 14 working days.'}
+                </p>
+              )}
+            </div>
+          )}
+          
+          {(formData.stockStatus === 'In Stock' || formData.stockStatus === 'Pre Order') && (
+            <div className="mt-4 p-3 bg-gray-50 rounded-md border border-gray-200">
+              <p className="text-sm text-gray-600">
+                {formData.stockStatus === 'In Stock' 
+                  ? 'In Stock products will be delivered within 74 hours (3 days).' 
+                  : 'Pre Order products will be delivered within 14 working days.'}
+              </p>
+            </div>
+          )}
           
           {/* Description */}
           <div>

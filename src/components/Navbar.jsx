@@ -25,6 +25,20 @@ const Navbar = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isAccessoriesOpen, setIsAccessoriesOpen] = useState(false);
     const [isFragranceOpen, setIsFragranceOpen] = useState(false);
+    
+    // Check if current page is search page
+    const isSearchPage = location.pathname === '/search';
+
+    // Extract search query from URL if on search page
+    useEffect(() => {
+        if (isSearchPage) {
+            const queryParams = new URLSearchParams(location.search);
+            const queryFromUrl = queryParams.get('q');
+            if (queryFromUrl) {
+                setSearchQuery(queryFromUrl);
+            }
+        }
+    }, [location.search, isSearchPage]);
 
     // Handle scroll effect for navbar
     useEffect(() => {
@@ -103,12 +117,24 @@ const Navbar = () => {
         }
     };
 
+    const handleSearchChange = (e) => {
+        const value = e.target.value;
+        setSearchQuery(value);
+        
+        // If we're already on the search page, update URL in real-time
+        if (isSearchPage && value.trim()) {
+            const searchParams = new URLSearchParams(location.search);
+            searchParams.set('q', value);
+            const newUrl = `${location.pathname}?${searchParams.toString()}`;
+            navigate(newUrl, { replace: true });
+        }
+    };
+
     const handleSearchSubmit = (e) => {
         e.preventDefault();
         if (searchQuery.trim()) {
             navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
             setShowSearch(false);
-            setSearchQuery('');
         }
     };
 
@@ -274,7 +300,7 @@ const Navbar = () => {
                                             placeholder="Search products..."
                                             className="search-input w-full py-2 px-3 border border-gray-200 rounded-l-md focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold transition-all duration-200"
                                             value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            onChange={handleSearchChange}
                                         />
                                         <button 
                                             type="submit"
@@ -430,7 +456,7 @@ const Navbar = () => {
                                         placeholder="Search products..."
                                         className="w-full py-2 px-3 border border-gray-200 rounded-l-md focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold"
                                         value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onChange={handleSearchChange}
                                     />
                                     <button 
                                         type="submit"
