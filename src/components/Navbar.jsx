@@ -152,9 +152,14 @@ const Navbar = () => {
     const handleCategoryClick = (category, subcategory = null) => {
         handleMobileMenuToggle(); // Close mobile menu
         const normalizedCategory = category.toLowerCase().replace(/\s+/g, '-');
-        const path = subcategory 
-            ? `/categories/${normalizedCategory}/${subcategory}`
-            : `/categories/${normalizedCategory}`;
+        
+        let path;
+        if (subcategory) {
+            path = `/categories/${normalizedCategory}/${subcategory}`;
+        } else {
+            path = `/categories/${normalizedCategory}`;
+        }
+        
         navigate(path);
     };
 
@@ -183,31 +188,31 @@ const Navbar = () => {
     ];
 
     const mobileCategories = [
-        {label: "New Arrivals", path: "/categories/new", icon: "material-icons", iconName: "new_releases"},
-        {label: "Clothing", path: "/categories/clothes", icon: "material-icons", iconName: "checkroom"},
-        {label: "Corporate Wears", path: "/categories/corporate", icon: "material-icons", iconName: "business_center"},
-        {label: "Dresses", path: "/categories/dress", icon: "material-icons", iconName: "dry_cleaning"},
-        {label: "Shoes", path: "/categories/shoes", icon: "material-icons", iconName: "settings_accessibility"},
-        {label: "Bags", path: "/categories/bags", icon: "material-icons", iconName: "shopping_bag"},
+        {label: "New Arrivals", path: "new", icon: "material-icons", iconName: "new_releases"},
+        {label: "Clothing", path: "clothes", icon: "material-icons", iconName: "checkroom"},
+        {label: "Corporate Wears", path: "corporate", icon: "material-icons", iconName: "business_center"},
+        {label: "Dresses", path: "dress", icon: "material-icons", iconName: "dry_cleaning"},
+        {label: "Shoes", path: "shoes", icon: "material-icons", iconName: "settings_accessibility"},
+        {label: "Bags", path: "bags", icon: "material-icons", iconName: "shopping_bag"},
     ];
 
     const accessoriesCategories = [
-        {label: "Sunglasses", path: "/categories/accessories/sunglasses", icon: "material-icons", iconName: "visibility"},
-        {label: "Wrist Watches", path: "/categories/accessories/wrist-watches", icon: "material-icons", iconName: "watch"},
-        {label: "Belts", path: "/categories/accessories/belts", icon: "material-icons", iconName: "no_encryption_gmailerrorred"},
-        {label: "Bangles & Bracelet", path: "/categories/accessories/bangles-bracelet", icon: "material-icons", iconName: "circle"},
-        {label: "Earrings", path: "/categories/accessories/earrings", icon: "material-icons", iconName: "stars"},
-        {label: "Necklace", path: "/categories/accessories/necklace", icon: "material-icons", iconName: "diamond"},
-        {label: "Pearls", path: "/categories/accessories/pearls", icon: "material-icons", iconName: "radio_button_unchecked"},
+        {label: "Sunglasses", path: "sunglasses", icon: "material-icons", iconName: "visibility"},
+        {label: "Wrist Watches", path: "wrist-watches", icon: "material-icons", iconName: "watch"},
+        {label: "Belts", path: "belts", icon: "material-icons", iconName: "no_encryption_gmailerrorred"},
+        {label: "Bangles & Bracelet", path: "bangles-bracelet", icon: "material-icons", iconName: "circle"},
+        {label: "Earrings", path: "earrings", icon: "material-icons", iconName: "stars"},
+        {label: "Necklace", path: "necklace", icon: "material-icons", iconName: "diamond"},
+        {label: "Pearls", path: "pearls", icon: "material-icons", iconName: "radio_button_unchecked"},
     ];
 
     const fragranceCategories = [
-        {label: "Designer Perfumes & Niche", path: "/categories/fragrance/designer-niche", icon: "material-icons", iconName: "spa"},
-        {label: "Unboxed Perfume", path: "/categories/fragrance/unboxed", icon: "material-icons", iconName: "inventory_2"},
-        {label: "Testers", path: "/categories/fragrance/testers", icon: "material-icons", iconName: "science"},
-        {label: "Arabian Perfume", path: "/categories/fragrance/arabian", icon: "material-icons", iconName: "mosque"},
-        {label: "Diffuser", path: "/categories/fragrance/diffuser", icon: "material-icons", iconName: "air"},
-        {label: "Mist", path: "/categories/fragrance/mist", icon: "material-icons", iconName: "water_drop"},
+        {label: "Designer Perfumes & Niche", path: "designer-niche", icon: "material-icons", iconName: "spa"},
+        {label: "Unboxed Perfume", path: "unboxed", icon: "material-icons", iconName: "inventory_2"},
+        {label: "Testers", path: "testers", icon: "material-icons", iconName: "science"},
+        {label: "Arabian Perfume", path: "arabian", icon: "material-icons", iconName: "mosque"},
+        {label: "Diffuser", path: "diffuser", icon: "material-icons", iconName: "air"},
+        {label: "Mist", path: "mist", icon: "material-icons", iconName: "water_drop"},
     ];
 
     // Animation variants
@@ -521,7 +526,7 @@ const Navbar = () => {
                                                     {fragranceCategories.map((category, index) => (
                                                         <li key={index}>
                                                             <button
-                                                                onClick={() => handleCategoryClick('fragrance', category.path.split('/').pop())}
+                                                                onClick={() => handleCategoryClick('fragrance', category.path)}
                                                                 className='flex items-center py-2 px-3 rounded-md text-gray-600 hover:bg-gold/5 hover:text-gold w-full text-left transition-colors duration-200'
                                                             >
                                                                 <span className={`${category.icon} text-lg mr-3`}>
@@ -542,7 +547,7 @@ const Navbar = () => {
                                     {mobileCategories.map((category, index) => (
                                         <li key={index}>
                                             <button
-                                                onClick={() => handleCategoryClick(category.path.split('/').pop())}
+                                                onClick={() => handleCategoryClick(category.path)}
                                                 className='flex items-center py-2 px-3 rounded-md hover:bg-gold/5 hover:text-gold w-full text-left transition-colors duration-200'
                                             >
                                                 <span className={`${category.icon} text-lg mr-3`}>
@@ -581,7 +586,7 @@ const Navbar = () => {
                                                     {accessoriesCategories.map((category, index) => (
                                                         <li key={index}>
                                                             <button
-                                                                onClick={() => handleCategoryClick('accessories', category.path.split('/').pop())}
+                                                                onClick={() => handleCategoryClick('accessories', category.path)}
                                                                 className='flex items-center py-2 px-3 rounded-md text-gray-600 hover:bg-gold/5 hover:text-gold w-full text-left transition-colors duration-200'
                                                             >
                                                                 <span className={`${category.icon} text-lg mr-3`}>

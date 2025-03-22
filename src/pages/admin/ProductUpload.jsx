@@ -40,6 +40,17 @@ const ProductUpload = () => {
   // Get subcategories based on selected category
   const subcategories = selectedCategory && CATEGORIES[selectedCategory.toUpperCase()]?.subcategories || [];
   
+  // Format subcategories for display
+  const formattedSubcategories = subcategories.map(sub => {
+    if (typeof sub === 'string') {
+      return {
+        value: sub,
+        label: sub.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+      };
+    }
+    return sub; // If it's already an object with value/label
+  });
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
@@ -223,11 +234,14 @@ const ProductUpload = () => {
                 value={formData.subcategory}
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                disabled={!selectedCategory || subcategories.length === 0}
+                disabled={!selectedCategory || formattedSubcategories.length === 0}
               >
                 <option value="">Select Subcategory</option>
-                {subcategories.map((subcategory) => (
-                  <option key={subcategory.value} value={subcategory.value}>
+                {formattedSubcategories.map((subcategory) => (
+                  <option 
+                    key={subcategory.value} 
+                    value={subcategory.value}
+                  >
                     {subcategory.label}
                   </option>
                 ))}

@@ -25,7 +25,7 @@ children: [
     {path: "/",element: <Home/>},
     {path: "/categories/:categoryName", element: <CategoryPage/>, errorElement: <ErrorBoundary />},
     {path: "/categories/:categoryName/:subcategory", element: <CategoryPage/>, errorElement: <ErrorBoundary />},
-    {path: "/category/:categoryName", element: <CategoryPage/>}, // Legacy support
+    {path: "/category/:categoryName", element: <CategoryPage/>}, // Legacy support - redirect to new format
     {path: "/search", element: <Search/>},
     {path: "/shop", element:<ShopPage/>},
     {path: "/product/:id", element:<SingleProduct/>},

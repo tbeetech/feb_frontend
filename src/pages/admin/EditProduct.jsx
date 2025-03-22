@@ -15,9 +15,8 @@ const EditProduct = () => {
   const navigate = useNavigate();
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
   const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
-  const { data, isLoading: isFetching, error } = useFetchProductByIdQuery(id);
+  const { data: product, error, isFetching } = useFetchProductByIdQuery(id);
   
-  const [selectedCategory, setSelectedCategory] = useState('');
   const [showPreview, setShowPreview] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState(false);
   
@@ -43,48 +42,59 @@ const EditProduct = () => {
   
   const [formData, setFormData] = useState(initialState);
   
-  // Get subcategories based on selected category
-  const subcategories = selectedCategory && CATEGORIES[selectedCategory.toUpperCase()]?.subcategories || [];
+  // Get subcategories based on the selected category
+  const getSubcategories = () => {
+    if (!formData.category) return [];
+    
+    const categoryData = CATEGORIES[formData.category.toUpperCase()];
+    if (!categoryData || !categoryData.subcategories) return [];
+    
+    return categoryData.subcategories.map(sub => {
+      if (typeof sub === 'string') {
+        return {
+          value: sub,
+          label: sub.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+        };
+      }
+      return sub; // If it's already an object with value/label
+    });
+  };
+  
+  const subcategories = getSubcategories();
   
   // Load product data when available
   useEffect(() => {
-    if (data?.product) {
-      const product = data.product;
+    if (product?.product) {
+      const productData = product.product;
       setFormData({
-        name: product.name || '',
-        category: product.category || '',
-        subcategory: product.subcategory || '',
-        description: product.description || '',
-        price: product.price || '',
-        oldPrice: product.oldPrice || '',
-        image: product.image || '',
-        rating: product.rating || 0,
-        sizeType: product.sizeType || 'none',
-        sizes: product.sizes || [],
-        stockStatus: product.stockStatus || 'In Stock',
-        stockQuantity: product.stockQuantity || 0,
+        name: productData.name || '',
+        category: productData.category || '',
+        subcategory: productData.subcategory || '',
+        description: productData.description || '',
+        price: productData.price || '',
+        oldPrice: productData.oldPrice || '',
+        image: productData.image || '',
+        rating: productData.rating || 0,
+        sizeType: productData.sizeType || 'none',
+        sizes: productData.sizes || [],
+        stockStatus: productData.stockStatus || 'In Stock',
+        stockQuantity: productData.stockQuantity || 0,
         deliveryTimeFrame: {
-          startDate: product.deliveryTimeFrame?.startDate 
-            ? new Date(product.deliveryTimeFrame.startDate).toISOString().split('T')[0] 
+          startDate: productData.deliveryTimeFrame?.startDate 
+            ? new Date(productData.deliveryTimeFrame.startDate).toISOString().split('T')[0] 
             : new Date().toISOString().split('T')[0],
-          endDate: product.deliveryTimeFrame?.endDate 
-            ? new Date(product.deliveryTimeFrame.endDate).toISOString().split('T')[0]
+          endDate: productData.deliveryTimeFrame?.endDate 
+            ? new Date(productData.deliveryTimeFrame.endDate).toISOString().split('T')[0]
             : new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0]
         }
       });
-      
-      if (product.category) {
-        setSelectedCategory(product.category);
-      }
     }
-  }, [data]);
+  }, [product]);
   
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
     if (name === 'category') {
-      setSelectedCategory(value);
-      // Reset subcategory when category changes
       setFormData({
         ...formData,
         [name]: value,
@@ -281,9 +291,9 @@ const EditProduct = () => {
                 required
               >
                 <option value="">Select a category</option>
-                {Object.keys(CATEGORIES).map((category) => (
-                  <option key={category} value={category.toLowerCase()}>
-                    {category.charAt(0) + category.slice(1).toLowerCase()}
+                {Object.values(CATEGORIES).map((category) => (
+                  <option key={category.name} value={category.name}>
+                    {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
                   </option>
                 ))}
               </select>
@@ -299,12 +309,12 @@ const EditProduct = () => {
                 value={formData.subcategory}
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                disabled={!selectedCategory || !subcategories.length}
+                disabled={!formData.category || subcategories.length === 0}
               >
                 <option value="">Select a subcategory</option>
-                {subcategories.map((subcat) => (
-                  <option key={subcat.value} value={subcat.value}>
-                    {subcat.label}
+                {subcategories.map((subcategory) => (
+                  <option key={subcategory.value} value={subcategory.value}>
+                    {subcategory.label}
                   </option>
                 ))}
               </select>
