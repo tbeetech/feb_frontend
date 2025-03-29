@@ -12,6 +12,8 @@ const ProductUpload = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [showPreview, setShowPreview] = useState(false);
   const [colors, setColors] = useState([]);
+  const [gallery, setGallery] = useState([]);
+  const [currentGalleryUrl, setCurrentGalleryUrl] = useState('');
   
   // Form initial state
   const initialState = {
@@ -22,6 +24,7 @@ const ProductUpload = () => {
     price: '',
     oldPrice: '',
     image: '',
+    gallery: [],
     rating: 0,
     orderType: 'regular',
     sizeType: 'none',
@@ -101,6 +104,21 @@ const ProductUpload = () => {
     });
   };
   
+  const handleGalleryUrlChange = (e) => {
+    setCurrentGalleryUrl(e.target.value);
+  };
+  
+  const addImageToGallery = () => {
+    if (!currentGalleryUrl.trim()) return;
+    
+    setGallery([...gallery, currentGalleryUrl]);
+    setCurrentGalleryUrl('');
+  };
+  
+  const removeImageFromGallery = (indexToRemove) => {
+    setGallery(gallery.filter((_, index) => index !== indexToRemove));
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -120,12 +138,14 @@ const ProductUpload = () => {
     try {
       await addProduct({
         ...formData,
-        colors: formattedColors
+        colors: formattedColors,
+        gallery: gallery // Add gallery to product submission
       }).unwrap();
       
       toast.success('Product added successfully');
       setFormData(initialState);
       setColors([]);
+      setGallery([]);
     } catch (error) {
       toast.error(error.data?.message || 'Failed to add product');
     }
@@ -259,10 +279,10 @@ const ProductUpload = () => {
             </div>
           </div>
           
-          {/* Image URL */}
+          {/* Main Image URL */}
           <div className="form-group">
             <label htmlFor="image" className="block mb-2 font-medium">
-              Image URL *
+              Main Image URL *
             </label>
             <input
               type="url"
@@ -272,7 +292,7 @@ const ProductUpload = () => {
               onChange={handleInputChange}
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               required
-              placeholder="Enter image URL"
+              placeholder="Enter main image URL"
             />
             {formData.image && (
               <div className="mt-2">
@@ -285,6 +305,58 @@ const ProductUpload = () => {
                     e.target.src = "https://via.placeholder.com/150?text=Invalid+URL";
                   }}
                 />
+              </div>
+            )}
+          </div>
+          
+          {/* Gallery Images */}
+          <div className="form-group">
+            <label className="block mb-2 font-medium">
+              Gallery Images
+            </label>
+            <div className="flex items-center space-x-2">
+              <input
+                type="url"
+                id="galleryImage"
+                value={currentGalleryUrl}
+                onChange={handleGalleryUrlChange}
+                className="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Enter gallery image URL"
+              />
+              <button
+                type="button"
+                onClick={addImageToGallery}
+                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
+              >
+                Add
+              </button>
+            </div>
+            
+            {gallery.length > 0 && (
+              <div className="mt-4">
+                <h3 className="text-sm font-medium mb-2">Gallery Preview:</h3>
+                <div className="flex flex-wrap gap-2">
+                  {gallery.map((imageUrl, index) => (
+                    <div key={index} className="relative group">
+                      <img 
+                        src={imageUrl} 
+                        alt={`Gallery ${index + 1}`} 
+                        className="w-20 h-20 object-cover rounded-md border"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "https://via.placeholder.com/150?text=Invalid+URL";
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeImageFromGallery(index)}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -521,6 +593,13 @@ const ProductUpload = () => {
                   ) : (
                     <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500">
                       No image provided
+                    </div>
+                  )}
+                  
+                  {/* Show gallery indicator if gallery images exist */}
+                  {gallery.length > 0 && (
+                    <div className="absolute bottom-4 right-4 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
+                      +{gallery.length} more
                     </div>
                   )}
                   

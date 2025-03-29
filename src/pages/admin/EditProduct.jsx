@@ -22,6 +22,8 @@ const EditProduct = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState(false);
   const [colors, setColors] = useState([]);
+  const [gallery, setGallery] = useState([]);
+  const [currentGalleryUrl, setCurrentGalleryUrl] = useState('');
   
   // Form initial state
   const initialState = {
@@ -32,6 +34,7 @@ const EditProduct = () => {
     price: '',
     oldPrice: '',
     image: '',
+    gallery: [],
     rating: 0,
     sizeType: 'none',
     sizes: [],
@@ -81,12 +84,18 @@ const EditProduct = () => {
         stockStatus: productData.stockStatus || 'In Stock',
         stockQuantity: productData.stockQuantity || 0,
         colors: productData.colors || [],
+        gallery: productData.gallery || [],
         deliveryTimeFrame: productData.deliveryTimeFrame || initialState.deliveryTimeFrame
       });
       
       // Set initial colors
       if (productData.colors?.length > 0) {
         setColors(productData.colors.map(c => c.hexCode));
+      }
+      
+      // Set initial gallery
+      if (productData.gallery?.length > 0) {
+        setGallery(productData.gallery);
       }
     }
   }, [product]);
@@ -137,6 +146,21 @@ const EditProduct = () => {
     setShowPreview(!showPreview);
   };
   
+  const handleGalleryUrlChange = (e) => {
+    setCurrentGalleryUrl(e.target.value);
+  };
+  
+  const addImageToGallery = () => {
+    if (!currentGalleryUrl.trim()) return;
+    
+    setGallery([...gallery, currentGalleryUrl]);
+    setCurrentGalleryUrl('');
+  };
+  
+  const removeImageFromGallery = (indexToRemove) => {
+    setGallery(gallery.filter((_, index) => index !== indexToRemove));
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -157,7 +181,8 @@ const EditProduct = () => {
       await updateProduct({
         id,
         ...formData,
-        colors: formattedColors
+        colors: formattedColors,
+        gallery: gallery // Include gallery in the update
       }).unwrap();
       
       toast.success('Product updated successfully');
@@ -338,7 +363,7 @@ const EditProduct = () => {
           {/* Image URL */}
           <div>
             <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
-              Image URL*
+              Main Image URL*
             </label>
             <input
               type="text"
@@ -349,6 +374,71 @@ const EditProduct = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
             />
+            {formData.image && (
+              <div className="mt-2">
+                <img 
+                  src={formData.image} 
+                  alt="Main product image" 
+                  className="w-32 h-32 object-cover rounded-md border"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "https://via.placeholder.com/150?text=Invalid+URL";
+                  }}
+                />
+              </div>
+            )}
+          </div>
+          
+          {/* Gallery Images */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Gallery Images
+            </label>
+            <div className="flex items-center space-x-2">
+              <input
+                type="text"
+                id="galleryImage"
+                value={currentGalleryUrl}
+                onChange={handleGalleryUrlChange}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter gallery image URL"
+              />
+              <button
+                type="button"
+                onClick={addImageToGallery}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Add
+              </button>
+            </div>
+            
+            {gallery.length > 0 && (
+              <div className="mt-4">
+                <h3 className="text-sm font-medium mb-2">Gallery Images:</h3>
+                <div className="flex flex-wrap gap-2">
+                  {gallery.map((imageUrl, index) => (
+                    <div key={index} className="relative group">
+                      <img 
+                        src={imageUrl} 
+                        alt={`Gallery ${index + 1}`} 
+                        className="w-20 h-20 object-cover rounded-md border"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "https://via.placeholder.com/150?text=Invalid+URL";
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeImageFromGallery(index)}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           
           {/* Stock Information */}
@@ -557,14 +647,36 @@ const EditProduct = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   {formData.image ? (
-                    <img
-                      src={formData.image}
-                      alt={formData.name}
-                      className="w-full h-64 object-cover rounded"
-                    />
+                    <div className="relative">
+                      <img
+                        src={formData.image}
+                        alt={formData.name}
+                        className="w-full h-64 object-cover rounded"
+                      />
+                      {/* Show gallery indicator if gallery images exist */}
+                      {gallery.length > 0 && (
+                        <div className="absolute bottom-4 right-4 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
+                          +{gallery.length} more
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <div className="w-full h-64 bg-gray-200 flex items-center justify-center rounded">
                       <span className="text-gray-500">No image provided</span>
+                    </div>
+                  )}
+                  
+                  {/* Show gallery thumbnails in preview */}
+                  {gallery.length > 0 && (
+                    <div className="mt-4 flex overflow-x-auto space-x-2 py-2">
+                      {gallery.map((imageUrl, index) => (
+                        <img 
+                          key={index}
+                          src={imageUrl} 
+                          alt={`Thumbnail ${index + 1}`} 
+                          className="w-16 h-16 object-cover rounded-md flex-shrink-0 border border-gray-200"
+                        />
+                      ))}
                     </div>
                   )}
                 </div>

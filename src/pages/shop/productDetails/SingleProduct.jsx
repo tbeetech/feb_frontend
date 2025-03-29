@@ -10,6 +10,7 @@ import ImagePreviewModal from '../../../components/ImagePreviewModal';
 import SizeSelectionWheel from '../../../components/SizeSelectionWheel';
 import ColorPalette from '../../../components/ColorPalette';
 import { toast } from 'react-hot-toast';
+import ImageSlider from '../../../components/ImageSlider';
 
 const SingleProduct = () => {
     const { id } = useParams();
@@ -172,11 +173,6 @@ const SingleProduct = () => {
         dispatch(decrementQuantity(product));
     };
     
-    const openPreview = (image) => {
-        setSelectedImage(image);
-        setPreviewOpen(true);
-    };
-
     // Handler for size selection
     const handleSizeSelect = (size) => {
         setSelectedSize(size);
@@ -220,7 +216,9 @@ const SingleProduct = () => {
 
     // Gallery setup
     const gallery = singleProduct.gallery || [];
-    const allImages = [singleProduct.image, ...gallery].filter(Boolean);
+    // Include color variant images in gallery if they have imageUrl
+    const colorVariantImages = singleProduct.colors?.filter(c => c.imageUrl)?.map(c => c.imageUrl) || [];
+    const allImages = [singleProduct.image, ...gallery, ...colorVariantImages].filter(Boolean);
     
     // Get delivery information
     const deliveryInfo = getDeliveryInfo();
@@ -229,266 +227,218 @@ const SingleProduct = () => {
         <>
             {/* Enhanced breadcrumb with animation */}
             <motion.section 
-                className='section__container bg-primary-light pb-8'
+                className='bg-primary-light py-6 lg:py-10'
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
             >
-                <motion.h2 
-                    className='section__header capitalize'
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 }}
-                >
-                    {singleProduct.name}
-                </motion.h2>
-                <motion.div
-                    className="flex items-center text-sm text-gray-600"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3 }}
-                >
-                    <Link to="/" className="hover:text-primary transition-colors">Home</Link>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mx-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                    <Link to="/shop" className="hover:text-primary transition-colors">Shop</Link>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mx-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                    <span className="text-primary font-medium truncate max-w-[200px]">{singleProduct.name}</span>
-                </motion.div>
+                <div className='container mx-auto px-4 lg:px-8'>
+                    <motion.h1 
+                        className='text-3xl md:text-4xl lg:text-5xl font-bold mb-4 uppercase tracking-wide'
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        {singleProduct.name}
+                    </motion.h1>
+                    <motion.div
+                        className="flex items-center text-sm lg:text-base text-gray-600"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                    >
+                        <Link to="/" className="hover:text-primary transition-colors">Home</Link>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mx-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                        <Link to="/shop" className="hover:text-primary transition-colors">Shop</Link>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mx-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                        <span className="text-primary font-medium truncate max-w-[200px]">{singleProduct.name}</span>
+                    </motion.div>
+                </div>
             </motion.section>
 
             <motion.section 
-                className="section__container my-12"
+                className="container mx-auto px-4 lg:px-8 py-12 lg:py-16"
                 initial="hidden"
                 animate="visible"
                 variants={stagger}
             >
-                <div className="grid md:grid-cols-2 gap-12">
-                    {/* Enhanced product gallery with animations */}
-                    <motion.div variants={fadeInUp} className="space-y-6">
-                        <motion.div 
-                            className="overflow-hidden rounded-xl shadow-lg relative group"
-                            whileHover={{ scale: 1.02 }}
-                            transition={{ duration: 0.3 }}
-                        >
-                            <motion.img
-                                src={selectedImage || singleProduct.image}
-                                alt={singleProduct.name}
-                                className="w-full h-auto object-cover rounded-xl"
-                                initial={{ scale: 1.1, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                transition={{ duration: 0.5 }}
-                            />
-                            <motion.div 
-                                className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                                whileHover={{ opacity: 1 }}
-                            >
-                                <button 
-                                    onClick={() => openPreview(selectedImage || singleProduct.image)}
-                                    className="bg-white/90 text-gray-800 rounded-full p-3 transform hover:scale-110 transition-transform"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </button>
-                            </motion.div>
-                        </motion.div>
-                        
-                        {/* Image Gallery Thumbnails */}
-                        {allImages.length > 1 && (
-                            <motion.div 
-                                className="flex flex-wrap gap-2"
-                                variants={fadeInUp}
-                            >
-                                {allImages.map((img, idx) => (
-                                    <motion.div
-                                        key={idx}
-                                        className={`w-20 h-20 border-2 rounded-lg overflow-hidden cursor-pointer transition-all ${selectedImage === img ? 'border-primary ring-2 ring-primary/30' : 'border-gray-200'}`}
-                                        whileHover={{ y: -5, scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() => setSelectedImage(img)}
-                                    >
-                                        <img src={img} alt="" className="w-full h-full object-cover" />
-                                    </motion.div>
-                                ))}
-                            </motion.div>
-                        )}
-                        
-                        {/* Delivery Information Card */}
-                        <motion.div 
-                            className={`mt-6 p-4 rounded-lg border bg-${deliveryInfo.color}-50 border-${deliveryInfo.color}-200`}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.5 }}
-                        >
-                            <div className="flex items-start space-x-3">
-                                <span className={`material-icons text-${deliveryInfo.color}-500 text-xl`}>
-                                    {deliveryInfo.icon}
-                                </span>
-                                <div>
-                                    <h3 className={`font-medium text-${deliveryInfo.color}-700`}>{deliveryInfo.title}</h3>
-                                    <p className="text-gray-600 text-sm mt-1">{deliveryInfo.message}</p>
-                                </div>
-                            </div>
-                        </motion.div>
+                <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
+                    {/* Image gallery in left column */}
+                    <motion.div variants={fadeInUp} className="bg-white rounded-lg shadow-xl overflow-hidden">
+                        <ImageSlider 
+                            images={allImages}
+                            productName={singleProduct.name}
+                            onPreviewClick={(image) => {
+                                setSelectedImage(image);
+                                setPreviewOpen(true);
+                            }}
+                        />
                     </motion.div>
                     
-                    {/* Enhanced product details with animations */}
-                    <motion.div variants={fadeInUp} className="space-y-6">
-                        <motion.div className="space-y-3">
-                            <motion.span 
-                                className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
+                    {/* Product details in right column */}
+                    <motion.div variants={fadeInUp} className="flex flex-col space-y-8">
+                        <div className="border-b border-gray-200 pb-8 space-y-4">
+                            <motion.div 
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.1 }}
+                                className="flex items-center"
                             >
-                                {singleProduct?.category}
-                            </motion.span>
-                            <motion.h1 
-                                className="text-3xl md:text-4xl font-bold text-gray-800"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2 }}
-                            >
-                                {singleProduct?.name}
-                            </motion.h1>
-                            <motion.div 
-                                className="flex items-center gap-2"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 0.3 }}
-                            >
-                                <RatingStars rating={singleProduct?.rating} />
-                                <span className="text-gray-500">({productReviews.length} reviews)</span>
-                            </motion.div>
-                        </motion.div>
-                        
-                        <motion.div 
-                            className="text-2xl font-bold"
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.4 }}
-                        >
-                            <span className="text-primary">₦{singleProduct?.price?.toLocaleString()}</span>
-                            {singleProduct?.oldPrice && (
-                                <span className="ml-3 text-lg text-gray-400 line-through">
-                                    ₦{singleProduct?.oldPrice?.toLocaleString()}
+                                <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                                    {singleProduct?.category}
                                 </span>
-                            )}
-                            {singleProduct?.oldPrice && (
-                                <span className="ml-3 text-sm bg-green-100 text-green-700 px-2 py-1 rounded">
-                                    {Math.round((singleProduct.oldPrice - singleProduct.price) / singleProduct.oldPrice * 100)}% OFF
-                                </span>
-                            )}
-                        </motion.div>
-                        
-                        {/* Stock Information */}
-                        <motion.div 
-                            className="py-3 border-t border-b border-gray-200 my-4"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.45 }}
-                        >
-                            <div className="flex items-center mb-2">
-                                <span className="font-medium mr-2">Availability:</span>
                                 {singleProduct?.stockStatus === 'In Stock' ? (
-                                    <span className="text-green-600 flex items-center">
+                                    <span className="ml-4 text-green-600 flex items-center text-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                         </svg>
                                         In Stock
                                     </span>
                                 ) : isPreOrder ? (
-                                    <span className="text-blue-600 flex items-center">
+                                    <span className="ml-4 text-blue-600 flex items-center text-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                                         </svg>
                                         Pre Order
                                     </span>
                                 ) : (
-                                    <span className="text-red-600 flex items-center">
+                                    <span className="ml-4 text-red-600 flex items-center text-sm">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                                         </svg>
                                         Out of Stock
                                     </span>
                                 )}
-                            </div>
+                            </motion.div>
 
-                            {singleProduct?.stockStatus === 'In Stock' && singleProduct?.stockQuantity > 0 && (
-                                <div className="flex items-center">
-                                    <span className="font-medium mr-2">Quantity Left:</span>
-                                    <span className={`${singleProduct.stockQuantity < 5 ? 'text-orange-600' : 'text-gray-700'}`}>
-                                        {singleProduct.stockQuantity} {singleProduct.stockQuantity === 1 ? 'item' : 'items'}
-                                        {singleProduct.stockQuantity < 5 && ' (Low Stock)'}
+                            <motion.h1 
+                                className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
+                            >
+                                {singleProduct?.name}
+                            </motion.h1>
+                            
+                            <motion.div 
+                                className="flex items-center gap-3"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.3 }}
+                            >
+                                <RatingStars rating={singleProduct?.rating} />
+                                <span className="text-gray-500">({productReviews.length} {productReviews.length === 1 ? 'review' : 'reviews'})</span>
+                            </motion.div>
+                            
+                            <motion.div 
+                                className="mt-4 flex items-baseline gap-3"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.4 }}
+                            >
+                                <span className="text-3xl md:text-4xl font-bold text-primary">₦{singleProduct?.price?.toLocaleString()}</span>
+                                {singleProduct?.oldPrice && (
+                                    <span className="text-xl text-gray-400 line-through">
+                                        ₦{singleProduct?.oldPrice?.toLocaleString()}
                                     </span>
-                                </div>
-                            )}
-                        </motion.div>
+                                )}
+                                {singleProduct?.oldPrice && (
+                                    <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">
+                                        {Math.round((singleProduct.oldPrice - singleProduct.price) / singleProduct.oldPrice * 100)}% OFF
+                                    </span>
+                                )}
+                            </motion.div>
+                        </div>
                         
+                        {/* Product description */}
                         <motion.div 
-                            className="prose text-gray-600 max-w-none"
+                            className="border-b border-gray-200 pb-8"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.5 }}
                         >
-                            <p>{singleProduct?.description}</p>
-                        </motion.div>
-                        
-                        {/* Size Selection Wheel */}
-                        {singleProduct?.sizeType !== 'none' && singleProduct?.sizes?.length > 0 && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.55 }}
+                            <h3 className="text-lg font-bold mb-4 text-gray-800">Product Description</h3>
+                            <div className="prose text-gray-600 max-w-none">
+                                <p>{singleProduct?.description}</p>
+                            </div>
+                            
+                            {/* Delivery Information Card */}
+                            <div 
+                                className={`mt-6 p-4 rounded-lg border bg-${deliveryInfo.color}-50 border-${deliveryInfo.color}-200`}
                             >
-                                <SizeSelectionWheel 
-                                    sizes={singleProduct.sizes} 
-                                    sizeType={singleProduct.sizeType}
-                                    onSizeSelect={handleSizeSelect}
-                                />
-                            </motion.div>
-                        )}
-                        
-                        {/* Add Color Selection */}
-                        {singleProduct.colors?.length > 0 && (
-                            <div className="mt-6">
-                                <h3 className="text-lg font-semibold mb-2">Select Color</h3>
-                                <div className="flex flex-col space-y-4">
-                                    <ColorPalette
-                                        colors={singleProduct.colors.map(c => c.hexCode)}
-                                        onColorSelect={handleColorSelect}
-                                        selectedColor={selectedColor}
-                                    />
-                                    {selectedColor && (
-                                        <div className="mt-2 flex items-center">
-                                            <span className="text-sm font-medium mr-2">Selected:</span>
-                                            <div
-                                                className="w-6 h-6 rounded-md border border-gray-300"
-                                                style={{ backgroundColor: selectedColor }}
-                                            />
-                                        </div>
-                                    )}
+                                <div className="flex items-start space-x-3">
+                                    <span className={`material-icons text-${deliveryInfo.color}-500 text-xl`}>
+                                        {deliveryInfo.icon}
+                                    </span>
+                                    <div>
+                                        <h3 className={`font-medium text-${deliveryInfo.color}-700`}>{deliveryInfo.title}</h3>
+                                        <p className="text-gray-600 text-sm mt-1">{deliveryInfo.message}</p>
+                                    </div>
                                 </div>
                             </div>
-                        )}
+                        </motion.div>
                         
+                        {/* Size and color selection */}
                         <motion.div 
-                            className="pt-6 border-t border-gray-200"
+                            className="border-b border-gray-200 pb-8"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.55 }}
+                        >
+                            {/* Size Selection Wheel */}
+                            {singleProduct?.sizeType !== 'none' && singleProduct?.sizes?.length > 0 && (
+                                <div className="mb-8">
+                                    <h3 className="text-lg font-bold mb-4 text-gray-800">Select Size</h3>
+                                    <SizeSelectionWheel 
+                                        sizes={singleProduct.sizes} 
+                                        sizeType={singleProduct.sizeType}
+                                        onSizeSelect={handleSizeSelect}
+                                    />
+                                </div>
+                            )}
+                            
+                            {/* Color Selection */}
+                            {singleProduct.colors?.length > 0 && (
+                                <div>
+                                    <h3 className="text-lg font-bold mb-4 text-gray-800">Select Color</h3>
+                                    <div className="flex flex-col space-y-4">
+                                        <ColorPalette
+                                            colors={singleProduct.colors.map(c => c.hexCode)}
+                                            onColorSelect={handleColorSelect}
+                                            selectedColor={selectedColor}
+                                        />
+                                        {selectedColor && (
+                                            <div className="mt-2 flex items-center">
+                                                <span className="text-sm font-medium mr-2">Selected:</span>
+                                                <div
+                                                    className="w-6 h-6 rounded-md border border-gray-300"
+                                                    style={{ backgroundColor: selectedColor }}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </motion.div>
+                        
+                        {/* Add to cart / Pre-order section */}
+                        <motion.div 
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.6 }}
+                            className="pt-4"
                         >
                             {isPreOrder ? (
                                 <div className="space-y-4">
-                                    <h3 className="text-lg font-semibold">This is a pre-order product</h3>
+                                    <h3 className="text-lg font-bold text-gray-800">Pre-order Information</h3>
                                     <p className="text-gray-600">Pre-order products will be delivered within 14 working days.</p>
                                     <motion.button
                                         onClick={() => handlePreOrder(singleProduct)}
-                                        className="w-full py-3 bg-primary text-white rounded-lg flex items-center justify-center hover:bg-primary-dark transition-colors"
+                                        className="w-full py-4 bg-primary text-white rounded-lg flex items-center justify-center hover:bg-primary-dark transition-colors text-lg font-medium"
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
                                     >
@@ -501,32 +451,41 @@ const SingleProduct = () => {
                             ) : (
                                 <div className="space-y-6">
                                     <div className="flex items-center">
-                                        <span className="text-gray-700 mr-4">Quantity:</span>
+                                        <span className="text-gray-700 mr-4 font-medium">Quantity:</span>
                                         <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
                                             <motion.button
                                                 onClick={() => handleDecrement(singleProduct)}
-                                                className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                                                className="px-5 py-3 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors text-lg font-bold"
                                                 disabled={quantity === 0}
                                                 whileTap={{ scale: 0.95 }}
                                             >
                                                 -
                                             </motion.button>
-                                            <span className="px-4 py-2 font-medium">{quantity}</span>
+                                            <span className="px-6 py-3 font-medium text-lg">{quantity}</span>
                                             <motion.button
                                                 onClick={() => handleIncrement(singleProduct)}
-                                                className={`px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors ${hasReachedStockLimit ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                className={`px-5 py-3 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors text-lg font-bold ${hasReachedStockLimit ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                 disabled={hasReachedStockLimit}
                                                 whileTap={{ scale: 0.95 }}
                                             >
                                                 +
                                             </motion.button>
                                         </div>
+                                        
+                                        {singleProduct?.stockStatus === 'In Stock' && singleProduct?.stockQuantity > 0 && (
+                                            <div className="ml-4 text-sm text-gray-500">
+                                                <span className={`${singleProduct.stockQuantity < 5 ? 'text-orange-600 font-medium' : 'text-gray-600'}`}>
+                                                    {singleProduct.stockQuantity} {singleProduct.stockQuantity === 1 ? 'item' : 'items'} left
+                                                    {singleProduct.stockQuantity < 5 && ' (Low Stock)'}
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                     
                                     {quantity === 0 ? (
                                         <motion.button
                                             onClick={() => handleAddToCart(singleProduct)}
-                                            className={`w-full py-3 bg-primary text-white rounded-lg flex items-center justify-center hover:bg-primary-dark transition-colors ${(isOutOfStock || hasReachedStockLimit) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            className={`w-full py-4 bg-primary text-white rounded-lg flex items-center justify-center hover:bg-primary-dark transition-colors text-lg font-medium ${(isOutOfStock || hasReachedStockLimit) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                             disabled={isOutOfStock || hasReachedStockLimit}
                                             whileHover={{ scale: isOutOfStock || hasReachedStockLimit ? 1 : 1.02 }}
                                             whileTap={{ scale: isOutOfStock || hasReachedStockLimit ? 1 : 0.98 }}
@@ -537,41 +496,68 @@ const SingleProduct = () => {
                                             {isOutOfStock ? 'Out of Stock' : hasReachedStockLimit ? 'Stock Limit Reached' : 'Add to Cart'}
                                         </motion.button>
                                     ) : (
-                                        <div className="text-green-600 py-2 text-center">
-                                            ✓ Product added to cart
+                                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-700 text-center font-medium flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                            </svg>
+                                            Product added to cart
                                         </div>
                                     )}
                                 </div>
                             )}
                         </motion.div>
                         
+                        {/* Product specs and details */}
                         <motion.div 
-                            className="pt-6 border-t border-gray-200 text-sm text-gray-600 space-y-2"
+                            className="mt-8 text-sm text-gray-600 grid grid-cols-2 gap-4"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.7 }}
                         >
-                            <p><span className="font-medium">SKU:</span> {singleProduct._id?.substring(0, 8)}</p>
-                            <p><span className="font-medium">Category:</span> {singleProduct?.category}</p>
+                            <div className="flex items-center">
+                                <span className="font-medium text-gray-800 mr-2">SKU:</span>
+                                <span>{singleProduct._id?.substring(0, 8)}</span>
+                            </div>
+                            <div className="flex items-center">
+                                <span className="font-medium text-gray-800 mr-2">Category:</span>
+                                <span className="capitalize">{singleProduct?.category}</span>
+                            </div>
                             {singleProduct?.subcategory && (
-                                <p><span className="font-medium">Subcategory:</span> {singleProduct?.subcategory}</p>
+                                <div className="flex items-center">
+                                    <span className="font-medium text-gray-800 mr-2">Subcategory:</span>
+                                    <span className="capitalize">{singleProduct?.subcategory.replace(/-/g, ' ')}</span>
+                                </div>
                             )}
                             {selectedSize && (
-                                <p><span className="font-medium">Selected Size:</span> {selectedSize}</p>
+                                <div className="flex items-center">
+                                    <span className="font-medium text-gray-800 mr-2">Selected Size:</span>
+                                    <span>{selectedSize}</span>
+                                </div>
                             )}
-                            <p><span className="font-medium">Tags:</span> {singleProduct?.tags?.join(', ') || 'None'}</p>
+                            {singleProduct?.tags?.length > 0 && (
+                                <div className="col-span-2 flex items-center flex-wrap">
+                                    <span className="font-medium text-gray-800 mr-2">Tags:</span>
+                                    <div className="flex flex-wrap gap-1">
+                                        {singleProduct.tags.map((tag, index) => (
+                                            <span key={index} className="px-2 py-1 bg-gray-100 rounded-full text-xs">
+                                                {tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </motion.div>
                     </motion.div>
                 </div>
                 
                 {/* Product reviews section with animation */}
                 <motion.div 
-                    className="mt-16"
+                    className="mt-20"
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8, duration: 0.6 }}
                 >
-                    <h2 className="text-2xl font-bold text-gray-800 mb-6">Customer Reviews</h2>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">Customer Reviews</h2>
                     <ReviewsCard productReviews={productReviews} />
                 </motion.div>
             </motion.section>
