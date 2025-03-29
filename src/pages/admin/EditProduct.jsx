@@ -142,7 +142,8 @@ const EditProduct = () => {
     });
   };
   
-  const togglePreview = () => {
+  const togglePreview = (e) => {
+    if (e) e.preventDefault();
     setShowPreview(!showPreview);
   };
   
@@ -150,19 +151,27 @@ const EditProduct = () => {
     setCurrentGalleryUrl(e.target.value);
   };
   
-  const addImageToGallery = () => {
+  const addImageToGallery = (e) => {
+    if (e) e.preventDefault();
     if (!currentGalleryUrl.trim()) return;
     
     setGallery([...gallery, currentGalleryUrl]);
     setCurrentGalleryUrl('');
   };
   
-  const removeImageFromGallery = (indexToRemove) => {
+  const removeImageFromGallery = (indexToRemove, e) => {
+    if (e) e.preventDefault();
     setGallery(gallery.filter((_, index) => index !== indexToRemove));
   };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Show alert when button is clicked
+    toast.info('Processing product update...', {
+      position: "top-center",
+      autoClose: 2000,
+    });
     
     // Validate required fields
     if (!formData.name || !formData.category || !formData.subcategory || !formData.price) {
@@ -180,19 +189,27 @@ const EditProduct = () => {
     try {
       await updateProduct({
         id,
-        ...formData,
-        colors: formattedColors,
-        gallery: gallery // Include gallery in the update
+        productData: {  // Fix the structure to match API expectation
+          ...formData,
+          colors: formattedColors,
+          gallery: gallery // Include gallery in the update
+        }
       }).unwrap();
       
       toast.success('Product updated successfully');
-      navigate('/admin/manage-products');
+      
+      // Add delay before navigation to ensure toast is displayed
+      setTimeout(() => {
+        navigate('/admin/manage-products');
+      }, 1500);
     } catch (error) {
       toast.error(error.data?.message || 'Failed to update product');
     }
   };
   
-  const handleDelete = async () => {
+  const handleDelete = async (e) => {
+    if (e) e.preventDefault();
+    
     if (!deleteConfirmation) {
       setDeleteConfirmation(true);
       return;
@@ -213,7 +230,8 @@ const EditProduct = () => {
     }
   };
   
-  const cancelDelete = () => {
+  const cancelDelete = (e) => {
+    if (e) e.preventDefault();
     setDeleteConfirmation(false);
   };
   
@@ -405,7 +423,7 @@ const EditProduct = () => {
               />
               <button
                 type="button"
-                onClick={addImageToGallery}
+                onClick={(e) => addImageToGallery(e)}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
               >
                 Add
@@ -430,7 +448,7 @@ const EditProduct = () => {
                       <button
                         type="button"
                         className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => removeImageFromGallery(index)}
+                        onClick={(e) => removeImageFromGallery(index, e)}
                       >
                         ×
                       </button>
@@ -585,7 +603,10 @@ const EditProduct = () => {
                         key={index}
                         className="w-6 h-6 rounded-md border border-gray-300 cursor-pointer"
                         style={{ backgroundColor: color }}
-                        onClick={() => handleColorSelect(color)}
+                        onClick={(e) => {
+                          e.preventDefault(); // Prevent form submission
+                          handleColorSelect(color);
+                        }}
                         title="Click to remove"
                       />
                     ))}
@@ -599,7 +620,7 @@ const EditProduct = () => {
           <div className="flex justify-between items-center">
             <button
               type="button"
-              onClick={togglePreview}
+              onClick={(e) => togglePreview(e)}
               className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 transition-all"
             >
               {showPreview ? 'Hide Preview' : 'Show Preview'}
@@ -609,7 +630,7 @@ const EditProduct = () => {
             {!deleteConfirmation ? (
               <button
                 type="button"
-                onClick={handleDelete}
+                onClick={(e) => handleDelete(e)}
                 className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-all"
                 disabled={isDeleting}
               >
@@ -619,14 +640,14 @@ const EditProduct = () => {
               <div className="flex space-x-2">
                 <button
                   type="button"
-                  onClick={cancelDelete}
+                  onClick={(e) => cancelDelete(e)}
                   className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
-                  onClick={handleDelete}
+                  onClick={(e) => handleDelete(e)}
                   className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-all"
                   disabled={isDeleting}
                 >

@@ -37,7 +37,7 @@ const productsApi = createApi({
             query: (id) => `/single/${id}`, // Update the endpoint to match backend
             providesTags: (result, error, id) => [{ type: "Products", id }],
         }),
-        AddProduct: builder.mutation({
+        addProduct: builder.mutation({
             query: (newProduct) => ({
                 url: '/create-product',
                 method: 'POST',

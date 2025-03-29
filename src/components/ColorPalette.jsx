@@ -11,7 +11,9 @@ const ColorPalette = ({ colors, onColorSelect, selectedColor }) => {
     config: { tension: 300, friction: 30 }
   });
 
-  const handleColorClick = (color) => {
+  const handleColorClick = (color, e) => {
+    // Prevent default form submission
+    if (e) e.preventDefault();
     onColorSelect(color);
   };
 
@@ -41,6 +43,7 @@ const ColorPalette = ({ colors, onColorSelect, selectedColor }) => {
   return (
     <div className="relative">
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
       >
@@ -87,7 +90,8 @@ const ColorPalette = ({ colors, onColorSelect, selectedColor }) => {
                   onMouseLeave={handleColorLeave}
                 >
                   <button
-                    onClick={() => handleColorClick(color)}
+                    type="button"
+                    onClick={(e) => handleColorClick(color, e)}
                     className={`w-8 h-8 border transition-transform hover:scale-110 focus:outline-none ${
                       selectedColor === color
                         ? 'border-indigo-500 ring-2 ring-indigo-500'
@@ -112,7 +116,8 @@ const ColorPalette = ({ colors, onColorSelect, selectedColor }) => {
                   onMouseLeave={handleColorLeave}
                 >
                   <button
-                    onClick={() => handleColorClick(color)}
+                    type="button"
+                    onClick={(e) => handleColorClick(color, e)}
                     className={`w-8 h-8 border transition-transform hover:scale-110 focus:outline-none ${
                       selectedColor === color
                         ? 'border-indigo-500 ring-2 ring-indigo-500'
@@ -137,7 +142,8 @@ const ColorPalette = ({ colors, onColorSelect, selectedColor }) => {
                   onMouseLeave={handleColorLeave}
                 >
                   <button
-                    onClick={() => handleColorClick(color)}
+                    type="button"
+                    onClick={(e) => handleColorClick(color, e)}
                     className={`w-8 h-8 border transition-transform hover:scale-110 focus:outline-none ${
                       selectedColor === color
                         ? 'border-indigo-500 ring-2 ring-indigo-500'
@@ -162,7 +168,8 @@ const ColorPalette = ({ colors, onColorSelect, selectedColor }) => {
                   onMouseLeave={handleColorLeave}
                 >
                   <button
-                    onClick={() => handleColorClick(color)}
+                    type="button"
+                    onClick={(e) => handleColorClick(color, e)}
                     className={`w-8 h-8 border transition-transform hover:scale-110 focus:outline-none ${
                       selectedColor === color
                         ? 'border-indigo-500 ring-2 ring-indigo-500'

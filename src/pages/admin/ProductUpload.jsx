@@ -122,6 +122,12 @@ const ProductUpload = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Show alert when button is clicked
+    toast.info('Processing product upload...', {
+      position: "top-center",
+      autoClose: 2000,
+    });
+    
     // Validate required fields
     if (!formData.name || !formData.category || !formData.subcategory || !formData.price) {
       toast.error('Please fill in all required fields');
@@ -143,6 +149,8 @@ const ProductUpload = () => {
       }).unwrap();
       
       toast.success('Product added successfully');
+      
+      // Clear form after successful submission
       setFormData(initialState);
       setColors([]);
       setGallery([]);
@@ -543,7 +551,10 @@ const ProductUpload = () => {
                         key={index}
                         className="w-6 h-6 rounded-md border border-gray-300 cursor-pointer"
                         style={{ backgroundColor: color }}
-                        onClick={() => handleColorSelect(color)}
+                        onClick={(e) => {
+                          e.preventDefault(); // Prevent form submission
+                          handleColorSelect(color);
+                        }}
                         title="Click to remove"
                       />
                     ))}
