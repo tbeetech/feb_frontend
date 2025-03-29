@@ -4,6 +4,7 @@ const ProductSizeInput = ({ sizeType, sizes, onChange }) => {
   // Define the available size options
   const romanSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'];
   const numericSizes = Array.from({ length: 20 }, (_, i) => (i + 1).toString());
+  const footwearSizes = Array.from({ length: 21 }, (_, i) => (i + 30).toString()); // Sizes 30-50
   
   // State for selected sizes - initialize with passed props
   const [selectedSizes, setSelectedSizes] = useState(sizes || []);
@@ -31,7 +32,14 @@ const ProductSizeInput = ({ sizeType, sizes, onChange }) => {
   };
   
   // Get the appropriate size options based on the type
-  const sizeOptions = sizeType === 'roman' ? romanSizes : numericSizes;
+  let sizeOptions;
+  if (sizeType === 'roman') {
+    sizeOptions = romanSizes;
+  } else if (sizeType === 'footwear') {
+    sizeOptions = footwearSizes;
+  } else {
+    sizeOptions = numericSizes;
+  }
   
   if (sizeType === 'none') {
     return (

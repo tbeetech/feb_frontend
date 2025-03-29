@@ -59,11 +59,21 @@ const ProductUpload = () => {
     
     if (name === 'category') {
       setSelectedCategory(value);
+      
+      // Set appropriate size type based on category
+      let newSizeType = 'none';
+      
+      // If shoes category is selected, set size type to footwear
+      if (value.toLowerCase() === 'shoes') {
+        newSizeType = 'footwear';
+      }
+      
       // Reset subcategory when category changes
       setFormData({
         ...formData,
         [name]: value,
-        subcategory: ''
+        subcategory: '',
+        sizeType: newSizeType // Auto-set size type based on category
       });
     } else if (name === 'sizeType') {
       // Reset sizes when size type changes
@@ -520,6 +530,7 @@ const ProductUpload = () => {
               <option value="none">No Size (Not Applicable)</option>
               <option value="roman">Roman (XS, S, M, L, XL)</option>
               <option value="numeric">Numeric (1-20)</option>
+              <option value="footwear">Footwear (30-50)</option>
             </select>
             
             {formData.sizeType !== 'none' && (
