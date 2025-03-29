@@ -8,6 +8,8 @@ import ReviewsCard from '../reviews/ReviewsCard';
 import { motion } from 'framer-motion';
 import ImagePreviewModal from '../../../components/ImagePreviewModal';
 import SizeSelectionWheel from '../../../components/SizeSelectionWheel';
+import ColorPalette from '../../../components/ColorPalette';
+import { toast } from 'react-hot-toast';
 
 const SingleProduct = () => {
     const { id } = useParams();
@@ -33,10 +35,11 @@ const SingleProduct = () => {
     const [selectedImage, setSelectedImage] = useState('');
     const [previewOpen, setPreviewOpen] = useState(false);
     
-    // Size selection state
+    // Size and color selection states
     const [selectedSize, setSelectedSize] = useState(null);
+    const [selectedColor, setSelectedColor] = useState(null);
     
-    // Set initial selected image and size when product loads
+    // Set initial selected image, size, and color when product loads
     useEffect(() => {
         if (singleProduct?.image) {
             setSelectedImage(singleProduct.image);
@@ -47,6 +50,13 @@ const SingleProduct = () => {
             setSelectedSize(singleProduct.sizes[0]);
         } else {
             setSelectedSize(null);
+        }
+
+        // Set the first available color as default if colors exist
+        if (singleProduct?.colors?.length > 0) {
+            setSelectedColor(singleProduct.colors[0].hexCode);
+        } else {
+            setSelectedColor(null);
         }
     }, [singleProduct]);
 
@@ -110,14 +120,25 @@ const SingleProduct = () => {
 
     // Handlers
     const handleAddToCart = (product) => {
-        if (!productInCart && !isOutOfStock && !hasReachedStockLimit) {
-            const productWithSize = {
-                ...product,
-                selectedSize: selectedSize,
-                quantity: 1
-            };
-            dispatch(addToCart(productWithSize));
+        if (!selectedSize && product.sizes?.length > 0) {
+            toast.error('Please select a size');
+            return;
         }
+
+        if (!selectedColor && product.colors?.length > 0) {
+            toast.error('Please select a color');
+            return;
+        }
+
+        const productToAdd = {
+            ...product,
+            selectedSize,
+            selectedColor,
+            quantity: 1
+        };
+
+        dispatch(addToCart(productToAdd));
+        toast.success('Product added to cart');
     };
 
     const handlePreOrder = (product) => {
@@ -159,6 +180,15 @@ const SingleProduct = () => {
     // Handler for size selection
     const handleSizeSelect = (size) => {
         setSelectedSize(size);
+    };
+
+    const handleColorSelect = (color) => {
+        setSelectedColor(color);
+        // Update the selected image if there's a color-specific image
+        const colorVariant = singleProduct.colors?.find(c => c.hexCode === color);
+        if (colorVariant?.imageUrl) {
+            setSelectedImage(colorVariant.imageUrl);
+        }
     };
 
     // Loading state
@@ -421,6 +451,29 @@ const SingleProduct = () => {
                                     onSizeSelect={handleSizeSelect}
                                 />
                             </motion.div>
+                        )}
+                        
+                        {/* Add Color Selection */}
+                        {singleProduct.colors?.length > 0 && (
+                            <div className="mt-6">
+                                <h3 className="text-lg font-semibold mb-2">Select Color</h3>
+                                <div className="flex flex-col space-y-4">
+                                    <ColorPalette
+                                        colors={singleProduct.colors.map(c => c.hexCode)}
+                                        onColorSelect={handleColorSelect}
+                                        selectedColor={selectedColor}
+                                    />
+                                    {selectedColor && (
+                                        <div className="mt-2 flex items-center">
+                                            <span className="text-sm font-medium mr-2">Selected:</span>
+                                            <div
+                                                className="w-6 h-6 rounded-md border border-gray-300"
+                                                style={{ backgroundColor: selectedColor }}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         )}
                         
                         <motion.div 

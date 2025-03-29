@@ -9,6 +9,8 @@ import { CATEGORIES } from '../../constants/categoryConstants';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
 import ProductSizeInput from '../../components/ProductSizeInput';
+import ColorPalette from '../../components/ColorPalette';
+import { PRODUCT_COLORS } from '../../constants/colorConstants';
 
 const EditProduct = () => {
   const { id } = useParams();
@@ -19,6 +21,7 @@ const EditProduct = () => {
   
   const [showPreview, setShowPreview] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState(false);
+  const [colors, setColors] = useState([]);
   
   // Form initial state
   const initialState = {
@@ -34,6 +37,7 @@ const EditProduct = () => {
     sizes: [],
     stockStatus: 'In Stock',
     stockQuantity: 0,
+    colors: [],
     deliveryTimeFrame: {
       startDate: new Date().toISOString().split('T')[0],
       endDate: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0]
@@ -56,7 +60,7 @@ const EditProduct = () => {
           label: sub.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
         };
       }
-      return sub; // If it's already an object with value/label
+      return sub;
     });
   };
   
@@ -67,27 +71,23 @@ const EditProduct = () => {
     if (product?.product) {
       const productData = product.product;
       setFormData({
-        name: productData.name || '',
-        category: productData.category || '',
-        subcategory: productData.subcategory || '',
-        description: productData.description || '',
+        ...initialState,
+        ...productData,
         price: productData.price || '',
         oldPrice: productData.oldPrice || '',
-        image: productData.image || '',
         rating: productData.rating || 0,
         sizeType: productData.sizeType || 'none',
         sizes: productData.sizes || [],
         stockStatus: productData.stockStatus || 'In Stock',
         stockQuantity: productData.stockQuantity || 0,
-        deliveryTimeFrame: {
-          startDate: productData.deliveryTimeFrame?.startDate 
-            ? new Date(productData.deliveryTimeFrame.startDate).toISOString().split('T')[0] 
-            : new Date().toISOString().split('T')[0],
-          endDate: productData.deliveryTimeFrame?.endDate 
-            ? new Date(productData.deliveryTimeFrame.endDate).toISOString().split('T')[0]
-            : new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0]
-        }
+        colors: productData.colors || [],
+        deliveryTimeFrame: productData.deliveryTimeFrame || initialState.deliveryTimeFrame
       });
+      
+      // Set initial colors
+      if (productData.colors?.length > 0) {
+        setColors(productData.colors.map(c => c.hexCode));
+      }
     }
   }, [product]);
   
@@ -102,12 +102,11 @@ const EditProduct = () => {
       });
     } else if (name === 'sizeType') {
       // Reset sizes when size type changes
-      const updatedFormData = {
+      setFormData({
         ...formData,
         [name]: value,
-        sizes: [] // Clear sizes when changing size type
-      };
-      setFormData(updatedFormData);
+        sizes: []
+      });
     } else {
       setFormData({
         ...formData,
@@ -119,10 +118,18 @@ const EditProduct = () => {
   };
   
   const handleSizesChange = (sizes) => {
-    // Just update the form data
     setFormData({
       ...formData,
       sizes
+    });
+  };
+  
+  const handleColorSelect = (color) => {
+    setColors(prev => {
+      if (prev.includes(color)) {
+        return prev.filter(c => c !== color);
+      }
+      return [...prev, color];
     });
   };
   
@@ -133,87 +140,30 @@ const EditProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Basic validation
-    if (!formData.name || !formData.price || !formData.category || !formData.image) {
+    // Validate required fields
+    if (!formData.name || !formData.category || !formData.subcategory || !formData.price) {
       toast.error('Please fill in all required fields');
       return;
     }
-    
+
+    // Format colors for submission
+    const formattedColors = colors.map(color => ({
+      name: color,
+      hexCode: color,
+      imageUrl: '' // You can add image upload for each color variant if needed
+    }));
+
     try {
-      // Format product data
-      const productData = {
+      await updateProduct({
+        id,
         ...formData,
-        price: Number(formData.price),
-        oldPrice: formData.oldPrice ? Number(formData.oldPrice) : undefined,
-        rating: Number(formData.rating) || 0,
-        sizeType: formData.sizeType || 'none',
-        sizes: formData.sizes || [],
-      };
-      
-      // Set delivery time frame based on stock status
-      if (formData.stockStatus === 'In Stock') {
-        // For In Stock items: Delivery in 74 hours (3 days)
-        const startDate = new Date();
-        const endDate = new Date();
-        endDate.setHours(endDate.getHours() + 74);
-        
-        productData.deliveryTimeFrame = {
-          startDate: startDate,
-          endDate: endDate
-        };
-      } else if (formData.stockStatus === 'Pre Order') {
-        // For Pre Order items: Delivery in 14 working days
-        const startDate = new Date();
-        const endDate = new Date();
-        
-        // Add 14 working days (excluding weekends)
-        let workingDaysAdded = 0;
-        while (workingDaysAdded < 14) {
-          endDate.setDate(endDate.getDate() + 1);
-          // Skip weekends (0 = Sunday, 6 = Saturday)
-          if (endDate.getDay() !== 0 && endDate.getDay() !== 6) {
-            workingDaysAdded++;
-          }
-        }
-        
-        productData.deliveryTimeFrame = {
-          startDate: startDate,
-          endDate: endDate
-        };
-      } else {
-        // For Out of Stock or any other status, use the form's delivery time frame
-        productData.deliveryTimeFrame = {
-          startDate: new Date(formData.deliveryTimeFrame.startDate),
-          endDate: new Date(formData.deliveryTimeFrame.endDate)
-        };
-      }
-      
-      // Remove empty fields
-      Object.keys(productData).forEach(key => {
-        if (productData[key] === '' || productData[key] === undefined) {
-          delete productData[key];
-        }
-      });
-      
-      console.log('Updating product with data:', productData, 'Product ID:', id);
-      
-      // Show immediate feedback to user
-      alert("Product updated");
-      
-      // The RTK Query hook expects { id, ...productData } where productData goes in the body
-      // and id is used to construct the URL
-      const response = await updateProduct({ 
-        id, 
-        productData // This will be spread into the body parameter
+        colors: formattedColors
       }).unwrap();
       
-      if (response) {
-        toast.success('Product updated successfully!');
-        navigate('/admin/manage-products');
-      }
+      toast.success('Product updated successfully');
+      navigate('/admin/manage-products');
     } catch (error) {
-      console.error('Error updating product:', error);
-      toast.error(error?.data?.message || 'Failed to update product');
+      toast.error(error.data?.message || 'Failed to update product');
     }
   };
   
@@ -255,9 +205,13 @@ const EditProduct = () => {
   }
   
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center">Edit Product</h1>
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="glass-morphism p-8 rounded-lg shadow-lg"
+      >
+        <h1 className="text-3xl font-semibold mb-6 text-center">Edit Product</h1>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Product Name */}
@@ -521,6 +475,36 @@ const EditProduct = () => {
             ></textarea>
           </div>
           
+          {/* Color Selection */}
+          <div className="space-y-4">
+            <label className="block text-sm font-medium text-gray-700">
+              Available Colors
+            </label>
+            <div className="flex flex-col space-y-2">
+              <ColorPalette
+                colors={PRODUCT_COLORS}
+                onColorSelect={handleColorSelect}
+                selectedColor={colors[colors.length - 1]}
+              />
+              {colors.length > 0 && (
+                <div className="mt-2">
+                  <h4 className="text-xs font-medium text-gray-500 mb-1">Selected Colors</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {colors.map((color, index) => (
+                      <div
+                        key={index}
+                        className="w-6 h-6 rounded-md border border-gray-300 cursor-pointer"
+                        style={{ backgroundColor: color }}
+                        onClick={() => handleColorSelect(color)}
+                        title="Click to remove"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          
           {/* Preview Toggle */}
           <div className="flex justify-between items-center">
             <button
@@ -641,7 +625,7 @@ const EditProduct = () => {
             </button>
           </div>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 };

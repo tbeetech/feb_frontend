@@ -192,7 +192,7 @@ const Checkout = () => {
       }
       
       // Items table
-      const tableColumn = ["Item", "Size", "Qty", "Unit Price (₦)", "Total (₦)"];
+      const tableColumn = ["Item", "Size", "Color", "Qty", "Unit Price (₦)", "Total (₦)"];
       const tableRows = [];
       
       // Ensure cartItems exists and is an array
@@ -201,6 +201,7 @@ const Checkout = () => {
           const itemData = [
             (item.name || 'Unnamed Product').substring(0, 30), // Limit name length to avoid overflow
             item.selectedSize || 'N/A',
+            item.selectedColor ? 'Custom' : 'N/A', // Since we can't display colors in PDF text directly
             item.quantity || 1,
             (item.price || 0).toLocaleString(),
             ((item.price || 0) * (item.quantity || 1)).toLocaleString()
@@ -209,7 +210,7 @@ const Checkout = () => {
         });
       } else {
         // Add a fallback row if cart is empty
-        tableRows.push(['No items in cart', 'N/A', '0', '0', '0']);
+        tableRows.push(['No items in cart', 'N/A', 'N/A', '0', '0', '0']);
       }
       
       // Create a manual table instead of using autoTable to avoid compatibility issues
@@ -218,7 +219,7 @@ const Checkout = () => {
       const cellPadding = 5;
       const tableWidth = 180;
       // Adjust column widths to provide more space for the price columns
-      const colWidths = [60, 25, 15, 35, 45]; // Column widths that sum to tableWidth
+      const colWidths = [50, 20, 20, 15, 35, 40]; // Column widths that sum to tableWidth
       
       // Draw table header with background
       doc.setFillColor(33, 150, 243);
@@ -436,6 +437,7 @@ const Checkout = () => {
               <tr>
                 <th>Item</th>
                 <th>Size</th>
+                <th>Color</th>
                 <th>Qty</th>
                 <th>Unit Price (₦)</th>
                 <th>Total (₦)</th>
@@ -447,6 +449,17 @@ const Checkout = () => {
                   <tr key={`${item._id || index}-${index}`}>
                     <td>{item.name}</td>
                     <td>{item.selectedSize || 'N/A'}</td>
+                    <td>
+                      {item.selectedColor ? (
+                        <div className="flex items-center space-x-2">
+                          <div 
+                            className="w-4 h-4 rounded-md border border-gray-300 inline-block" 
+                            style={{ backgroundColor: item.selectedColor }}
+                            title={item.selectedColor}
+                          />
+                        </div>
+                      ) : 'N/A'}
+                    </td>
                     <td>{item.quantity}</td>
                     <td>{item.price.toLocaleString()}</td>
                     <td>{(item.price * item.quantity).toLocaleString()}</td>
@@ -454,7 +467,7 @@ const Checkout = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="text-center py-4">No items in cart</td>
+                  <td colSpan="6" className="text-center py-4">No items in cart</td>
                 </tr>
               )}
             </tbody>

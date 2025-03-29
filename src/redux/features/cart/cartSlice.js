@@ -10,11 +10,12 @@ const cartSlice = createSlice({
     initialState,
     reducers: {
         addToCart: (state, action) => {
-            // Check if product with same ID and size exists
+            // Check if product with same ID, size, and color exists
             const existingProductIndex = state.products.findIndex(
                 (product) => 
                     product._id === action.payload._id && 
-                    product.selectedSize === action.payload.selectedSize
+                    product.selectedSize === action.payload.selectedSize &&
+                    product.selectedColor === action.payload.selectedColor
             );
             
             if (existingProductIndex >= 0) {
@@ -31,11 +32,12 @@ const cartSlice = createSlice({
             );
         },
         decrementQuantity: (state, action) => {
-            // Find product with same ID and size
+            // Find product with same ID, size, and color
             const existingProductIndex = state.products.findIndex(
                 (product) => 
                     product._id === action.payload._id && 
-                    product.selectedSize === action.payload.selectedSize
+                    product.selectedSize === action.payload.selectedSize &&
+                    product.selectedColor === action.payload.selectedColor
             );
             
             if (existingProductIndex >= 0) {
@@ -48,17 +50,22 @@ const cartSlice = createSlice({
                     // Otherwise decrement quantity
                     state.products[existingProductIndex].quantity -= 1;
                 }
+                
+                // Recalculate total
+                state.total = state.products.reduce(
+                    (total, item) => total + item.price * item.quantity,
+                    0
+                );
             }
-            
-            state.total = state.products.reduce(
-                (total, item) => total + item.price * item.quantity,
-                0
-            );
         },
         removeFromCart: (state, action) => {
             state.products = state.products.filter(
-                (product) => product._id !== action.payload._id
+                (product) => 
+                    !(product._id === action.payload._id && 
+                      product.selectedSize === action.payload.selectedSize &&
+                      product.selectedColor === action.payload.selectedColor)
             );
+            
             state.total = state.products.reduce(
                 (total, item) => total + item.price * item.quantity,
                 0
@@ -67,7 +74,7 @@ const cartSlice = createSlice({
         clearCart: (state) => {
             state.products = [];
             state.total = 0;
-        },
+        }
     }
 });
 

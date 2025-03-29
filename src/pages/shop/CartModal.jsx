@@ -81,6 +81,18 @@ const CartModal = ({ products, isOpen, onClose }) => {
                                                         </p>
                                                     )}
                                                     
+                                                    {/* Display selected color if available */}
+                                                    {product.selectedColor && (
+                                                        <div className="flex items-center space-x-2 text-sm text-gray-600 mt-1">
+                                                            <span>Color:</span>
+                                                            <div 
+                                                                className="w-4 h-4 rounded-md border border-gray-300" 
+                                                                style={{ backgroundColor: product.selectedColor }}
+                                                                title={product.selectedColor}
+                                                            ></div>
+                                                        </div>
+                                                    )}
+                                                    
                                                     <div className="flex items-center gap-2 mt-2">
                                                         <button
                                                             onClick={() => handleDecrement(product)}

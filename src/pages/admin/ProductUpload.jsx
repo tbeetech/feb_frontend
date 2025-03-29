@@ -3,16 +3,15 @@ import { useAddProductMutation } from '../../redux/features/products/productsApi
 import { CATEGORIES } from '../../constants/categoryConstants';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
-import { useSelector } from 'react-redux';
 import ProductSizeInput from '../../components/ProductSizeInput';
+import ColorPalette from '../../components/ColorPalette';
+import { PRODUCT_COLORS } from '../../constants/colorConstants';
 
 const ProductUpload = () => {
   const [addProduct, { isLoading }] = useAddProductMutation();
   const [selectedCategory, setSelectedCategory] = useState('');
   const [showPreview, setShowPreview] = useState(false);
-  
-  // Get the current user from Redux store
-  const { user } = useSelector((state) => state.auth);
+  const [colors, setColors] = useState([]);
   
   // Form initial state
   const initialState = {
@@ -29,6 +28,7 @@ const ProductUpload = () => {
     sizes: [],
     stockStatus: 'In Stock',
     stockQuantity: 0,
+    colors: [],
     deliveryTimeFrame: {
       startDate: new Date().toISOString().split('T')[0],
       endDate: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0]
@@ -48,7 +48,7 @@ const ProductUpload = () => {
         label: sub.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
       };
     }
-    return sub; // If it's already an object with value/label
+    return sub;
   });
   
   const handleInputChange = (e) => {
@@ -92,85 +92,42 @@ const ProductUpload = () => {
     setShowPreview(!showPreview);
   };
   
+  const handleColorSelect = (color) => {
+    setColors(prev => {
+      if (prev.includes(color)) {
+        return prev.filter(c => c !== color);
+      }
+      return [...prev, color];
+    });
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Validate required fields
+    if (!formData.name || !formData.category || !formData.subcategory || !formData.price) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    // Format colors for submission
+    const formattedColors = colors.map(color => ({
+      name: color,
+      hexCode: color,
+      imageUrl: '' // You can add image upload for each color variant if needed
+    }));
+
     try {
-      if (!user || !user._id) {
-        toast.error('You must be logged in to upload products');
-        return;
-      }
-      
-      // Format product data
-      const productData = {
+      await addProduct({
         ...formData,
-        price: Number(formData.price),
-        oldPrice: formData.oldPrice ? Number(formData.oldPrice) : undefined,
-        rating: Number(formData.rating) || 0,
-        author: user._id,  // Add the author ID from the current user
-        sizeType: formData.sizeType || 'none',
-        sizes: formData.sizes || [],
-      };
+        colors: formattedColors
+      }).unwrap();
       
-      // Set delivery time frame based on stock status
-      if (formData.stockStatus === 'In Stock') {
-        // For In Stock items: Delivery in 74 hours (3 days)
-        const startDate = new Date();
-        const endDate = new Date();
-        endDate.setHours(endDate.getHours() + 74);
-        
-        productData.deliveryTimeFrame = {
-          startDate: startDate,
-          endDate: endDate
-        };
-      } else if (formData.stockStatus === 'Pre Order') {
-        // For Pre Order items: Delivery in 14 working days
-        const startDate = new Date();
-        const endDate = new Date();
-        
-        // Add 14 working days (excluding weekends)
-        let workingDaysAdded = 0;
-        while (workingDaysAdded < 14) {
-          endDate.setDate(endDate.getDate() + 1);
-          // Skip weekends (0 = Sunday, 6 = Saturday)
-          if (endDate.getDay() !== 0 && endDate.getDay() !== 6) {
-            workingDaysAdded++;
-          }
-        }
-        
-        productData.deliveryTimeFrame = {
-          startDate: startDate,
-          endDate: endDate
-        };
-      } else {
-        // For Out of Stock or any other status, use the form's delivery time frame
-        productData.deliveryTimeFrame = {
-          startDate: new Date(formData.deliveryTimeFrame.startDate),
-          endDate: new Date(formData.deliveryTimeFrame.endDate)
-        };
-      }
-      
-      // Remove empty fields
-      Object.keys(productData).forEach(key => {
-        if (productData[key] === '' || productData[key] === undefined) {
-          delete productData[key];
-        }
-      });
-      
-      console.log('Submitting product with data:', productData);
-      
-      // Submit product to API
-      const response = await addProduct(productData).unwrap();
-      
-      if (response) {
-        toast.success('Product uploaded successfully!');
-        alert("Product uploaded");
-        setFormData(initialState);
-        setSelectedCategory('');
-      }
+      toast.success('Product added successfully');
+      setFormData(initialState);
+      setColors([]);
     } catch (error) {
-      console.error('Error uploading product:', error);
-      toast.error(error?.data?.message || 'Failed to upload product');
+      toast.error(error.data?.message || 'Failed to add product');
     }
   };
   
@@ -492,6 +449,36 @@ const ProductUpload = () => {
                 onChange={handleSizesChange} 
               />
             )}
+          </div>
+          
+          {/* Color Selection */}
+          <div className="space-y-4">
+            <label className="block text-sm font-medium text-gray-700">
+              Available Colors
+            </label>
+            <div className="flex flex-col space-y-2">
+              <ColorPalette
+                colors={PRODUCT_COLORS}
+                onColorSelect={handleColorSelect}
+                selectedColor={colors[colors.length - 1]}
+              />
+              {colors.length > 0 && (
+                <div className="mt-2">
+                  <h4 className="text-xs font-medium text-gray-500 mb-1">Selected Colors</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {colors.map((color, index) => (
+                      <div
+                        key={index}
+                        className="w-6 h-6 rounded-md border border-gray-300 cursor-pointer"
+                        style={{ backgroundColor: color }}
+                        onClick={() => handleColorSelect(color)}
+                        title="Click to remove"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           
           {/* Preview Button */}
