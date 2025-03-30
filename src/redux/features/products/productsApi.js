@@ -38,24 +38,52 @@ const productsApi = createApi({
             providesTags: (result, error, id) => [{ type: "Products", id }],
         }),
         addProduct: builder.mutation({
-            query: (newProduct) => ({
-                url: '/create-product',
-                method: 'POST',
-                body: newProduct,
-                credentials: "include"
-            }),
+            query: (newProduct) => {
+                // Ensure data consistency
+                const formattedData = {
+                    ...newProduct,
+                    category: newProduct.category || '', // Ensure category is not undefined
+                    deliveryTimeFrame: {
+                        startDate: newProduct.deliveryTimeFrame?.startDate || new Date().toISOString().split('T')[0],
+                        endDate: newProduct.deliveryTimeFrame?.endDate || new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0]
+                    }
+                };
+                
+                console.log('Creating product with data:', formattedData);
+                
+                return {
+                    url: '/create-product',
+                    method: 'POST',
+                    body: formattedData,
+                    credentials: "include"
+                };
+            },
             invalidatesTags: ["Products"]
         }),
         updateProduct: builder.mutation({
-            query: ({ id, productData }) => ({
-                url: `update-product/${id}`,
-                method: "PATCH",
-                body: productData,
-                credentials: "include",
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            }),
+            query: ({ id, productData }) => {
+                // Ensure data consistency
+                const formattedData = {
+                    ...productData,
+                    category: productData.category || '', // Ensure category is not undefined
+                    deliveryTimeFrame: {
+                        startDate: productData.deliveryTimeFrame?.startDate || new Date().toISOString().split('T')[0],
+                        endDate: productData.deliveryTimeFrame?.endDate || new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0]
+                    }
+                };
+                
+                console.log('Updating product with data:', formattedData);
+                
+                return {
+                    url: `update-product/${id}`,
+                    method: "PATCH",
+                    body: formattedData,
+                    credentials: "include",
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+            },
             invalidatesTags: ["Products"],
         }),
         deleteProduct: builder.mutation({

@@ -183,7 +183,7 @@ const EditProduct = () => {
     });
     
     // Validate required fields
-    if (!formData.name || !formData.category || !formData.subcategory || !formData.price) {
+    if (!formData.name || !formData.category || !formData.price) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -195,24 +195,43 @@ const EditProduct = () => {
       imageUrl: '' // You can add image upload for each color variant if needed
     }));
 
+    // Ensure deliveryTimeFrame is properly structured with both fields defined
+    const currentDate = new Date().toISOString().split('T')[0];
+    const oneWeekLater = new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0];
+    
+    const deliveryTimeFrame = {
+      startDate: formData.deliveryTimeFrame?.startDate || currentDate,
+      endDate: formData.deliveryTimeFrame?.endDate || oneWeekLater
+    };
+
     try {
-      await updateProduct({
+      // Create a structured object for submission to ensure all required fields are present
+      const productDataToSubmit = {
+        ...formData,
+        deliveryTimeFrame: deliveryTimeFrame,
+        colors: formattedColors,
+        gallery: gallery,
+        // Ensure category is always defined for subcategory validation
+        category: formData.category || ''
+      };
+
+      console.log("Submitting product data:", productDataToSubmit);
+
+      const result = await updateProduct({
         id,
-        productData: {  // Fix the structure to match API expectation
-          ...formData,
-          colors: formattedColors,
-          gallery: gallery // Include gallery in the update
-        }
+        productData: productDataToSubmit
       }).unwrap();
       
       toast.success('Product updated successfully');
+      console.log("Product updated successfully:", result);
       
       // Add delay before navigation to ensure toast is displayed
       setTimeout(() => {
         navigate('/admin/manage-products');
       }, 1500);
     } catch (error) {
-      toast.error(error.data?.message || 'Failed to update product');
+      console.error('Update error:', error);
+      toast.error(`Failed to update product: ${error.data?.error || error.data?.message || 'Unknown error'}`);
     }
   };
   
@@ -679,11 +698,11 @@ const EditProduct = () => {
                 <div>
                   {formData.image ? (
                     <div className="relative">
-                      <img
-                        src={formData.image}
-                        alt={formData.name}
-                        className="w-full h-64 object-cover rounded"
-                      />
+                    <img
+                      src={formData.image}
+                      alt={formData.name}
+                      className="w-full h-64 object-cover rounded"
+                    />
                       {/* Show gallery indicator if gallery images exist */}
                       {gallery.length > 0 && (
                         <div className="absolute bottom-4 right-4 bg-black/50 text-white text-xs px-2 py-1 rounded-full">

@@ -139,11 +139,11 @@ const ProductUpload = () => {
     });
     
     // Validate required fields
-    if (!formData.name || !formData.category || !formData.subcategory || !formData.price) {
+    if (!formData.name || !formData.category || !formData.price) {
       toast.error('Please fill in all required fields');
-      return;
-    }
-
+        return;
+      }
+      
     // Format colors for submission
     const formattedColors = colors.map(color => ({
       name: color,
@@ -151,21 +151,41 @@ const ProductUpload = () => {
       imageUrl: '' // You can add image upload for each color variant if needed
     }));
 
+    // Ensure deliveryTimeFrame is properly structured with both fields defined
+    const currentDate = new Date().toISOString().split('T')[0];
+    const oneWeekLater = new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0];
+    
+    const deliveryTimeFrame = {
+      startDate: formData.deliveryTimeFrame?.startDate || currentDate,
+      endDate: formData.deliveryTimeFrame?.endDate || oneWeekLater
+    };
+
     try {
-      await addProduct({
+      // Create a structured object for submission to ensure all required fields are present
+      const productDataToSubmit = {
         ...formData,
+        deliveryTimeFrame: deliveryTimeFrame,
         colors: formattedColors,
-        gallery: gallery // Add gallery to product submission
-      }).unwrap();
+        gallery: gallery,
+        // Ensure category is always defined for subcategory validation
+        category: formData.category || ''
+      };
+
+      console.log("Submitting product data:", productDataToSubmit);
+      
+      const result = await addProduct(productDataToSubmit).unwrap();
       
       toast.success('Product added successfully');
+      console.log("Product uploaded successfully:", result);
+      alert("Upload successful");
       
       // Clear form after successful submission
-      setFormData(initialState);
+        setFormData(initialState);
       setColors([]);
       setGallery([]);
     } catch (error) {
-      toast.error(error.data?.message || 'Failed to add product');
+      console.error('Upload error:', error);
+      toast.error(`Failed to add product: ${error.data?.error || error.data?.message || 'Unknown error'}`);
     }
   };
   
