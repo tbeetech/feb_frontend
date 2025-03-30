@@ -32,10 +32,26 @@ const productsApi = createApi({
                 console.log('API Response:', response);
                 return response;
             },
+            transformErrorResponse: (error) => {
+                console.error('API Error:', error);
+                return {
+                    status: error.status,
+                    message: error.data?.message || 'Failed to fetch products',
+                    details: error.data?.details || {}
+                };
+            }
         }),
         fetchProductById: builder.query({
             query: (id) => `/single/${id}`, // Update the endpoint to match backend
             providesTags: (result, error, id) => [{ type: "Products", id }],
+            transformErrorResponse: (error) => {
+                console.error('API Error when fetching product:', error);
+                return {
+                    status: error.status,
+                    message: error.data?.message || 'Failed to fetch product',
+                    details: error.data?.details || {}
+                };
+            }
         }),
         addProduct: builder.mutation({
             query: (newProduct) => {
@@ -58,7 +74,34 @@ const productsApi = createApi({
                     credentials: "include"
                 };
             },
-            invalidatesTags: ["Products"]
+            invalidatesTags: ["Products"],
+            transformErrorResponse: (error) => {
+                console.error('API Error when creating product:', error);
+                
+                // Format validation errors for user-friendly display
+                let errorMessage = error.data?.message || 'Failed to create product';
+                let errorDetails = {};
+                
+                // Process validation errors if available
+                if (error.data?.details) {
+                    Object.keys(error.data.details).forEach(field => {
+                        errorDetails[field] = error.data.details[field];
+                    });
+                    
+                    // Special handling for common errors
+                    if (error.data.details.sizeType) {
+                        errorMessage = `Size type error: ${error.data.details.sizeType}`;
+                    } else if (error.data.details.subcategory) {
+                        errorMessage = `Subcategory error: ${error.data.details.subcategory}`;
+                    }
+                }
+                
+                return {
+                    status: error.status,
+                    message: errorMessage,
+                    details: errorDetails
+                };
+            }
         }),
         updateProduct: builder.mutation({
             query: ({ id, productData }) => {
@@ -85,6 +128,33 @@ const productsApi = createApi({
                 };
             },
             invalidatesTags: ["Products"],
+            transformErrorResponse: (error) => {
+                console.error('API Error when updating product:', error);
+                
+                // Format validation errors for user-friendly display
+                let errorMessage = error.data?.message || 'Failed to update product';
+                let errorDetails = {};
+                
+                // Process validation errors if available
+                if (error.data?.details) {
+                    Object.keys(error.data.details).forEach(field => {
+                        errorDetails[field] = error.data.details[field];
+                    });
+                    
+                    // Special handling for common errors
+                    if (error.data.details.sizeType) {
+                        errorMessage = `Size type error: ${error.data.details.sizeType}`;
+                    } else if (error.data.details.subcategory) {
+                        errorMessage = `Subcategory error: ${error.data.details.subcategory}`;
+                    }
+                }
+                
+                return {
+                    status: error.status,
+                    message: errorMessage,
+                    details: errorDetails
+                };
+            }
         }),
         deleteProduct: builder.mutation({
             query: (id) => ({
@@ -93,6 +163,14 @@ const productsApi = createApi({
                 credentials: "include",
             }),
             invalidatesTags: (result, error, id) => [{ type: "Products", id }],
+            transformErrorResponse: (error) => {
+                console.error('API Error when deleting product:', error);
+                return {
+                    status: error.status,
+                    message: error.data?.message || 'Failed to delete product',
+                    details: error.data?.details || {}
+                };
+            }
         }),
         searchProducts: builder.query({
             query: (searchQuery = '') => ({
@@ -106,6 +184,14 @@ const productsApi = createApi({
                 console.log('Search Response:', response);
                 return response;
             },
+            transformErrorResponse: (error) => {
+                console.error('API Error during search:', error);
+                return {
+                    status: error.status,
+                    message: error.data?.message || 'Failed to search products',
+                    details: error.data?.details || {}
+                };
+            }
         }),
     }),
 });

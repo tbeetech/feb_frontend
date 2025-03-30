@@ -231,7 +231,37 @@ const EditProduct = () => {
       }, 1500);
     } catch (error) {
       console.error('Update error:', error);
-      toast.error(`Failed to update product: ${error.data?.error || error.data?.message || 'Unknown error'}`);
+      
+      // Display specific validation errors if available
+      if (error.details && Object.keys(error.details).length > 0) {
+        // Show each validation error as a separate toast
+        Object.entries(error.details).forEach(([field, message]) => {
+          toast.error(`${field}: ${message}`, {
+            position: "top-center",
+            autoClose: 5000
+          });
+        });
+      } else {
+        // Show general error message
+        toast.error(`Failed to update product: ${error.message || 'Unknown error'}`, {
+          position: "top-center",
+          autoClose: 5000
+        });
+      }
+      
+      // If there's a sizeType error, reset the sizeType field
+      if (error.details?.sizeType) {
+        setFormData(prev => ({
+          ...prev,
+          sizeType: 'none',
+          sizes: []
+        }));
+        
+        toast.info('Size type has been reset. Please select a different size type.', {
+          position: "top-center",
+          autoClose: 5000
+        });
+      }
     }
   };
   

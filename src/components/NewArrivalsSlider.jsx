@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useFetchAllProductsQuery } from '../redux/features/products/productsApi';
 
 const NewArrivalsSlider = () => {
@@ -26,7 +26,7 @@ const NewArrivalsSlider = () => {
                 setCurrentIndex((prevIndex) => 
                     prevIndex === products.length - 1 ? 0 : prevIndex + 1
                 );
-            }, 2000); // Change slide every 2 seconds
+            }, 3000); // Change slide every 3 seconds (changed from 3500)
 
             return () => clearInterval(timer);
         }
@@ -191,7 +191,7 @@ const NewArrivalsSlider = () => {
                                 paginate(-1);
                             }
                         }}
-                        className="absolute inset-0"
+                        className="absolute inset-0 z-10"
                     >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full items-center">
                             {/* Product Image */}
@@ -267,6 +267,19 @@ const NewArrivalsSlider = () => {
                             whileTap={{ scale: 0.8 }}
                         />
                     ))}
+                </div>
+                
+                {/* Go to Shop button */}
+                <div className="flex justify-center mt-12 relative z-20">
+                    <Link 
+                        to="/shop" 
+                        className="bg-gold hover:bg-gold-dark text-white font-medium py-3 px-6 rounded-md transition-all duration-300 shadow-luxury flex items-center gap-2 transform hover:scale-105"
+                    >
+                        Go to Shop
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                    </Link>
                 </div>
             </div>
         </motion.div>

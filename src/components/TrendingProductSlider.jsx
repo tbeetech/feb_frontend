@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useFetchAllProductsQuery } from '../redux/features/products/productsApi';
 
 const TrendingProductSlider = () => {
@@ -37,9 +37,9 @@ const TrendingProductSlider = () => {
     }
 
     return (
-        <div className="relative overflow-hidden py-4">
+        <div className="relative overflow-hidden py-4 max-w-full">
             <motion.div 
-                className="flex gap-4 overflow-x-hidden"
+                className="flex gap-4 overflow-hidden"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
@@ -51,7 +51,7 @@ const TrendingProductSlider = () => {
                     transition={{
                         x: {
                             repeat: Infinity,
-                            duration: 30,
+                            duration: 60, // Doubled the duration from 30 to 60 to slow it down by 50%
                             ease: "linear",
                         },
                     }}
@@ -106,6 +106,19 @@ const TrendingProductSlider = () => {
                     ))}
                 </motion.div>
             </motion.div>
+            
+            {/* Go to Shop button */}
+            <div className="flex justify-center mt-8">
+                <Link 
+                    to="/shop" 
+                    className="bg-gold hover:bg-gold-dark text-white font-medium py-3 px-6 rounded-md transition-all duration-300 shadow-luxury flex items-center gap-2 transform hover:scale-105"
+                >
+                    Go to Shop
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                </Link>
+            </div>
         </div>
     );
 };

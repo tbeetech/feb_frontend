@@ -6,9 +6,12 @@ import router from './router/router.jsx'
 import 'remixicon/fonts/remixicon.css'
 import {Provider} from 'react-redux'
 import {store} from './redux/store.js'
+import { ThemeProvider } from './context/ThemeContext'
 
 createRoot(document.getElementById('root')).render(
   <Provider store={store}>
-    <RouterProvider router={router} />
+    <ThemeProvider>
+      <RouterProvider router={router} />
+    </ThemeProvider>
   </Provider>,
 )

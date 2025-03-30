@@ -7,6 +7,7 @@ import avatarImg from "../assets/avatar.png"
 import { useLogoutUserMutation } from '../redux/features/auth/authApi';
 import { logout } from '../redux/features/auth/authSlice';
 import { CATEGORIES } from '../constants/categoryConstants';
+import ToggleTheme from './ToggleTheme';
 
 const Navbar = () => {
     const products = useSelector((state) => state.cart.products);
@@ -237,8 +238,8 @@ const Navbar = () => {
     };
 
     return (
-        <header className={`fixed-nav-bar w-full z-50 transition-all duration-300 ${isScrolled ? 'shadow-md bg-white/95 backdrop-blur-sm' : 'bg-white'}`}>
-            <nav className='max-w-screen-2xl mx-auto px-4 flex justify-between items-center h-20'>
+        <header className={`fixed-nav-bar w-full z-50 transition-all duration-300 ${isScrolled ? 'shadow-md dark:bg-gray-900/95 bg-white/95 backdrop-blur-sm' : 'dark:bg-gray-900 bg-white'}`}>
+            <nav className='max-w-screen-2xl mx-auto px-4 flex justify-between items-center h-20 text-primary dark:text-white'>
                 {/* Mobile Menu Button */}
                 <span className='md:hidden'>
                     <button 
@@ -279,6 +280,9 @@ const Navbar = () => {
                 
                 {/* Nav Icons */}
                 <div className='nav__icons relative flex items-center space-x-6'>
+                    {/* Theme Toggle */}
+                    <ToggleTheme className="hidden md:flex" />
+                    
                     {/* Search Icon */}
                     <span className="relative search-container">
                         <button 
@@ -363,41 +367,46 @@ const Navbar = () => {
                                 {/* User Dropdown Menu */}
                                 <AnimatePresence>
                                     {isDropDownOpen && (
-                                        <motion.div 
-                                            className="absolute right-0 mt-3 w-56 bg-white rounded-lg shadow-luxury overflow-hidden z-50"
-                                            initial="hidden"
-                                            animate="visible"
-                                            exit="hidden"
-                                            variants={dropdownVariants}
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            transition={{ duration: 0.2 }}
+                                            className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg py-1 z-10"
                                         >
-                                            <div className="p-4 bg-gradient-to-r from-gold/10 to-gold/5 border-b border-gray-100">
-                                                <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                                                <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                                            <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                                                <p className="text-sm leading-5 dark:text-gray-200">Signed in as</p>
+                                                <p className="text-sm font-medium leading-5 text-gray-900 dark:text-white truncate">
+                                                    {user.email}
+                                                </p>
                                             </div>
                                             <ul className="py-2">
                                                 {dropdownMenus.map((menu, index) => (
                                                     <li key={index}>
                                                         <Link
                                                             to={menu.path}
-                                                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gold/5 hover:text-gold transition-colors duration-200"
+                                                            className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gold/5 hover:text-gold transition-colors duration-200"
                                                             onClick={() => setIsDropDownOpen(false)}
                                                         >
-                                                            <span className="material-icons text-lg mr-3 text-gray-400">
+                                                            <span className="material-icons text-lg mr-3 text-gray-400 dark:text-gray-500">
                                                                 {menu.icon}
                                                             </span>
                                                             {menu.label}
                                                         </Link>
                                                     </li>
                                                 ))}
-                                                <li className="border-t border-gray-100 mt-2">
+                                            </ul>
+                                            <div className="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                                            <ul className="py-1">
+                                                <li>
                                                     <button
                                                         onClick={handleLogout}
-                                                        className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-500 transition-colors duration-200"
+                                                        className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-red-50 hover:text-red-500 transition-colors duration-200"
                                                     >
-                                                        <span className="material-icons text-lg mr-3 text-gray-400">
+                                                        <span className="material-icons text-lg mr-3 text-gray-400 dark:text-gray-500">
                                                             logout
                                                         </span>
-                                                        Logout
+                                                        Sign out
                                                     </button>
                                                 </li>
                                             </ul>
@@ -434,45 +443,51 @@ const Navbar = () => {
                             onClick={handleMobileMenuToggle}
                         />
                         <motion.div 
-                            className="fixed top-0 left-0 h-full w-[280px] bg-white z-50 mobile-menu-scroll overflow-y-auto"
+                            className="fixed top-0 left-0 h-full w-[280px] bg-white dark:bg-gray-900 z-50 mobile-menu-scroll overflow-y-auto"
                             initial="hidden"
                             animate="visible"
                             exit="hidden"
                             variants={mobileMenuVariants}
                         >
-                            <div className="sticky top-0 bg-white p-4 border-b border-gray-200 flex justify-between items-center">
+                            <div className="sticky top-0 dark:bg-gray-900 bg-white p-4 border-b dark:border-gray-700 border-gray-200 flex justify-between items-center">
                                 <Link to="/" className="font-display text-xl" onClick={handleMobileMenuToggle}>
                                     feb<span className="text-gold">luxury</span>
                                 </Link>
-                                <button 
-                                    onClick={handleMobileMenuToggle} 
-                                    className="p-1 hover:text-gold transition-colors duration-300"
-                                    aria-label="Close menu"
-                                >
-                                    <span className="material-icons text-xl">close</span>
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <ToggleTheme />
+                                    <button 
+                                        onClick={handleMobileMenuToggle} 
+                                        className="p-1 hover:text-gold transition-colors duration-300"
+                                        aria-label="Close menu"
+                                    >
+                                        <span className="material-icons text-xl">close</span>
+                                    </button>
+                                </div>
                             </div>
                             
                             {/* Mobile Search */}
-                            <div className="p-4 border-b border-gray-100">
-                                <form onSubmit={handleSearchSubmit} className="flex items-center">
-                                    <input
-                                        type="text"
-                                        placeholder="Search products..."
-                                        className="w-full py-2 px-3 border border-gray-200 rounded-l-md focus:outline-none focus:ring-1 focus:ring-gold focus:border-gold"
+                            <div className="p-4">
+                                <form 
+                                    className="relative flex items-center"
+                                    onSubmit={handleSearchSubmit}
+                                >
+                                    <input 
+                                        type="text" 
+                                        placeholder="Search products..." 
                                         value={searchQuery}
                                         onChange={handleSearchChange}
+                                        className="w-full py-2 px-4 pr-10 border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold/50"
                                     />
                                     <button 
                                         type="submit"
-                                        className="bg-gold text-white py-2 px-4 rounded-r-md hover:bg-gold-dark transition-colors duration-300"
+                                        className="absolute right-3 text-gray-500 dark:text-gray-400"
                                     >
                                         <i className="ri-search-line"></i>
                                     </button>
                                 </form>
                             </div>
                             
-                            <div className="p-4 overflow-y-auto">
+                            <div className="p-4 overflow-y-auto dark:text-gray-200">
                                 {/* Navigation Links */}
                                 <ul className="space-y-1 mb-6">
                                     {navigationLinks.map((link, index) => (
@@ -493,7 +508,7 @@ const Navbar = () => {
                                     ))}
                                 </ul>
 
-                                <div className="border-t border-gray-100 my-4"></div>
+                                <div className="border-t border-gray-100 dark:border-gray-700 my-4"></div>
 
                                 {/* Categories Section */}
                                 <div className="mb-2 px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">

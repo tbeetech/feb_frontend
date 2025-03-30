@@ -132,11 +132,11 @@ const SingleProduct = () => {
         }
 
         const productToAdd = {
-            ...product,
+                ...product,
             selectedSize,
             selectedColor,
-            quantity: 1
-        };
+                quantity: 1
+            };
 
         dispatch(addToCart(productToAdd));
         toast.success('Product added to cart');
@@ -172,7 +172,7 @@ const SingleProduct = () => {
     const handleDecrement = (product) => {
         dispatch(decrementQuantity(product));
     };
-    
+
     // Handler for size selection
     const handleSizeSelect = (size) => {
         setSelectedSize(size);
@@ -235,28 +235,28 @@ const SingleProduct = () => {
                 <div className='container mx-auto px-4 lg:px-8'>
                     <motion.h1 
                         className='text-3xl md:text-4xl lg:text-5xl font-bold mb-4 uppercase tracking-wide'
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 }}
-                    >
-                        {singleProduct.name}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
+                >
+                    {singleProduct.name}
                     </motion.h1>
-                    <motion.div
+                <motion.div
                         className="flex items-center text-sm lg:text-base text-gray-600"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.3 }}
-                    >
-                        <Link to="/" className="hover:text-primary transition-colors">Home</Link>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mx-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                        <Link to="/shop" className="hover:text-primary transition-colors">Shop</Link>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mx-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                        <span className="text-primary font-medium truncate max-w-[200px]">{singleProduct.name}</span>
-                    </motion.div>
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                >
+                    <Link to="/" className="hover:text-primary transition-colors">Home</Link>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mx-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                    <Link to="/shop" className="hover:text-primary transition-colors">Shop</Link>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mx-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                    <span className="text-primary font-medium truncate max-w-[200px]">{singleProduct.name}</span>
+                </motion.div>
                 </div>
             </motion.section>
 
@@ -289,7 +289,7 @@ const SingleProduct = () => {
                                 className="flex items-center"
                             >
                                 <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
-                                    {singleProduct?.category}
+                                {singleProduct?.category}
                                 </span>
                                 {singleProduct?.stockStatus === 'In Stock' ? (
                                     <span className="ml-4 text-green-600 flex items-center text-sm">
@@ -350,8 +350,8 @@ const SingleProduct = () => {
                                     <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">
                                         {Math.round((singleProduct.oldPrice - singleProduct.price) / singleProduct.oldPrice * 100)}% OFF
                                     </span>
-                                )}
-                            </motion.div>
+                            )}
+                        </motion.div>
                         </div>
                         
                         {/* Product description */}
@@ -363,7 +363,7 @@ const SingleProduct = () => {
                         >
                             <h3 className="text-lg font-bold mb-4 text-gray-800">Product Description</h3>
                             <div className="prose text-gray-600 max-w-none">
-                                <p>{singleProduct?.description}</p>
+                            <p>{singleProduct?.description}</p>
                             </div>
                             
                             {/* Delivery Information Card */}
@@ -383,21 +383,21 @@ const SingleProduct = () => {
                         </motion.div>
                         
                         {/* Size and color selection */}
-                        <motion.div 
+                            <motion.div
                             className="border-b border-gray-200 pb-8"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            transition={{ delay: 0.55 }}
-                        >
+                                transition={{ delay: 0.55 }}
+                            >
                             {/* Size Selection Wheel */}
                             {singleProduct?.sizeType !== 'none' && singleProduct?.sizes?.length > 0 && (
                                 <div className="mb-8">
                                     <h3 className="text-lg font-bold mb-4 text-gray-800">Select Size</h3>
-                                    <SizeSelectionWheel 
-                                        sizes={singleProduct.sizes} 
-                                        sizeType={singleProduct.sizeType}
-                                        onSizeSelect={handleSizeSelect}
-                                    />
+                                <SizeSelectionWheel 
+                                    sizes={singleProduct.sizes} 
+                                    sizeType={singleProduct.sizeType}
+                                    onSizeSelect={handleSizeSelect}
+                                />
                                 </div>
                             )}
                             
@@ -423,7 +423,7 @@ const SingleProduct = () => {
                                     </div>
                                 </div>
                             )}
-                        </motion.div>
+                            </motion.div>
                         
                         {/* Add to cart / Pre-order section */}
                         <motion.div 
