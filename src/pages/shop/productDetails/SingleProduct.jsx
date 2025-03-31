@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import RatingStars from '../../../components/RatingStars';
 import { useDispatch, useSelector } from 'react-redux';
-import { useFetchProductByIdQuery } from '../../../redux/features/products/productsApi';
+import { useFetchProductByIdQuery, useUpdateProductRatingMutation } from '../../../redux/features/products/productsApi';
 import { addToCart, decrementQuantity } from '../../../redux/features/cart/cartSlice';
 import ReviewsCard from '../reviews/ReviewsCard';
 import { motion } from 'framer-motion';
@@ -11,6 +11,8 @@ import SizeSelectionWheel from '../../../components/SizeSelectionWheel';
 import ColorPalette from '../../../components/ColorPalette';
 import { toast } from 'react-hot-toast';
 import ImageSlider from '../../../components/ImageSlider';
+import ReviewForm from '../reviews/ReviewForm';
+import axios from 'axios';
 
 const SingleProduct = () => {
     const { id } = useParams();
@@ -184,6 +186,91 @@ const SingleProduct = () => {
         const colorVariant = singleProduct.colors?.find(c => c.hexCode === color);
         if (colorVariant?.imageUrl) {
             setSelectedImage(colorVariant.imageUrl);
+        }
+    };
+
+    const [reviews, setReviews] = useState([]);
+    const { user } = useSelector((state) => state.auth);
+    const [updateProductRating] = useUpdateProductRatingMutation();
+
+    // Fetch reviews when component mounts
+    const fetchReviews = async () => {
+        try {
+            console.log('Fetching reviews for product:', id);
+            const response = await axios.get(
+                `${import.meta.env.VITE_API_URL}/api/reviews/product/${id}`
+            );
+            console.log('Fetched reviews:', response.data);
+            if (response.data.success) {
+                setReviews(response.data.reviews);
+            } else {
+                console.error('Failed to fetch reviews:', response.data.message);
+                toast.error('Failed to load reviews');
+            }
+        } catch (error) {
+            console.error('Error fetching reviews:', error);
+            toast.error('Failed to load reviews');
+        }
+    };
+
+    useEffect(() => {
+        if (id) {
+            fetchReviews();
+        }
+    }, [id]);
+
+    const handleReviewSubmitted = async (updatedReviews) => {
+        try {
+            console.log('Handling review submission with:', updatedReviews);
+            
+            // Update the reviews state with the new reviews
+            setReviews(updatedReviews);
+            
+            // Update the product rating in the UI
+            if (updatedReviews.length > 0) {
+                const totalRating = updatedReviews.reduce((acc, review) => acc + review.rating, 0);
+                const averageRating = totalRating / updatedReviews.length;
+                
+                console.log('Updating product rating to:', averageRating);
+                // Update the product rating in the backend
+                await updateProductRating({ productId: id, rating: averageRating }).unwrap();
+            }
+        } catch (error) {
+            console.error('Error updating reviews:', error);
+            toast.error('Failed to update reviews');
+        }
+    };
+
+    const handleReviewLike = async (reviewId) => {
+        if (!user) {
+            toast.error('Please login to like a review');
+            return;
+        }
+
+        try {
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_URL}/api/reviews/${reviewId}/like`,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            );
+
+            if (response.data.success) {
+                setReviews(prevReviews =>
+                    prevReviews.map(review =>
+                        review._id === reviewId
+                            ? { ...review, likes: response.data.likes }
+                            : review
+                    )
+                );
+                toast.success('Review liked successfully');
+            }
+        } catch (error) {
+            console.error('Error liking review:', error);
+            toast.error('Failed to like review');
         }
     };
 
@@ -558,7 +645,32 @@ const SingleProduct = () => {
                     transition={{ delay: 0.8, duration: 0.6 }}
                 >
                     <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">Customer Reviews</h2>
-                    <ReviewsCard productReviews={productReviews} />
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Review Form */}
+                        <div className="lg:col-span-1">
+                            {user ? (
+                                <ReviewForm
+                                    productId={id}
+                                    onReviewSubmitted={handleReviewSubmitted}
+                                />
+                            ) : (
+                                <div className="bg-white p-6 rounded-lg shadow-sm">
+                                    <h3 className="text-lg font-medium mb-4">Write a Review</h3>
+                                    <p className="text-gray-600 mb-4">
+                                        Please <Link to="/login" className="text-gold hover:underline">login</Link> to submit a review.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Reviews List */}
+                        <div className="lg:col-span-2">
+                            <ReviewsCard
+                                productReviews={reviews}
+                                onReviewLike={handleReviewLike}
+                            />
+                        </div>
+                    </div>
                 </motion.div>
             </motion.section>
             

@@ -177,6 +177,7 @@ const Navbar = () => {
         {label: "Profile", path: "/dashboard/profile", icon: "person"},
         {label: "Payments", path: "/dashboard/payments", icon: "payment"},
         {label: "Orders", path: "/dashboard/orders", icon: "shopping_bag"},
+        {label: "My Reviews", path: "/dashboard/reviews", icon: "rate_review"},
     ];
     
     const dropdownMenus = user?.role === 'admin' ? [...adminDropDownMenus] : [...userDropDownMenus];

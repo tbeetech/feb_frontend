@@ -193,9 +193,26 @@ const productsApi = createApi({
                 };
             }
         }),
+        updateProductRating: builder.mutation({
+            query: ({ productId, rating }) => ({
+                url: `update-rating/${productId}`,
+                method: 'PATCH',
+                body: { rating },
+                credentials: 'include'
+            }),
+            invalidatesTags: (result, error, { productId }) => [{ type: "Products", id: productId }],
+            transformErrorResponse: (error) => {
+                console.error('API Error when updating product rating:', error);
+                return {
+                    status: error.status,
+                    message: error.data?.message || 'Failed to update product rating',
+                    details: error.data?.details || {}
+                };
+            }
+        }),
     }),
 });
 export const { useFetchAllProductsQuery, useFetchProductByIdQuery, useAddProductMutation,
-    useUpdateProductMutation, useDeleteProductMutation, useSearchProductsQuery } = productsApi;
+    useUpdateProductMutation, useDeleteProductMutation, useSearchProductsQuery, useUpdateProductRatingMutation } = productsApi;
 
 export default productsApi;

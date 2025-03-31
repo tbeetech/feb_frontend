@@ -15,6 +15,12 @@ import BillingDetails from "../components/BillingDetails";
 import Contact from "../pages/contact/Contact";
 import About from "../pages/about/About";
 import ErrorBoundary from '../components/ErrorBoundary';
+import Dashboard from "../pages/Dashboard";
+import Profile from "../pages/Profile";
+import Orders from "../pages/Orders";
+import Payments from "../pages/Payments";
+import Reviews from "../pages/Reviews";
+import PrivateRoute from "../routes/PrivateRoute";
 
 const router = createBrowserRouter([
 {
@@ -35,7 +41,18 @@ children: [
     {path: "/about", element: <About/>},
     {path: "/admin/upload-product", element: <ProductUpload />},
     {path: "/admin/manage-products", element: <ProductManagement />},
-    {path: "/admin/edit-product/:id", element: <EditProduct />}
+    {path: "/admin/edit-product/:id", element: <EditProduct />},
+    {
+        path: "/dashboard",
+        element: <PrivateRoute><Dashboard /></PrivateRoute>,
+        children: [
+            { index: true, element: <Profile /> },
+            { path: "profile", element: <Profile /> },
+            { path: "orders", element: <Orders /> },
+            { path: "payments", element: <Payments /> },
+            { path: "reviews", element: <Reviews /> }
+        ]
+    }
 ]
 },
 {
