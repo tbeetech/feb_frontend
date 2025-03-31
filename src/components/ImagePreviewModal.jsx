@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getImageUrl } from '../utils/imageUrl';
 
 const ImagePreviewModal = ({ isOpen, imageUrl, onClose, productName }) => {
   if (!isOpen) return null;
@@ -30,7 +31,7 @@ const ImagePreviewModal = ({ isOpen, imageUrl, onClose, productName }) => {
             </button>
             
             <img 
-              src={imageUrl} 
+              src={getImageUrl(imageUrl)}
               alt={productName || "Product image"} 
               className="w-full h-full object-contain bg-white"
               onError={(e) => {

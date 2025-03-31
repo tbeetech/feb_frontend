@@ -7,6 +7,7 @@ import { FaHeart, FaRegHeart, FaShoppingCart, FaEye } from 'react-icons/fa';
 import RatingStars from '../../components/RatingStars';
 import { springAnimation } from '../../utils/animations';
 import ImagePreviewModal from '../../components/ImagePreviewModal';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const ProductCard = ({ product }) => {
     const dispatch = useDispatch();
@@ -140,12 +141,16 @@ const ProductCard = ({ product }) => {
                         {/* Product Image */}
                         <div className="aspect-square overflow-hidden bg-gray-100">
                             <motion.img
-                                src={product.image}
+                                src={getImageUrl(product.image)}
                                 alt={product.name}
                                 className="w-full h-full object-cover"
                                 variants={imageVariants}
                                 initial="initial"
                                 animate={isHovered ? "hover" : "initial"}
+                                onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = "https://via.placeholder.com/400x400?text=No+Image";
+                                }}
                             />
                         </div>
                         

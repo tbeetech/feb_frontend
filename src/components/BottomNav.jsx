@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import avatarImg from "../assets/avatar.png";
 import { AnimatePresence, motion } from 'framer-motion';
-import CartModal from './CartModal';
+import CartModal from '../pages/shop/CartModal';
 
 const BottomNav = () => {
     const [isCartOpen, setIsCartOpen] = useState(false);
