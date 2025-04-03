@@ -26,8 +26,12 @@ import {
     FaUser,
     FaSignOutAlt,
     FaSignInAlt,
-    FaUserPlus
+    FaUserPlus,
+    FaPlus,
+    FaTh,
+    FaEdit
 } from 'react-icons/fa';
+import MiniCart from './MiniCart';
 
 const Navbar = () => {
     const products = useSelector((state) => state.cart.products);
@@ -285,13 +289,43 @@ const Navbar = () => {
                                                     >
                                                         Dashboard
                                                     </Link>
-                                                        <Link
+                                                    <Link
                                                         to="/dashboard/orders" 
                                                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                                            onClick={() => setIsDropDownOpen(false)}
-                                                        >
+                                                        onClick={() => setIsDropDownOpen(false)}
+                                                    >
                                                         Orders
-                                                        </Link>
+                                                    </Link>
+                                                    
+                                                    {/* Admin menu items */}
+                                                    {user?.role === 'admin' && (
+                                                        <>
+                                                            <div className="border-t border-gray-100 my-1"></div>
+                                                            <span className="block px-4 py-1 text-xs text-gray-500">Admin</span>
+                                                            <Link
+                                                                to="/admin/upload-product" 
+                                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                                                onClick={() => setIsDropDownOpen(false)}
+                                                            >
+                                                                Upload Product
+                                                            </Link>
+                                                            <Link
+                                                                to="/admin/manage-products" 
+                                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                                                onClick={() => setIsDropDownOpen(false)}
+                                                            >
+                                                                Manage Products
+                                                            </Link>
+                                                            <Link
+                                                                to="/admin/edit-product" 
+                                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                                                onClick={() => setIsDropDownOpen(false)}
+                                                            >
+                                                                Edit Product
+                                                            </Link>
+                                                        </>
+                                                    )}
+                                                    
                                                     <button
                                                         onClick={handleLogout}
                                                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
@@ -328,17 +362,14 @@ const Navbar = () => {
                             </Link>
                             
                             {/* Cart */}
-                            <button 
-                                onClick={handleCartToggle} 
-                                className="p-1 text-gray-700 hover:text-black transition-colors relative"
-                            >
+                            <Link to="/cart" className="p-1 text-gray-700 hover:text-black transition-colors relative">
                                 <CiShoppingCart className="h-6 w-6" />
                                 {products.length > 0 && (
-                                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-black text-white text-xs flex items-center justify-center font-medium">
-                                        {products.length}
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
+                                        {products.reduce((sum, item) => sum + item.quantity, 0)}
                                     </span>
                                 )}
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -375,7 +406,7 @@ const Navbar = () => {
                             />
                             <CiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 </form>
-                    </div>
+                            </div>
                 </div>
             </header>
             
@@ -392,7 +423,7 @@ const Navbar = () => {
                         <div className="flex justify-between items-center p-4 border-b border-gray-100">
                             <h2 className="font-display text-xl font-bold">Menu</h2>
                             <button 
-                                onClick={handleMobileMenuToggle}
+                                                onClick={handleMobileMenuToggle}
                                 className="p-2 text-gray-800 focus:outline-none"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -407,8 +438,8 @@ const Navbar = () => {
                                 <li className="py-2 border-b border-gray-100">
                                     <Link to="/" className="flex items-center py-2 font-display text-xl font-bold" onClick={handleMobileMenuToggle}>
                                         FEB LUXURY
-                                    </Link>
-                                </li>
+                                            </Link>
+                                        </li>
                                 
                                 {/* Single linear menu with all links */}
                                 {/* Main categories */}
@@ -422,30 +453,30 @@ const Navbar = () => {
                                             {category.icon}
                                             {category.name}
                                         </Link>
-                                    </li>
-                                ))}
-                                
+                                        </li>
+                                    ))}
+
                                 {/* Shopping categories */}
                                 {shoppingCategories.map((category, index) => (
                                     <li key={`shop-${index}`} className="border-b border-gray-100 py-1">
                                         {hasSubcategories(category.path) ? (
                                             <div>
-                                                <button 
+                                        <button 
                                                     onClick={() => toggleMobileCategory(category.path)}
                                                     className={`flex items-center justify-between w-full py-2 ${
                                                         category.highlight ? 'text-red-600' : 'text-gray-800'
                                                     }`}
-                                                >
-                                                    <div className="flex items-center">
+                                        >
+                                            <div className="flex items-center">
                                                         {category.icon}
                                                         {category.name}
-                                                    </div>
+                                            </div>
                                                     <FaChevronDown 
                                                         className={`transition-transform ${
                                                             expandedCategories[category.path] ? 'rotate-180' : ''
                                                         }`} 
                                                     />
-                                                </button>
+                                        </button>
                                                 
                                                 {expandedCategories[category.path] && (
                                                     <ul className="pl-8 mt-1 space-y-1">
@@ -458,8 +489,8 @@ const Navbar = () => {
                                                                 >
                                                                     {subcategory.label}
                                                                 </Link>
-                                                            </li>
-                                                        ))}
+                                                        </li>
+                                                    ))}
                                                     </ul>
                                                 )}
                                             </div>
@@ -492,49 +523,90 @@ const Navbar = () => {
                                             </Link>
                                         </li>
                                         <li className="border-b border-gray-100 py-1">
-                                            <Link
+                                                    <Link
                                                 to="/dashboard/orders" 
                                                 className="flex items-center py-2 text-gray-800"
-                                                onClick={handleMobileMenuToggle}
-                                            >
+                                                        onClick={handleMobileMenuToggle}
+                                                    >
                                                 <FaShoppingBag className="w-5 h-5 mr-3" />
                                                 Orders
-                                            </Link>
-                                        </li>
+                                                    </Link>
+                                                </li>
                                         <li className="border-b border-gray-100 py-1">
-                                            <button
+                                                <button
                                                 onClick={() => {
                                                     handleLogout();
                                                     handleMobileMenuToggle();
                                                 }}
-                                                className="flex items-center w-full text-left py-2 text-gray-800"
+                                                className="flex items-center py-2 text-gray-800 w-full"
                                             >
                                                 <FaSignOutAlt className="w-5 h-5 mr-3" />
                                                 Sign out
                                             </button>
                                         </li>
+                                        
+                                        {/* Admin mobile menu items */}
+                                        {user?.role === 'admin' && (
+                                            <>
+                                                <li className="border-b border-gray-100 py-1 mt-4">
+                                                    <span className="block px-2 py-1 text-xs text-gray-500 font-semibold uppercase">
+                                                        Admin Controls
+                                                    </span>
+                                                </li>
+                                                <li className="border-b border-gray-100 py-1">
+                                                    <Link 
+                                                        to="/admin/upload-product" 
+                                                        className="flex items-center py-2 text-gray-800"
+                                                        onClick={handleMobileMenuToggle}
+                                                    >
+                                                        <FaPlus className="w-5 h-5 mr-3" />
+                                                        Upload Product
+                                                    </Link>
+                                                </li>
+                                                <li className="border-b border-gray-100 py-1">
+                                                    <Link 
+                                                        to="/admin/manage-products" 
+                                                        className="flex items-center py-2 text-gray-800"
+                                                        onClick={handleMobileMenuToggle}
+                                                    >
+                                                        <FaTh className="w-5 h-5 mr-3" />
+                                                        Manage Products
+                                                    </Link>
+                                                </li>
+                                                <li className="border-b border-gray-100 py-1">
+                                                    <Link 
+                                                        to="/admin/edit-product" 
+                                                        className="flex items-center py-2 text-gray-800"
+                                                        onClick={handleMobileMenuToggle}
+                                                    >
+                                                        <FaEdit className="w-5 h-5 mr-3" />
+                                                        Edit Product
+                                                    </Link>
+                                                </li>
+                                            </>
+                                        )}
                                     </>
                                 ) : (
                                     <>
                                         <li className="border-b border-gray-100 py-1">
-                                            <Link
-                                                to="/login"
+                                        <Link
+                                            to="/login"
                                                 className="flex items-center py-2 text-gray-800"
-                                                onClick={handleMobileMenuToggle}
-                                            >
+                                            onClick={handleMobileMenuToggle}
+                                        >
                                                 <FaSignInAlt className="w-5 h-5 mr-3" />
                                                 Sign in
-                                            </Link>
+                                        </Link>
                                         </li>
                                         <li className="border-b border-gray-100 py-1">
-                                            <Link
-                                                to="/register"
+                                        <Link
+                                            to="/register"
                                                 className="flex items-center py-2 text-gray-800"
-                                                onClick={handleMobileMenuToggle}
-                                            >
+                                            onClick={handleMobileMenuToggle}
+                                        >
                                                 <FaUserPlus className="w-5 h-5 mr-3" />
                                                 Register
-                                            </Link>
+                                        </Link>
                                         </li>
                                     </>
                                 )}
@@ -548,7 +620,7 @@ const Navbar = () => {
                                 </li>
                             </ul>
                         </nav>
-                    </motion.div>
+                        </motion.div>
                 )}
             </AnimatePresence>
             

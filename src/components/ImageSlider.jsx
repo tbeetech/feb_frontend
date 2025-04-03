@@ -197,10 +197,9 @@ const ImageSlider = ({ images, productName, onPreviewClick }) => {
                     <img
                       src={images[currentIndex]}
                       alt={`${productName} - view ${currentIndex + 1}`}
-                      className="w-full h-full object-cover transform scale-150 transition-transform duration-300"
-                      style={{ 
-                        transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`,
-                        objectPosition: `${mousePosition.x}% ${mousePosition.y}%`
+                      className="w-full h-full object-contain transform scale-150 transition-transform duration-300"
+                      style={{
+                        transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`
                       }}
                     />
                   </div>
@@ -208,7 +207,8 @@ const ImageSlider = ({ images, productName, onPreviewClick }) => {
                   <img
                     src={images[currentIndex]}
                     alt={`${productName} - view ${currentIndex + 1}`}
-                    className="w-full h-full object-cover transition-all duration-300 cursor-zoom-in"
+                    className="w-full h-full object-contain object-center"
+                    onClick={() => onPreviewClick && onPreviewClick(images[currentIndex])}
                   />
                 )}
               </motion.div>

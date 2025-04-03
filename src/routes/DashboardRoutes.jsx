@@ -16,6 +16,7 @@ const DashboardRoutes = () => {
                 <Route path="orders" element={<Orders />} />
                 <Route path="payments" element={<Payments />} />
                 <Route path="reviews" element={<Reviews />} />
+                <Route path="likes" element={<Reviews />} />
             </Route>
         </Routes>
     );

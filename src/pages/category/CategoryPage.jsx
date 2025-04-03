@@ -4,6 +4,7 @@ import ProductCards from '../shop/ProductCards'
 import { useFetchAllProductsQuery } from '../../redux/features/products/productsApi'
 import CategoryHeader from '../../components/CategoryHeader';
 import { CATEGORIES } from '../../constants/categoryConstants';
+import ProductCardSkeleton from '../../components/ProductCardSkeleton';
 
 const CategoryPage = () => {    
     const { categoryName, subcategory } = useParams();
@@ -77,8 +78,13 @@ const CategoryPage = () => {
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center min-h-[400px]">
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+            <div className="container mx-auto px-4 py-8">
+                <div className="w-full bg-gray-200 h-40 animate-pulse rounded-lg mb-8"></div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                    {[...Array(8)].map((_, index) => (
+                        <ProductCardSkeleton key={index} />
+                    ))}
+                </div>
             </div>
         );
     }

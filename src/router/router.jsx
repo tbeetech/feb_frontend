@@ -11,6 +11,7 @@ import SingleProduct from "../pages/shop/productDetails/SingleProduct";
 import Login from "../components/Login";
 import Register from "../components/Register";
 import Checkout from "../pages/shop/Checkout";
+import CartPage from "../pages/shop/CartPage";
 import BillingDetails from "../components/BillingDetails";
 import Contact from "../pages/contact/Contact";
 import About from "../pages/about/About";
@@ -21,6 +22,7 @@ import Orders from "../pages/Orders";
 import Payments from "../pages/Payments";
 import Reviews from "../pages/Reviews";
 import PrivateRoute from "../routes/PrivateRoute";
+import AdminRoute from "../routes/AdminRoute";
 
 const router = createBrowserRouter([
 {
@@ -35,13 +37,15 @@ children: [
     {path: "/search", element: <Search/>},
     {path: "/shop", element:<ShopPage/>},
     {path: "/product/:id", element:<SingleProduct/>},
+    {path: "/cart", element:<CartPage/>},
     {path: "/checkout", element:<Checkout/>},
     {path: "/billing-details", element:<BillingDetails/>},
     {path: "/contact", element: <Contact/>},
     {path: "/about", element: <About/>},
-    {path: "/admin/upload-product", element: <ProductUpload />},
-    {path: "/admin/manage-products", element: <ProductManagement />},
-    {path: "/admin/edit-product/:id", element: <EditProduct />},
+    {path: "/admin/upload-product", element: <AdminRoute><ProductUpload /></AdminRoute>},
+    {path: "/admin/manage-products", element: <AdminRoute><ProductManagement /></AdminRoute>},
+    {path: "/admin/edit-product", element: <AdminRoute><EditProduct /></AdminRoute>},
+    {path: "/admin/edit-product/:id", element: <AdminRoute><EditProduct /></AdminRoute>},
     {
         path: "/dashboard",
         element: <PrivateRoute><Dashboard /></PrivateRoute>,

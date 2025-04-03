@@ -6,6 +6,8 @@ import { CiHeart, CiShoppingCart } from 'react-icons/ci';
 import RatingStars from '../../components/RatingStars';
 import { getImageUrl } from '../../utils/imageUrl';
 import { useCurrency } from './CurrencySwitcher';
+import LazyImage from './Image';
+import { toast } from 'react-hot-toast';
 
 const ProductCard = ({ product }) => {
     const dispatch = useDispatch();
@@ -27,6 +29,18 @@ const ProductCard = ({ product }) => {
         e.preventDefault();
         e.stopPropagation();
         setIsFavorite(!isFavorite);
+        toast.success(isFavorite ? 'Removed from favorites' : 'Added to favorites');
+    };
+
+    // Handle add to cart
+    const handleAddToCart = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dispatch(addToCart({
+            ...product,
+            quantity: 1
+        }));
+        toast.success('Added to cart');
     };
 
     return (
@@ -37,16 +51,17 @@ const ProductCard = ({ product }) => {
         >
             <Link to={`/product/${product._id}`} className="block">
                 {/* Product Image */}
-                <div className="relative overflow-hidden bg-gray-100 rounded-lg shadow-sm" style={{ aspectRatio: '1/1' }}>
-                    <img
-                        src={getImageUrl(product.image)}
-                        alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 rounded-lg"
-                        onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = "https://via.placeholder.com/400x400?text=No+Image";
-                        }}
-                    />
+                <div className="relative group overflow-hidden rounded-lg">
+                    <div className="aspect-square w-full overflow-hidden">
+                        <img
+                            src={getImageUrl(product.images[0])}
+                            alt={product.name}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            onError={(e) => {
+                                e.target.src = 'https://via.placeholder.com/400x400?text=No+Image';
+                            }}
+                        />
+                    </div>
                     
                     {/* Discount Badge */}
                     {discount && (
@@ -69,6 +84,12 @@ const ProductCard = ({ product }) => {
                             className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-gray-800 hover:bg-gray-100 transition-colors shadow-sm"
                         >
                             <CiHeart className={`h-5 w-5 ${isFavorite ? 'text-red-500 fill-red-500' : ''}`} />
+                        </button>
+                        <button
+                            onClick={handleAddToCart}
+                            className="w-9 h-9 rounded-full bg-black flex items-center justify-center text-white hover:bg-gray-800 transition-colors shadow-sm"
+                        >
+                            <CiShoppingCart className="h-5 w-5" />
                         </button>
                     </div>
                 </div>

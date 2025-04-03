@@ -15,6 +15,139 @@ import ReviewForm from '../reviews/ReviewForm';
 import axios from 'axios';
 import { useCurrency } from '../../../components/CurrencySwitcher';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import LazyImage from '../../../components/Image';
+import { getImageUrl } from '../../../utils/imageUrl';
+
+// Add this recommendation engine
+const useRecommendationEngine = (currentProductId, productCategory) => {
+    // Recommendation states
+    const [recommendations, setRecommendations] = useState([]);
+    const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(true);
+    
+    // Get data for recommendations
+    const { data: allProductsData } = useFetchAllProductsQuery({
+        limit: 20,
+        category: productCategory || '',
+    }, { skip: !productCategory });
+    
+    useEffect(() => {
+        // Start loading
+        setIsLoadingRecommendations(true);
+        
+        // Function to get browsing history from localStorage
+        const getBrowsingHistory = () => {
+            try {
+                const history = localStorage.getItem('browsingHistory');
+                return history ? JSON.parse(history) : [];
+            } catch (error) {
+                console.error('Error parsing browsing history:', error);
+                return [];
+            }
+        };
+        
+        // Function to update browsing history
+        const updateBrowsingHistory = (productId) => {
+            try {
+                const history = getBrowsingHistory();
+                // Add current product to history if not already there
+                if (!history.includes(productId)) {
+                    // Keep only last 20 items
+                    const updatedHistory = [productId, ...history].slice(0, 20);
+                    localStorage.setItem('browsingHistory', JSON.stringify(updatedHistory));
+                } else {
+                    // Move current product to the top
+                    const filteredHistory = history.filter(id => id !== productId);
+                    const updatedHistory = [productId, ...filteredHistory];
+                    localStorage.setItem('browsingHistory', JSON.stringify(updatedHistory));
+                }
+            } catch (error) {
+                console.error('Error updating browsing history:', error);
+            }
+        };
+        
+        // Update browsing history with current product
+        if (currentProductId) {
+            updateBrowsingHistory(currentProductId);
+        }
+        
+        // Generate recommendations if we have products data
+        if (allProductsData?.products) {
+            const allProducts = allProductsData.products;
+            const history = getBrowsingHistory();
+            
+            // Filter out current product
+            const availableProducts = allProducts.filter(product => 
+                product._id !== currentProductId
+            );
+            
+            if (availableProducts.length === 0) {
+                setRecommendations([]);
+                setIsLoadingRecommendations(false);
+                return;
+            }
+            
+            // Create personalized recommendations:
+            // 1. Products from same category as recently viewed items
+            // 2. Products with similar price range
+            // 3. Fallback to random products from the same category
+            
+            // Get the categories of recently viewed products
+            const recentlyViewedProducts = availableProducts.filter(
+                product => history.includes(product._id)
+            );
+            
+            // Get current product's price for price-based recommendations
+            const currentProduct = allProducts.find(p => p._id === currentProductId);
+            const currentPrice = currentProduct?.price || 0;
+            
+            // Price range: 75% to 150% of current product price
+            const minPrice = currentPrice * 0.75;
+            const maxPrice = currentPrice * 1.5;
+            
+            // Score products based on multiple factors
+            const scoredProducts = availableProducts.map(product => {
+                let score = 0;
+                
+                // Same category as current product
+                if (product.category === productCategory) {
+                    score += 5;
+                }
+                
+                // Within similar price range
+                if (product.price >= minPrice && product.price <= maxPrice) {
+                    score += 3;
+                }
+                
+                // Has been viewed recently
+                if (history.includes(product._id)) {
+                    score += 1;
+                }
+                
+                // Same brand as current product
+                if (product.brand === currentProduct?.brand) {
+                    score += 3;
+                }
+                
+                // New products get a boost
+                if (product.isNew) {
+                    score += 2;
+                }
+                
+                return { ...product, score };
+            });
+            
+            // Sort by score and take top 8
+            const sortedRecommendations = scoredProducts
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 8);
+            
+            setRecommendations(sortedRecommendations);
+            setIsLoadingRecommendations(false);
+        }
+    }, [currentProductId, productCategory, allProductsData]);
+    
+    return { recommendations, isLoadingRecommendations };
+};
 
 const SingleProduct = () => {
     const { id } = useParams();
@@ -302,6 +435,12 @@ const SingleProduct = () => {
         }
     };
 
+    // Use our recommendation engine
+    const { recommendations, isLoadingRecommendations } = useRecommendationEngine(
+        id, 
+        singleProduct?.category
+    );
+
     // Loading state
     if (isLoading) return (
         <div className="min-h-screen flex items-center justify-center">
@@ -389,14 +528,48 @@ const SingleProduct = () => {
                 <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
                     {/* Image gallery in left column */}
                     <motion.div variants={fadeInUp} className="bg-white rounded-lg shadow-xl overflow-hidden">
-                        <ImageSlider 
-                            images={allImages}
-                            productName={singleProduct.name}
-                            onPreviewClick={(image) => {
-                                setSelectedImage(image);
-                                setPreviewOpen(true);
-                            }}
-                        />
+                        {/* Main Product Image */}
+                        <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-50">
+                            <img
+                                src={getImageUrl(selectedImage || (singleProduct.images && singleProduct.images.length > 0 ? singleProduct.images[0] : singleProduct.image))}
+                                alt={singleProduct.name}
+                                className="w-full h-full object-contain"
+                                onClick={() => setPreviewOpen(true)}
+                            />
+                        </div>
+
+                        {/* Thumbnail Gallery */}
+                        <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
+                            {singleProduct.images && singleProduct.images.length > 0 ? (
+                                singleProduct.images.map((image, index) => (
+                                    <div
+                                        key={index}
+                                        className={`relative aspect-square w-20 flex-shrink-0 cursor-pointer rounded-lg overflow-hidden border-2 ${
+                                            selectedImage === image ? 'border-black' : 'border-transparent'
+                                        }`}
+                                        onClick={() => setSelectedImage(image)}
+                                    >
+                                        <img
+                                            src={getImageUrl(image)}
+                                            alt={`${singleProduct.name} - View ${index + 1}`}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                ))
+                            ) : (
+                                singleProduct.image && (
+                                    <div
+                                        className="relative aspect-square w-20 flex-shrink-0 cursor-pointer rounded-lg overflow-hidden border-2 border-black"
+                                    >
+                                        <img
+                                            src={getImageUrl(singleProduct.image)}
+                                            alt={singleProduct.name}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                )
+                            )}
+                        </div>
                     </motion.div>
                     
                     {/* Product details in right column */}

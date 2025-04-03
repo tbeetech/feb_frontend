@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { springAnimation } from '../../utils/animations'
 import RatingStars from '../../components/RatingStars'
 import ImagePreviewModal from '../../components/ImagePreviewModal'
+import ProductCardSkeleton from '../../components/ProductCardSkeleton'
 
 const filters = {
   categories: {
@@ -213,7 +214,11 @@ const ProductManagement = () => {
       
       {/* Products Grid */}
       {isLoading ? (
-        <div className="text-center py-8">Loading products...</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          {[...Array(8)].map((_, index) => (
+            <ProductCardSkeleton key={index} />
+          ))}
+        </div>
       ) : error ? (
         <div className="text-center py-8 text-red-600">Error loading products. Please try again.</div>
       ) : products.length === 0 ? (

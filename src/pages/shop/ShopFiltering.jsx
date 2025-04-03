@@ -254,7 +254,7 @@ const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, o
                                 )}
                             </div>
                         ))}
-                    </div>
+                </div>
                 )}
             </div>
 
@@ -273,7 +273,7 @@ const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, o
                 
                 {expandedSections.price && (
                     <div className="mt-3 space-y-2">
-                        {filters.priceRanges.map((range, index) => (
+                    {filters.priceRanges.map((range, index) => (
                             <div 
                                 key={index}
                                 className={`flex items-center py-2 px-1 rounded cursor-pointer hover:bg-gray-50 ${
@@ -281,10 +281,10 @@ const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, o
                                 }`}
                                 onClick={() => onPriceRangeChange(range)}
                             >
-                                {range.label}
+                            {range.label}
                             </div>
-                        ))}
-                    </div>
+                    ))}
+                </div>
                 )}
             </div>
         </div>

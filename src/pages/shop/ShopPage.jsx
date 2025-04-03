@@ -6,6 +6,7 @@ import { useFetchAllProductsQuery } from '../../redux/features/products/products
 import { CATEGORIES } from '../../constants/categoryConstants'
 import { CiFilter, CiGrid41, CiGrid2H, CiCircleChevLeft, CiCircleChevRight } from 'react-icons/ci'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
+import ProductCardSkeleton from '../../components/ProductCardSkeleton'
 
 const filters = {
   categories: {
@@ -119,8 +120,46 @@ const ShopPage = () => {
   ];
 
   if(isLoading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">Shop</h1>
+        <p className="text-gray-600">Browse our collection</p>
+      </div>
+      
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center space-x-2">
+          <div className="w-20 h-6 bg-gray-200 animate-pulse rounded"></div>
+          <div className="w-40 h-6 bg-gray-200 animate-pulse rounded"></div>
+        </div>
+        <div className="flex space-x-2">
+          <div className="w-8 h-8 bg-gray-200 animate-pulse rounded"></div>
+          <div className="w-8 h-8 bg-gray-200 animate-pulse rounded"></div>
+        </div>
+      </div>
+      
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Skeleton for filters panel */}
+        <div className="hidden lg:block lg:w-64 flex-shrink-0">
+          <div className="p-4 border border-gray-200 rounded-lg">
+            <div className="w-32 h-6 bg-gray-200 animate-pulse rounded mb-4"></div>
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="mb-4">
+                <div className="w-full h-5 bg-gray-200 animate-pulse rounded mb-2"></div>
+                <div className="w-3/4 h-4 bg-gray-200 animate-pulse rounded"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Skeleton for products grid */}
+        <div className="flex-1">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {[...Array(8)].map((_, index) => (
+              <ProductCardSkeleton key={index} />
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   )
   

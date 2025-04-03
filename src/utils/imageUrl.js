@@ -1,4 +1,4 @@
-import { getBaseUrl } from './baseURL';
+import { baseURL } from './baseURL';
 
 export const getImageUrl = (imageUrl) => {
     if (!imageUrl) return 'https://via.placeholder.com/400x400?text=No+Image';
@@ -9,5 +9,5 @@ export const getImageUrl = (imageUrl) => {
     }
     
     // If it's a relative path, prepend the API base URL
-    return `${getBaseUrl()}/${imageUrl.startsWith('/') ? imageUrl.slice(1) : imageUrl}`;
+    return `${baseURL}/${imageUrl.startsWith('/') ? imageUrl.slice(1) : imageUrl}`;
 }; 

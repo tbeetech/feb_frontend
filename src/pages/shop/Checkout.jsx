@@ -1,14 +1,17 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { FaWhatsapp, FaEye, FaEyeSlash, FaDownload, FaExternalLinkAlt } from 'react-icons/fa';
 import styled from 'styled-components';
-import { useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { saveAs } from 'file-saver';
 import { formatDate, formatPrice, formatReceiptNumber } from '../../utils/formatters';
+import { toast } from 'react-hot-toast';
 
 const Checkout = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [showAccountNumber, setShowAccountNumber] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
@@ -17,16 +20,32 @@ const Checkout = () => {
   const [pdfUrl, setPdfUrl] = useState('');
   const whatsappNumber = '+2348033825144';
   const location = useLocation();
-  const cartTotal = location.state?.total || 0;
+  
+  // Get cart state from Redux store
+  const cartState = useSelector((state) => state.cart);
+  
+  // Calculate cart total price if not provided in location state
+  const calculateCartTotal = (items) => {
+    return items.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
+  };
+  
+  // Get cart items from Redux store or from location state
+  const cartItems = location.state?.cartItems || useSelector((state) => state.cart.products);
+  
+  // Calculate the total from the cart items in real-time
+  const cartItemsTotal = useMemo(() => {
+    return calculateCartTotal(cartItems);
+  }, [cartItems]);
+  
+  // Use the total from location state, or calculate it from cart items, or fall back to Redux total
+  const cartTotal = location.state?.total || cartItemsTotal || cartState.total || 0;
+  
   const isPreOrder = location.state?.isPreOrder || false;
   const billingDetails = location.state?.billingDetails || null;
   const orderDate = location.state?.orderDate || new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
   const deliveryDate = location.state?.deliveryDate || '';
   const accountNumber = '0038685089';
   const receiptRef = useRef(null);
-  
-  // Get cart items from Redux store or from location state
-  const cartItems = location.state?.cartItems || useSelector((state) => state.cart.products);
   
   // Generate a receipt number
   const receiptNumber = formatReceiptNumber();
@@ -40,6 +59,27 @@ const Checkout = () => {
       }
     };
   }, [pdfUrl]);
+
+  // Verify cart has items
+  useEffect(() => {
+    if (cartItems.length === 0 && !location.state?.cartItems) {
+      toast.error("Your cart is empty. Please add items to your cart before checkout.");
+      navigate('/shop');
+    }
+  }, [cartItems, location.state, navigate]);
+
+  // For debugging and verification
+  useEffect(() => {
+    console.log("Cart total:", cartTotal);
+    console.log("Calculated cart items total:", cartItemsTotal);
+    console.log("Cart items:", cartItems);
+    console.log("Redux cart state:", cartState);
+    
+    // Alert if the totals don't match
+    if (cartTotal !== cartItemsTotal && cartItems.length > 0) {
+      console.warn("Cart total mismatch. Using calculated total instead.");
+    }
+  }, [cartTotal, cartItemsTotal, cartItems, cartState]);
   
   // Pre-load libraries to ensure they're available
   useEffect(() => {
@@ -534,6 +574,25 @@ const Checkout = () => {
             </ol>
           </PaymentInstructions>
         </AccountDetailsCard>
+      </div>
+      
+      {/* Summary area with correct total display */}
+      <div className="mt-8 p-6 bg-gray-50 rounded-lg">
+        <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+        <div className="flex justify-between mb-2">
+          <span>Subtotal</span>
+          <span>₦{cartItemsTotal.toLocaleString()}</span>
+        </div>
+        <div className="flex justify-between mb-2">
+          <span>Shipping</span>
+          <span>₦0.00</span>
+        </div>
+        <div className="border-t border-gray-200 pt-4 mt-4">
+          <div className="flex justify-between font-bold">
+            <span>Total</span>
+            <span>₦{cartItemsTotal.toLocaleString()}</span>
+          </div>
+        </div>
       </div>
     </CheckoutContainer>
   );

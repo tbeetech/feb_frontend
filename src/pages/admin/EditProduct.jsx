@@ -17,7 +17,17 @@ const EditProduct = () => {
   const navigate = useNavigate();
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
   const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
-  const { data: product, error, isFetching } = useFetchProductByIdQuery(id);
+  const { data: product, error, isFetching } = useFetchProductByIdQuery(id, {
+    skip: !id // Skip fetching if no ID is provided
+  });
+  
+  // If no ID is provided, redirect to manage products page
+  useEffect(() => {
+    if (!id) {
+      navigate('/admin/manage-products');
+      toast.info('Please select a product to edit');
+    }
+  }, [id, navigate]);
   
   const [showPreview, setShowPreview] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState(false);

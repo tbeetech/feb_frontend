@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import CartModal from '../pages/shop/CartModal';
 import { CATEGORIES } from '../constants/categoryConstants';
 import { FaHome, FaSearch, FaShoppingBag, FaBars, FaTimes, FaChevronRight } from 'react-icons/fa';
+import { CiShoppingCart } from 'react-icons/ci';
 
 const BottomNav = () => {
     const [isCartOpen, setIsCartOpen] = useState(false);
@@ -89,18 +90,17 @@ const BottomNav = () => {
                                 <span>Search</span>
                             </button>
                             
-                            <button 
-                                onClick={() => setIsCartOpen(true)}
-                                className="flex flex-col items-center text-xs py-1 text-gray-500 relative"
-                            >
-                                <FaShoppingBag className="text-lg mb-0.5" />
-                                {productCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-black text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                                        {productCount > 99 ? '99+' : productCount}
-                                    </span>
-                                )}
-                                <span>Cart</span>
-                            </button>
+                            <Link to="/cart" className="flex flex-col items-center px-1">
+                                <div className="relative">
+                                    <CiShoppingCart className="w-7 h-7" />
+                                    {productCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
+                                            {productCount}
+                                        </span>
+                                    )}
+                                </div>
+                                <span className="text-xs mt-1">Cart</span>
+                            </Link>
                             
                             <button 
                                 onClick={() => setShowMenu(!showMenu)}
