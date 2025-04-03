@@ -35,7 +35,7 @@ const TrendingProducts = () => {
     }
 
     return (
-        <section className="section__container bg-gradient-to-r from-primary-light/20 to-white">
+        <section className="section__container bg-gradient-to-r from-gray-100/20 to-white">
             <motion.div
                 initial="hidden"
                 animate="visible"

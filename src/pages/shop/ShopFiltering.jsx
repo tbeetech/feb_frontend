@@ -1,12 +1,28 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { CATEGORIES } from '../../constants/categoryConstants';
-import { motion, AnimatePresence } from 'framer-motion';
+import { CiFilter, CiCirclePlus, CiCircleMinus, CiTrash } from 'react-icons/ci';
+import { FaChevronDown, FaChevronRight } from 'react-icons/fa';
 
 const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, onPriceRangeChange, closeMobileFilter }) => {
     const navigate = useNavigate();
-    // State to track expanded category dropdowns
+    const [expandedSections, setExpandedSections] = useState({
+        categories: true,
+        price: true
+    });
+    
+    // Track which category groups are expanded
     const [expandedCategories, setExpandedCategories] = useState({});
+
+    // When filtersState.category changes, expand that category
+    useEffect(() => {
+        if (filtersState.category && filtersState.category !== 'all') {
+            setExpandedCategories(prev => ({
+                ...prev,
+                [filtersState.category]: true
+            }));
+        }
+    }, [filtersState.category]);
 
     const handleCategoryChange = (category) => {
         // Set selected category in filter state
@@ -16,21 +32,10 @@ const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, o
             subcategory: '' // Reset subcategory when category changes
         }));
         
-        // Check if category has subcategories
-        const categoryData = CATEGORIES[category?.toUpperCase()];
-        const hasSubcategories = categoryData && categoryData.subcategories && categoryData.subcategories.length > 0;
-        
-        if (hasSubcategories) {
-            // If category has subcategories, toggle dropdown instead of navigating
-            setExpandedCategories(prev => ({
-                ...prev,
-                [category]: !prev[category]
-            }));
-        } else if (category && category !== 'all') {
-            // If no subcategories, navigate directly
-            navigate(`/categories/${category}`);
-        } else if (category === 'all') {
+        if (category === 'all') {
             navigate('/shop');
+        } else {
+            navigate(`/categories/${category}`);
         }
     };
 
@@ -46,25 +51,33 @@ const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, o
         }
     };
     
+    // Toggle section expansion
+    const toggleSection = (section) => {
+        setExpandedSections(prev => ({
+            ...prev,
+            [section]: !prev[section]
+        }));
+    };
+    
     // Toggle category expansion
-    const toggleCategoryExpansion = (category) => {
+    const toggleCategory = (category) => {
         setExpandedCategories(prev => ({
             ...prev,
             [category]: !prev[category]
         }));
     };
 
-    // Create an array of all categories with icons
+    // Create an array of all categories
     const allCategories = [
-        { value: 'all', label: 'All Products', icon: 'grid_view' },
-        { value: 'accessories', label: 'Accessories', icon: 'diamond' },
-        { value: 'fragrance', label: 'Fragrance', icon: 'local_pharmacy' },
-        { value: 'corporate', label: 'Corporate Wears', icon: 'business_center' },
-        { value: 'dress', label: 'Dresses', icon: 'dry_cleaning' },
-        { value: 'new', label: 'New Arrivals', icon: 'new_releases' },
-        { value: 'shoes', label: 'Shoes', icon: 'settings_accessibility' },
-        { value: 'bags', label: 'Bags', icon: 'shopping_bag' },
-        { value: 'clothes', label: 'Clothes', icon: 'checkroom' },
+        { value: 'all', label: 'All Products', icon: '🛍️' },
+        { value: 'new', label: 'New Arrivals', icon: '✨' },
+        { value: 'clothes', label: 'Clothing', icon: '👕' },
+        { value: 'dress', label: 'Dresses', icon: '👗' },
+        { value: 'shoes', label: 'Shoes', icon: '👠' },
+        { value: 'bags', label: 'Bags', icon: '👜' },
+        { value: 'accessories', label: 'Accessories', icon: '⌚' },
+        { value: 'fragrance', label: 'Fragrances', icon: '🧴' },
+        { value: 'corporate', label: 'Corporate Wear', icon: '👔' },
     ];
 
     // Get subcategories based on selected category
@@ -102,51 +115,6 @@ const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, o
             }
         });
     };
-    
-    // Get subcategory icon
-    const getSubcategoryIcon = (category, subcategory) => {
-        // Default icons for common subcategories based on their names
-        const iconMap = {
-            // Accessories subcategory icons
-            'sunglasses': 'visibility',
-            'wrist-watches': 'watch',
-            'belts': 'no_encryption_gmailerrorred',
-            'bangles-bracelet': 'circle',
-            'earrings': 'stars',
-            'necklace': 'diamond',
-            'pearls': 'radio_button_unchecked',
-            
-            // Fragrance subcategory icons
-            'designer-niche': 'spa',
-            'unboxed': 'inventory_2',
-            'testers': 'science',
-            'arabian': 'mosque',
-            'diffuser': 'air',
-            'mist': 'water_drop',
-            
-            // Corporate subcategory icons
-            'suits': 'person',
-            'blazers': 'groups',
-            'office-wear': 'work',
-            
-            // Dress subcategory icons
-            'casual': 'weekend',
-            'formal': 'event',
-            'party': 'celebration',
-            
-            // Shoes subcategory icons
-            'heels': 'high_heels',
-            'flats': 'slippers',
-            'sandals': 'co_present',
-            'sneakers': 'directions_walk',
-            
-            // New subcategory icons
-            'this-week': 'today',
-            'this-month': 'calendar_month',
-        };
-        
-        return iconMap[subcategory] || 'sell';
-    };
 
     // Check if a category has subcategories
     const categoryHasSubcategories = (category) => {
@@ -154,119 +122,171 @@ const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, o
         return subcategories.length > 0;
     };
 
+    const subcategories = getSubcategories(filtersState.category);
+    const hasAppliedFilters = filtersState.category !== 'all' || filtersState.subcategory || filtersState.priceRange;
+
     return (
-        <div className="bg-white p-4 rounded-lg shadow-md">
-            <div className='mb-8'>
-                <h3 className='font-medium mb-4 text-lg flex items-center gap-2'>
-                    <span className="material-icons text-gold">filter_alt</span>
+        <div className="filters-container">
+            {/* Mobile view close button */}
+            <div className="md:hidden flex justify-between items-center mb-6">
+                <h3 className="text-lg font-medium">Filters</h3>
+                <button 
+                    onClick={closeMobileFilter}
+                    className="text-gray-500 hover:text-black"
+                >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            {/* Applied filters summary */}
+            {hasAppliedFilters && (
+                <div className="mb-6">
+                    <div className="flex justify-between items-center mb-2">
+                        <h4 className="text-sm font-medium uppercase">Applied Filters</h4>
+                        <button 
+                            onClick={clearFilters}
+                            className="text-xs text-gray-500 hover:text-black flex items-center"
+                        >
+                            <CiTrash className="mr-1" /> Clear All
+                        </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {filtersState.category !== 'all' && (
+                            <div className="inline-flex items-center px-2 py-1 bg-gray-100 text-xs">
+                                {allCategories.find(cat => cat.value === filtersState.category)?.label || filtersState.category}
+                                <button 
+                                    onClick={() => handleCategoryChange('all')}
+                                    className="ml-1 text-gray-500 hover:text-black"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        )}
+                        {filtersState.subcategory && (
+                            <div className="inline-flex items-center px-2 py-1 bg-gray-100 text-xs">
+                                {subcategories.find(sub => sub.value === filtersState.subcategory)?.label || filtersState.subcategory}
+                                <button 
+                                    onClick={() => handleSubcategoryChange(filtersState.category, '')}
+                                    className="ml-1 text-gray-500 hover:text-black"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        )}
+                        {filtersState.priceRange && (
+                            <div className="inline-flex items-center px-2 py-1 bg-gray-100 text-xs">
+                                {filters.priceRanges.find(range => 
+                                    `${range.min}-${range.max === Infinity ? 'Infinity' : range.max}` === filtersState.priceRange
+                                )?.label || 'Price Range'}
+                                <button 
+                                    onClick={() => setFiltersState(prev => ({ ...prev, priceRange: '' }))}
+                                    className="ml-1 text-gray-500 hover:text-black"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+            
+            {/* Categories section */}
+            <div className="filter-section mb-6">
+                <button 
+                    className="w-full flex justify-between items-center py-2 border-b border-gray-200 text-sm font-medium uppercase"
+                    onClick={() => toggleSection('categories')}
+                >
                     Categories
-                </h3>
-                <div className='space-y-3'>
-                    {allCategories.map(category => {
-                        const hasSubcategories = categoryHasSubcategories(category.value);
-                        const isExpanded = expandedCategories[category.value];
-                        
-                        return (
+                    {expandedSections.categories ? 
+                        <CiCircleMinus className="w-5 h-5" /> : 
+                        <CiCirclePlus className="w-5 h-5" />
+                    }
+                </button>
+                
+                {expandedSections.categories && (
+                    <div className="mt-3 space-y-1">
+                        {allCategories.map(category => (
                             <div key={category.value} className="category-item">
-                                <div className={`flex items-center justify-between ${filtersState.category === category.value ? 'text-gold' : ''} hover:text-gold transition-colors duration-200`}>
-                                    <label className='flex items-center cursor-pointer flex-1'>
-                                        <input
-                                            type='radio'
-                                            name='category'
-                                            checked={filtersState.category === category.value}
-                                            onChange={() => handleCategoryChange(category.value)}
-                                            className='mr-2 accent-gold'
-                                        />
-                                        <span className="material-icons text-lg mr-2">
-                                            {category.icon}
-                                        </span>
-                                        {category.label}
-                                    </label>
+                                <div 
+                                    className={`flex items-center justify-between py-2 px-1 rounded cursor-pointer hover:bg-gray-50 ${
+                                        filtersState.category === category.value ? 'bg-gray-50 font-medium' : ''
+                                    }`}
+                                    onClick={() => handleCategoryChange(category.value)}
+                                >
+                                    <div className="flex items-center">
+                                        <span className="mr-2">{category.icon}</span>
+                                        <span>{category.label}</span>
+                                    </div>
                                     
-                                    {hasSubcategories && (
+                                    {categoryHasSubcategories(category.value) && (
                                         <button 
-                                            onClick={() => toggleCategoryExpansion(category.value)}
-                                            className="p-1 hover:bg-gray-100 rounded-full transition-colors duration-200"
-                                            aria-label={isExpanded ? "Collapse" : "Expand"}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                toggleCategory(category.value);
+                                            }}
+                                            className="p-1 text-gray-500"
                                         >
-                                            <span className="material-icons text-lg">
-                                                {isExpanded ? 'expand_less' : 'expand_more'}
-                                            </span>
+                                            {expandedCategories[category.value] ? 
+                                                <FaChevronDown className="w-3 h-3" /> : 
+                                                <FaChevronRight className="w-3 h-3" />
+                                            }
                                         </button>
                                     )}
                                 </div>
                                 
-                                {/* Subcategories dropdown */}
-                                <AnimatePresence>
-                                    {hasSubcategories && isExpanded && (
-                                        <motion.div 
-                                            initial={{ height: 0, opacity: 0 }}
-                                            animate={{ height: 'auto', opacity: 1 }}
-                                            exit={{ height: 0, opacity: 0 }}
-                                            transition={{ duration: 0.2 }}
-                                            className='ml-8 mt-2 space-y-2 overflow-hidden'
-                                        >
-                                            {getSubcategories(category.value).map((sub) => (
-                                                <label key={sub.value} className={`flex items-center cursor-pointer py-1 pl-2 rounded-md ${filtersState.subcategory === sub.value ? 'text-gold bg-gold/5' : ''} hover:bg-gold/5 hover:text-gold transition-all duration-200`}>
-                                                    <input
-                                                        type='radio'
-                                                        name='subcategory'
-                                                        checked={filtersState.category === category.value && filtersState.subcategory === sub.value}
-                                                        onChange={() => handleSubcategoryChange(category.value, sub.value)}
-                                                        className='mr-2 accent-gold'
-                                                    />
-                                                    <span className="material-icons text-sm mr-2">
-                                                        {getSubcategoryIcon(category.value, sub.value)}
-                                                    </span>
-                                                    {sub.label}
-                                                </label>
-                                            ))}
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                {/* Show subcategories when category is expanded */}
+                                {expandedCategories[category.value] && categoryHasSubcategories(category.value) && (
+                                    <div className="ml-8 mt-1 mb-2 border-l-2 border-gray-200 pl-2 space-y-1">
+                                        {getSubcategories(category.value).map(subcategory => (
+                                            <div 
+                                                key={subcategory.value}
+                                                className={`py-1 px-2 rounded text-sm cursor-pointer hover:bg-gray-50 ${
+                                                    filtersState.subcategory === subcategory.value ? 'bg-gray-50 font-medium' : ''
+                                                }`}
+                                                onClick={() => handleSubcategoryChange(category.value, subcategory.value)}
+                                            >
+                                                {subcategory.label}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-                        );
-                    })}
-                </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
-            <div className='mb-8'>
-                <h3 className='font-medium mb-4 text-lg flex items-center gap-2'>
-                    <span className="material-icons text-gold">payments</span>
-                    Price Range
-                </h3>
-                <div className='space-y-3'>
-                    {filters.priceRanges.map((range, index) => (
-                        <label key={index} className={`flex items-center cursor-pointer py-1 rounded-md ${filtersState.priceRange === `${range.min}-${range.max === Infinity ? 'Infinity' : range.max}` ? 'text-gold' : ''} hover:text-gold transition-colors duration-200`}>
-                            <input
-                                type='radio'
-                                name='priceRange'
-                                checked={filtersState.priceRange === `${range.min}-${range.max === Infinity ? 'Infinity' : range.max}`}
-                                onChange={() => onPriceRangeChange(range)}
-                                className='mr-2 accent-gold'
-                            />
-                            <span className="material-icons text-lg mr-2">
-                                {index === 0 ? 'savings' : 
-                                 index === 1 ? 'sell' :
-                                 index === 2 ? 'diamond' : 'paid'}
-                            </span>
-                            {range.label}
-                        </label>
-                    ))}
-                </div>
+            {/* Price filter section */}
+            <div className="filter-section mb-6">
+                <button 
+                    className="w-full flex justify-between items-center py-2 border-b border-gray-200 text-sm font-medium uppercase"
+                    onClick={() => toggleSection('price')}
+                >
+                    Price
+                    {expandedSections.price ? 
+                        <CiCircleMinus className="w-5 h-5" /> : 
+                        <CiCirclePlus className="w-5 h-5" />
+                    }
+                </button>
+                
+                {expandedSections.price && (
+                    <div className="mt-3 space-y-2">
+                        {filters.priceRanges.map((range, index) => (
+                            <div 
+                                key={index}
+                                className={`flex items-center py-2 px-1 rounded cursor-pointer hover:bg-gray-50 ${
+                                    filtersState.priceRange === `${range.min}-${range.max === Infinity ? 'Infinity' : range.max}` ? 'bg-gray-50 font-medium' : ''
+                                }`}
+                                onClick={() => onPriceRangeChange(range)}
+                            >
+                                {range.label}
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
-
-            <button
-                onClick={() => {
-                    clearFilters();
-                    closeMobileFilter();
-                    navigate('/shop');
-                }}
-                className='w-full bg-gold/10 text-gold py-3 rounded-md hover:bg-gold hover:text-white transition-all duration-300 flex items-center justify-center'
-            >
-                <span className="material-icons mr-2">refresh</span>
-                Clear Filters
-            </button>
         </div>
     );
 };

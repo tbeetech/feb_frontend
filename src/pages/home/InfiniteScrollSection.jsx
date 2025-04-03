@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaGem, FaSprayCan, FaTshirt, FaShoppingBag, FaChevronLeft, FaChevronRight, FaStar, FaShoePrints, FaBriefcase, FaLongArrowAltRight } from 'react-icons/fa';
@@ -43,19 +43,7 @@ const InfiniteScrollSection = () => {
   const [currentImage, setCurrentImage] = useState(0);
   const images = [image1, image2, image3]; // Using all three images
   const scrollContainerRef = useRef(null);
-  const [isHovering, setIsHovering] = useState(false);
   
-  // Auto scroll timer for the image carousel
-  useEffect(() => {
-    if (isHovering) return; // Pause auto-scroll when hovering
-    
-    const timer = setInterval(() => {
-      setCurrentImage((prev) => (prev + 1) % images.length);
-    }, 3000); // Changed from 5000 to 3000 ms (3 seconds)
-    
-    return () => clearInterval(timer);
-  }, [images.length, isHovering]);
-
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({
@@ -117,17 +105,22 @@ const InfiniteScrollSection = () => {
     }
   };
 
+  // Handle manual navigation for the image slider
+  const goToNext = () => {
+    setCurrentImage((prev) => (prev + 1) % images.length);
+  };
+  
+  const goToPrev = () => {
+    setCurrentImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+  
   // Handle manual navigation
   const goToSlide = (index) => {
     setCurrentImage(index);
   };
 
   return (
-    <section 
-      className="relative h-screen overflow-hidden -mt-[60px]"
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-    >
+    <section className="relative h-screen overflow-hidden -mt-[60px]">
       {/* Main Background Images */}
       <div className="h-full w-full relative">
         <AnimatePresence initial={false}>
@@ -154,6 +147,31 @@ const InfiniteScrollSection = () => {
             />
           </motion.div>
         </AnimatePresence>
+        
+        {/* Navigation Arrows */}
+        <div className="absolute inset-0 flex items-center justify-between px-4 z-20">
+          <motion.button
+            onClick={goToPrev}
+            className="bg-white/30 hover:bg-white/60 text-white rounded-full p-2"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 0.7, x: 0 }}
+          >
+            <FaChevronLeft className="text-2xl" />
+          </motion.button>
+          
+          <motion.button
+            onClick={goToNext}
+            className="bg-white/30 hover:bg-white/60 text-white rounded-full p-2"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 0.7, x: 0 }}
+          >
+            <FaChevronRight className="text-2xl" />
+          </motion.button>
+        </div>
         
         {/* Main Content */}
         <div className="absolute inset-0 flex flex-col justify-center items-center text-center z-10 px-4">
@@ -199,20 +217,6 @@ const InfiniteScrollSection = () => {
         {/* Category Buttons with Navigation */}
         <div className="absolute bottom-12 w-full z-20">
           <div className="relative max-w-5xl mx-auto">
-            {/* Left Navigation Button */}
-            <motion.button 
-              onClick={scrollLeft} 
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 -ml-4 z-10 bg-white/90 hover:bg-gold hover:text-white text-primary w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-all duration-300"
-              aria-label="Scroll left"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8 }}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <FaChevronLeft className="text-lg" />
-            </motion.button>
-            
             {/* Scrollable Container */}
             <motion.div 
               ref={scrollContainerRef}
@@ -247,20 +251,6 @@ const InfiniteScrollSection = () => {
                 );
               })}
             </motion.div>
-            
-            {/* Right Navigation Button */}
-            <motion.button 
-              onClick={scrollRight} 
-              className="absolute right-0 top-1/2 transform -translate-y-1/2 -mr-4 z-10 bg-white/90 hover:bg-gold hover:text-white text-primary w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-all duration-300"
-              aria-label="Scroll right"
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8 }}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <FaChevronRight className="text-lg" />
-            </motion.button>
           </div>
         </div>
       </div>

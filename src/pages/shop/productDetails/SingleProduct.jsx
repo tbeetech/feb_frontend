@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import RatingStars from '../../../components/RatingStars';
 import { useDispatch, useSelector } from 'react-redux';
-import { useFetchProductByIdQuery, useUpdateProductRatingMutation } from '../../../redux/features/products/productsApi';
+import { useFetchProductByIdQuery, useUpdateProductRatingMutation, useFetchAllProductsQuery } from '../../../redux/features/products/productsApi';
 import { addToCart, decrementQuantity } from '../../../redux/features/cart/cartSlice';
 import ReviewsCard from '../reviews/ReviewsCard';
 import { motion } from 'framer-motion';
@@ -13,6 +13,8 @@ import { toast } from 'react-hot-toast';
 import ImageSlider from '../../../components/ImageSlider';
 import ReviewForm from '../reviews/ReviewForm';
 import axios from 'axios';
+import { useCurrency } from '../../../components/CurrencySwitcher';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const SingleProduct = () => {
     const { id } = useParams();
@@ -21,7 +23,33 @@ const SingleProduct = () => {
     const { data, error, isLoading } = useFetchProductByIdQuery(id);
     const singleProduct = data?.product || {};
     const productReviews = data?.reviews || [];
+    const { formatPrice, currencySymbol } = useCurrency();
     
+    // Add ref for product recommendation slider
+    const recommendationSliderRef = useRef(null);
+    
+    // Get similar products (for now just use a subset of the same data since we don't have a dedicated API)
+    const { data: allProductsData } = useFetchAllProductsQuery({
+        limit: 10,
+        category: singleProduct?.category || '',
+    }, { skip: !singleProduct?.category });
+    
+    // Filter out the current product
+    const similarProducts = allProductsData?.products.filter(product => 
+        product._id !== id
+    ) || [];
+    
+    // Handle sliding through recommendations
+    const scrollRecommendations = (direction) => {
+        if (recommendationSliderRef.current) {
+            const scrollAmount = direction * 300;
+            recommendationSliderRef.current.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    };
+
     // Get cart state to check if product exists
     const cartProducts = useSelector(state => state.cart.products);
     const productInCart = cartProducts.find(product => product._id === id);
@@ -311,7 +339,12 @@ const SingleProduct = () => {
     const deliveryInfo = getDeliveryInfo();
 
     return (
-        <>
+        <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={stagger}
+            className="container mx-auto py-4 mt-12 px-4 lg:px-0"
+        >
             {/* Enhanced breadcrumb with animation */}
             <motion.section 
                 className='bg-primary-light py-6 lg:py-10'
@@ -427,18 +460,18 @@ const SingleProduct = () => {
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: 0.4 }}
                             >
-                                <span className="text-3xl md:text-4xl font-bold text-primary">₦{singleProduct?.price?.toLocaleString()}</span>
+                                <span className="text-3xl md:text-4xl font-bold text-primary">{currencySymbol}{formatPrice(singleProduct?.price)}</span>
                                 {singleProduct?.oldPrice && (
                                     <span className="text-xl text-gray-400 line-through">
-                                        ₦{singleProduct?.oldPrice?.toLocaleString()}
+                                        {currencySymbol}{formatPrice(singleProduct?.oldPrice)}
                                     </span>
                                 )}
                                 {singleProduct?.oldPrice && (
                                     <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">
                                         {Math.round((singleProduct.oldPrice - singleProduct.price) / singleProduct.oldPrice * 100)}% OFF
                                     </span>
-                            )}
-                        </motion.div>
+                                )}
+                            </motion.div>
                         </div>
                         
                         {/* Product description */}
@@ -569,25 +602,27 @@ const SingleProduct = () => {
                                         )}
                                     </div>
                                     
-                                    {quantity === 0 ? (
-                                        <motion.button
-                                            onClick={() => handleAddToCart(singleProduct)}
-                                            className={`w-full py-4 bg-primary text-white rounded-lg flex items-center justify-center hover:bg-primary-dark transition-colors text-lg font-medium ${(isOutOfStock || hasReachedStockLimit) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            disabled={isOutOfStock || hasReachedStockLimit}
-                                            whileHover={{ scale: isOutOfStock || hasReachedStockLimit ? 1 : 1.02 }}
-                                            whileTap={{ scale: isOutOfStock || hasReachedStockLimit ? 1 : 0.98 }}
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                                <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
-                                            </svg>
-                                            {isOutOfStock ? 'Out of Stock' : hasReachedStockLimit ? 'Stock Limit Reached' : 'Add to Cart'}
-                                        </motion.button>
-                                    ) : (
-                                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-green-700 text-center font-medium flex items-center justify-center">
+                                    {/* Always show Add to Cart button */}
+                                    <motion.button
+                                        onClick={() => handleAddToCart(singleProduct)}
+                                        className={`w-full py-4 bg-black text-white rounded-lg flex items-center justify-center hover:bg-gray-800 transition-colors text-lg font-medium ${(isOutOfStock || hasReachedStockLimit) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        disabled={isOutOfStock || hasReachedStockLimit}
+                                        whileHover={{ scale: isOutOfStock || hasReachedStockLimit ? 1 : 1.02 }}
+                                        whileTap={{ scale: isOutOfStock || hasReachedStockLimit ? 1 : 0.98 }}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+                                        </svg>
+                                        {isOutOfStock ? 'Out of Stock' : hasReachedStockLimit ? 'Stock Limit Reached' : (quantity > 0 ? 'Add More to Cart' : 'Add to Cart')}
+                                    </motion.button>
+                                    
+                                    {/* Show confirmation when product is in cart */}
+                                    {quantity > 0 && (
+                                        <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-green-700 text-center font-medium flex items-center justify-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                             </svg>
-                                            Product added to cart
+                                            {quantity} {quantity === 1 ? 'item' : 'items'} in your cart
                                         </div>
                                     )}
                                 </div>
@@ -674,14 +709,81 @@ const SingleProduct = () => {
                 </motion.div>
             </motion.section>
             
+            {/* Product Recommendations */}
+            {!isLoading && !error && similarProducts.length > 0 && (
+                <motion.section
+                    className="py-12 mt-12 border-t border-gray-200"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.7 }}
+                >
+                    <h2 className="text-2xl md:text-3xl font-bold mb-8">You May Also Like</h2>
+                    
+                    <div className="relative">
+                        {/* Left Navigation Button */}
+                        <button 
+                            onClick={() => scrollRecommendations(-1)}
+                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full shadow-lg p-2 hover:bg-gray-50 transition-colors"
+                            aria-label="Scroll left"
+                        >
+                            <FaChevronLeft className="w-5 h-5" />
+                        </button>
+                        
+                        {/* Scrollable Products Container */}
+                        <div 
+                            ref={recommendationSliderRef}
+                            className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide scroll-smooth"
+                            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                        >
+                            {similarProducts.map((product) => (
+                                <div 
+                                    key={product._id}
+                                    className="flex-shrink-0 w-60 group"
+                                >
+                                    <Link to={`/product/${product._id}`} className="block">
+                                        <div className="relative overflow-hidden rounded-lg bg-gray-100" style={{ aspectRatio: '1/1' }}>
+                                            <img 
+                                                src={product.image} 
+                                                alt={product.name} 
+                                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                            />
+                                        </div>
+                                        <div className="mt-3">
+                                            <h3 className="text-sm font-medium text-gray-900">{product.name}</h3>
+                                            <p className="mt-1 text-sm text-primary">
+                                                {currencySymbol}{formatPrice(product.price)}
+                                                {product.oldPrice && (
+                                                    <span className="ml-2 line-through text-gray-500">
+                                                        {currencySymbol}{formatPrice(product.oldPrice)}
+                                                    </span>
+                                                )}
+                                            </p>
+                                        </div>
+                                    </Link>
+                                </div>
+                            ))}
+                        </div>
+                        
+                        {/* Right Navigation Button */}
+                        <button 
+                            onClick={() => scrollRecommendations(1)}
+                            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full shadow-lg p-2 hover:bg-gray-50 transition-colors"
+                            aria-label="Scroll right"
+                        >
+                            <FaChevronRight className="w-5 h-5" />
+                        </button>
+                    </div>
+                </motion.section>
+            )}
+            
             {/* Image Preview Modal */}
             <ImagePreviewModal 
                 isOpen={previewOpen}
-                imageUrl={selectedImage}
+                imageUrl={selectedImage || singleProduct.image}
                 productName={singleProduct.name}
                 onClose={() => setPreviewOpen(false)}
             />
-        </>
+        </motion.div>
     )
 }
 

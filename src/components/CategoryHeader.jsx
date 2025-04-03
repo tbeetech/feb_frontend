@@ -132,7 +132,7 @@ const CategoryHeader = ({ categoryName, subcategory, products = [], categoryImag
                                 {[...Array(5)].map((_, i) => (
                                     <motion.div
                                         key={i}
-                                        className="absolute rounded-full bg-gradient-to-r from-primary/10 to-white/20"
+                                        className="absolute rounded-full bg-gradient-to-r from-gray-200/10 to-white/20"
                                         style={{
                                             width: Math.random() * 300 + 100,
                                             height: Math.random() * 300 + 100,
@@ -172,27 +172,18 @@ const CategoryHeader = ({ categoryName, subcategory, products = [], categoryImag
                             />
 
                             {/* Products Scroll */}
-                            <motion.div
-                                className="absolute inset-0 flex gap-4"
+                            <div
+                                className="absolute inset-0 flex gap-4 overflow-x-auto py-4 px-2 no-scrollbar"
                                 style={{
                                     transform: 'translateZ(0px)',
                                 }}
-                                animate={{
-                                    x: [0, -(products.length * 320)],
-                                }}
-                                transition={{
-                                    x: {
-                                        repeat: Infinity,
-                                        duration: 30,
-                                        ease: "linear",
-                                    },
-                                }}
                             >
-                                {[...products, ...products].map((product, index) => (
+                                {products.slice(0, 6).map((product, index) => (
                                     <motion.div
                                         key={`${product._id}-${index}`}
-                                        className="w-80 flex-shrink-0 glass-effect rounded-lg overflow-hidden"
+                                        className="w-80 flex-shrink-0 glass-effect rounded-lg overflow-hidden cursor-pointer"
                                         whileHover={{ scale: 1.05, translateZ: 20 }}
+                                        onClick={() => navigate(`/product/${product._id}`)}
                                     >
                                         {/* Product content */}
                                         <div className="relative h-48">
@@ -212,7 +203,7 @@ const CategoryHeader = ({ categoryName, subcategory, products = [], categoryImag
                                         </div>
                                     </motion.div>
                                 ))}
-                            </motion.div>
+                            </div>
 
                             {/* Floating Particles */}
                             <div className="absolute inset-0">

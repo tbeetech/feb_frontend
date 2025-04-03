@@ -210,6 +210,20 @@ const productsApi = createApi({
                 };
             }
         }),
+        fetchSimilarProducts: builder.query({
+            query: ({ id, category, limit = 8 }) => ({
+                url: `/products/similar?productId=${id}&category=${category}&limit=${limit}`,
+                method: 'GET',
+            }),
+            transformResponse: (response) => {
+                return {
+                    products: response.data,
+                    success: response.success,
+                    message: response.message,
+                };
+            },
+            providesTags: ['Products'],
+        }),
     }),
 });
 export const { useFetchAllProductsQuery, useFetchProductByIdQuery, useAddProductMutation,

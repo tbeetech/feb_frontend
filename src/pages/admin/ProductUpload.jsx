@@ -646,7 +646,7 @@ const ProductUpload = () => {
             <h2 className="text-xl font-semibold mb-4">Product Preview</h2>
             <div className="bg-white p-4 rounded-lg shadow-md">
               <div className="product__card relative group">
-                <div className="relative aspect-square overflow-hidden w-full max-w-xs mx-auto">
+                <div className="relative overflow-hidden w-full max-w-xs mx-auto" style={{ aspectRatio: '1/1' }}>
                   {formData.image ? (
                     <img 
                       src={formData.image} 

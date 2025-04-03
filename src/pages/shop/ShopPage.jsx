@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import ProductCards from './ProductCards'
 import ShopFiltering from './ShopFiltering'
 import ShopHeader from './ShopHeader'
 import { useFetchAllProductsQuery } from '../../redux/features/products/productsApi'
 import { CATEGORIES } from '../../constants/categoryConstants'
+import { CiFilter, CiGrid41, CiGrid2H, CiCircleChevLeft, CiCircleChevRight } from 'react-icons/ci'
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 
 const filters = {
   categories: {
@@ -29,9 +31,10 @@ const ShopPage = () => {
     priceRange: ''
   })
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
+  const [viewMode, setViewMode] = useState('grid') // 'grid' or 'list'
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [ProductsPerPage] = useState(8);
+  const [ProductsPerPage] = useState(12);
 
   const { category, subcategory, priceRange } = filtersState;
   
@@ -57,52 +60,159 @@ const ShopPage = () => {
     limit: ProductsPerPage,
   })
 
-    const clearFilters = () => {
-      setFiltersState({
-        category: 'all',
-        subcategory: '',
-        priceRange: ''
-      })
+  const clearFilters = () => {
+    setFiltersState({
+      category: 'all',
+      subcategory: '',
+      priceRange: ''
+    })
+  }
+
+  const handlePageChange = (pageNumber) => {
+    if(pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber)
+      // Scroll to top when changing pages
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  }
 
-    const handlePageChange =(pageNumber)=> {
-      if(pageNumber > 0 && pageNumber <= totalPages) {
-        setCurrentPage(pageNumber)
-      }
+  // Add handler for price range changes
+  const handlePriceRangeChange = (range) => {
+    setFiltersState(prev => ({
+      ...prev,
+      priceRange: `${range.min}-${range.max === Infinity ? 'Infinity' : range.max}`
+    }));
+    setCurrentPage(1);
+  };
+
+  const categorySliderRef = useRef(null);
+  
+  const handleCategoryClick = (category) => {
+    setFiltersState(prev => ({
+      ...prev,
+      category: category === 'all' ? 'all' : category,
+      subcategory: ''
+    }));
+    setCurrentPage(1);
+  };
+  
+  const scrollCategories = (direction) => {
+    if (categorySliderRef.current) {
+      categorySliderRef.current.scrollBy({
+        left: direction * 200,
+        behavior: 'smooth'
+      });
     }
+  };
+  
+  // Generate all categories for the slider
+  const allCategoryOptions = [
+    { value: 'all', label: 'All Products', icon: '🛍️' },
+    { value: 'new', label: 'New Arrivals', icon: '✨' },
+    { value: 'clothes', label: 'Clothing', icon: '👕' },
+    { value: 'dress', label: 'Dresses', icon: '👗' },
+    { value: 'shoes', label: 'Shoes', icon: '👠' },
+    { value: 'bags', label: 'Bags', icon: '👜' },
+    { value: 'accessories', label: 'Accessories', icon: '⌚' },
+    { value: 'fragrance', label: 'Fragrances', icon: '🧴' },
+    { value: 'corporate', label: 'Corporate Wear', icon: '👔' },
+  ];
 
-    // Add handler for price range changes
-    const handlePriceRangeChange = (range) => {
-      setFiltersState(prev => ({
-        ...prev,
-        priceRange: `${range.min}-${range.max === Infinity ? 'Infinity' : range.max}`
-      }));
-      setCurrentPage(1);
-    };
+  if(isLoading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+    </div>
+  )
+  
+  if(error) return (
+    <div className="text-center py-10 text-red-500">
+      Error loading products. Please try again later.
+    </div>
+  )
 
-    if(isLoading) return <div>Loading...</div>
-    if(error) return <div>Error Loading products.</div>
+  const startProduct = (currentPage - 1) * ProductsPerPage + 1; 
+  const endProduct = Math.min(startProduct + products.length - 1, totalProducts);
 
-    const startProduct = (currentPage - 1) * ProductsPerPage + 1; 
-    const endProduct = startProduct + products.length - 1;
   return(
-    <>
+    <div className="max-w-7xl mx-auto px-4 py-8">
       <ShopHeader products={products} />
-      <section className='section__container'>
-        <div className='md:hidden mb-4'>
-          <button 
-            onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-            className='bg-gold text-white px-4 py-2 rounded-md shadow-md flex items-center gap-2 hover:bg-gold-dark transition-all duration-300'
-          >
-            <span className="material-icons">
-              {isMobileFilterOpen ? 'close' : 'filter_alt'}
-            </span>
-            {isMobileFilterOpen ? 'Hide Filters' : 'Show Filters'}
-          </button>
+      
+      {/* Category Slider */}
+      <div className="my-6 relative">
+        <button 
+          onClick={() => scrollCategories(-1)}
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full shadow-md p-1"
+          aria-label="Scroll categories left"
+        >
+          <FaChevronLeft className="w-4 h-4" />
+        </button>
+        
+        <div 
+          ref={categorySliderRef}
+          className="flex space-x-2 overflow-x-auto py-2 px-8 scrollbar-hide scroll-smooth"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {allCategoryOptions.map((cat) => (
+            <button
+              key={cat.value}
+              onClick={() => handleCategoryClick(cat.value)}
+              className={`flex items-center space-x-2 whitespace-nowrap px-4 py-2 rounded-full transition-colors ${
+                filtersState.category === cat.value 
+                  ? 'bg-black text-white' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
+              }`}
+            >
+              <span>{cat.icon}</span>
+              <span>{cat.label}</span>
+            </button>
+          ))}
         </div>
-        <div className='flex flex-col md:flex-row md:gap-12 gap-8'>
-          {/* Filter section - show based on screen size or toggle */}
-          <div className={`${isMobileFilterOpen ? 'block' : 'hidden'} md:block md:w-1/4 md:sticky md:top-24 md:self-start`}>
+        
+        <button 
+          onClick={() => scrollCategories(1)}
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full shadow-md p-1"
+          aria-label="Scroll categories right"
+        >
+          <FaChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+      
+      <div className="border-t border-gray-200 pt-6 pb-4">
+        {/* Filtering controls */}
+        <div className="flex flex-wrap items-center justify-between mb-6">
+          <div className="flex items-center space-x-4 mb-4 md:mb-0">
+            <button 
+              onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
+              className="flex items-center space-x-2 px-4 py-2 border border-gray-300 bg-white hover:bg-gray-50 text-sm"
+            >
+              <CiFilter className="h-5 w-5" />
+              <span>All Filters</span>
+            </button>
+            
+            <div className="hidden md:flex items-center space-x-4">
+              <button 
+                onClick={() => setViewMode('grid')} 
+                className={`p-2 ${viewMode === 'grid' ? 'text-black' : 'text-gray-400'}`}
+              >
+                <CiGrid41 className="h-5 w-5" />
+              </button>
+              <button 
+                onClick={() => setViewMode('list')} 
+                className={`p-2 ${viewMode === 'list' ? 'text-black' : 'text-gray-400'}`}
+              >
+                <CiGrid2H className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+          
+          <div className="text-sm text-gray-500">
+            Showing {startProduct}-{endProduct} of {totalProducts} results
+          </div>
+        </div>
+        
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Filters panel */}
+          <div className={`${isMobileFilterOpen ? 'block' : 'hidden'} lg:block lg:w-64 flex-shrink-0`}>
             <ShopFiltering
               filters={filters}
               filtersState={filtersState}
@@ -112,48 +222,125 @@ const ShopPage = () => {
               closeMobileFilter={() => setIsMobileFilterOpen(false)}
             />
           </div>
-
-          {/* right side */}
+          
+          {/* Products grid */}
           <div className="flex-1">
-            <h3 className='text-xl font-medium mb-4 flex items-center gap-2'>
-              <span className="material-icons text-gold">inventory_2</span>
-              Showing {startProduct} to {endProduct} of {totalProducts} products
-            </h3>
-            <ProductCards products={products} />
-
-            {/* pagination controls */}
-            <div className='mt-8 flex justify-center gap-2'>
-                <button
+            <ProductCards products={products} viewMode={viewMode} />
+            
+            {/* Empty state */}
+            {products.length === 0 && (
+              <div className="text-center py-16 border border-gray-200">
+                <h3 className="text-lg text-gray-500 mb-2">No products found</h3>
+                <p className="text-sm text-gray-400 mb-4">Try adjusting your filters</p>
+                <button 
+                  onClick={clearFilters}
+                  className="px-4 py-2 border border-gray-300 text-sm hover:bg-gray-50"
+                >
+                  Clear all filters
+                </button>
+              </div>
+            )}
+            
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-8 flex justify-center">
+                <div className="flex border border-gray-200 divide-x">
+                  <button
                     disabled={currentPage === 1}
-                    onClick={()=> handlePageChange(currentPage -1)} 
-                    className='px-4 py-2 text-gray-700 border border-gray-300 hover:border-gold hover:text-gold disabled:opacity-50 disabled:hover:border-gray-300 transition-all duration-300'>
-                    <span className="material-icons">navigate_before</span>
-                </button>
-                    {
-                        [...Array(totalPages)].map((_, index)=> (
-                          <button key={index}
-                          onClick={()=> handlePageChange(index + 1)}
-                          className={`px-4 py-2 border transition-all duration-300 ${
-                            currentPage === index + 1
-                                ? 'border-gold bg-gold/5 text-gold'
-                                : 'border-gray-300 text-gray-700 hover:border-gold hover:text-gold'
-                          }`}
-                          >{index + 1}</button>
-                        ))
-                    }
-                    <button
+                    onClick={() => handlePageChange(currentPage - 1)} 
+                    className="px-4 py-2 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white"
+                  >
+                    Previous
+                  </button>
+                  
+                  {totalPages <= 5 ? (
+                    [...Array(totalPages)].map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handlePageChange(index + 1)}
+                        className={`px-4 py-2 ${
+                          currentPage === index + 1
+                            ? 'bg-black text-white'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {index + 1}
+                      </button>
+                    ))
+                  ) : (
+                    <>
+                      {/* First page */}
+                      <button
+                        onClick={() => handlePageChange(1)}
+                        className={`px-4 py-2 ${
+                          currentPage === 1
+                            ? 'bg-black text-white'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        1
+                      </button>
+                      
+                      {/* Ellipsis if needed */}
+                      {currentPage > 3 && (
+                        <span className="px-4 py-2 text-gray-500">...</span>
+                      )}
+                      
+                      {/* Pages around current page */}
+                      {[...Array(5)]
+                        .map((_, i) => {
+                          const pageNum = currentPage - 2 + i;
+                          return pageNum > 1 && pageNum < totalPages ? pageNum : null;
+                        })
+                        .filter(Boolean)
+                        .map(pageNum => (
+                          <button
+                            key={pageNum}
+                            onClick={() => handlePageChange(pageNum)}
+                            className={`px-4 py-2 ${
+                              currentPage === pageNum
+                                ? 'bg-black text-white'
+                                : 'text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        ))}
+                      
+                      {/* Ellipsis if needed */}
+                      {currentPage < totalPages - 2 && (
+                        <span className="px-4 py-2 text-gray-500">...</span>
+                      )}
+                      
+                      {/* Last page */}
+                      <button
+                        onClick={() => handlePageChange(totalPages)}
+                        className={`px-4 py-2 ${
+                          currentPage === totalPages
+                            ? 'bg-black text-white'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {totalPages}
+                      </button>
+                    </>
+                  )}
+                  
+                  <button
                     disabled={currentPage === totalPages}
-                     onClick={()=> handlePageChange(currentPage + 1)} 
-                    className='px-4 py-2 text-gray-700 border border-gray-300 hover:border-gold hover:text-gold disabled:opacity-50 disabled:hover:border-gray-300 transition-all duration-300'>
-                    <span className="material-icons">navigate_next</span>
-                </button>
-            </div>
+                    onClick={() => handlePageChange(currentPage + 1)} 
+                    className="px-4 py-2 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-
         </div>
-      </section>
-
-    </>
+      </div>
+    </div>
   )
 }
+
 export default ShopPage

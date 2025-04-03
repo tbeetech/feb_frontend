@@ -10,15 +10,16 @@ import ScrollToTopButton from './components/ScrollToTopButton'
  
 function App() {
   return (
-    <div className="flex flex-col min-h-screen"> {/* Add flex container */}
-      <Navbar/>
-      <main className="flex-grow content-wrapper"> {/* Add content-wrapper class */}
-        <Outlet/>
+    <div className="min-h-screen bg-white text-gray-900">
+      <Navbar />
+      <main className="min-h-[60vh] pt-2">
+        <Outlet />
       </main>
-      <Footer/>
-      <BottomNav/> {/* Place BottomNav after Footer */}
+      <Footer />
+      <BottomNav className="md:hidden" /> {/* Only show on mobile */}
       <ScrollToTopButton />
     </div>
   )
 }
+
 export default App

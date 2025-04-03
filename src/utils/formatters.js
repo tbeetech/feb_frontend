@@ -4,9 +4,9 @@ import { formatDate as originalFormatDate } from './formatDate';
 // Re-export the original formatDate
 export const formatDate = originalFormatDate;
 
-// Format price to Nigerian Naira
+// Format price to the selected currency (defaults to Nigerian Naira)
 export const formatPrice = (price) => {
-  return `₦${Number(price).toLocaleString()}`;
+  return Number(price).toLocaleString();
 };
 
 // Format receipt number

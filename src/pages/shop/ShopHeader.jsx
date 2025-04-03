@@ -1,15 +1,29 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { useCurrency } from '../../components/CurrencySwitcher';
 
 const ShopHeader = ({ products = [] }) => {
     const navigate = useNavigate();
+    const sliderRef = useRef(null);
+    const { formatPrice, currencySymbol } = useCurrency();
+
+    const scrollSlider = (direction) => {
+        if (sliderRef.current) {
+            const scrollAmount = direction * 300; // Adjust scroll amount as needed
+            sliderRef.current.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    };
 
     return (
         <section className="relative min-h-[500px] mt-16 overflow-hidden">
             {/* Glassmorphism Background */}
             <motion.div 
-                className="absolute inset-0 bg-gradient-to-r from-primary-light/30 to-white"
+                className="absolute inset-0 bg-gradient-to-r from-gray-100/30 to-white"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 1 }}
@@ -72,25 +86,27 @@ const ShopHeader = ({ products = [] }) => {
                     </motion.p>
                 </motion.div>
 
-                {/* Floating Products Display */}
+                {/* Products Slider */}
                 {products.length > 0 && (
-                    <div className="relative h-40 overflow-hidden mt-8">
-                        <motion.div
-                            className="flex gap-6 absolute"
-                            animate={{
-                                x: [-products.length * 320, 0],
-                            }}
-                            transition={{
-                                x: {
-                                    repeat: Infinity,
-                                    duration: 20,
-                                    ease: "linear",
-                                },
-                            }}
+                    <div className="relative mt-8">
+                        {/* Left Navigation Button */}
+                        <button 
+                            onClick={() => scrollSlider(-1)}
+                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 rounded-full shadow-md p-2 hover:bg-white transition-colors"
+                            aria-label="Scroll left"
                         >
-                            {[...products, ...products].map((product, index) => (
+                            <FaChevronLeft className="w-5 h-5" />
+                        </button>
+
+                        {/* Scrollable Products Container */}
+                        <div 
+                            ref={sliderRef}
+                            className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
+                            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                        >
+                            {products.map((product) => (
                                 <motion.div
-                                    key={`${product._id}-${index}`}
+                                    key={product._id}
                                     whileHover={{ scale: 1.05, y: -5 }}
                                     className="w-64 flex-shrink-0 bg-white/80 backdrop-blur-md rounded-lg shadow-lg overflow-hidden cursor-pointer"
                                     onClick={() => navigate(`/product/${product._id}`)}
@@ -104,12 +120,21 @@ const ShopHeader = ({ products = [] }) => {
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                                         <div className="absolute bottom-2 left-2 right-2 text-white">
                                             <p className="text-sm font-semibold truncate">{product.name}</p>
-                                            <p className="text-xs">₦{product.price.toLocaleString()}</p>
+                                            <p className="text-xs">{currencySymbol}{formatPrice(product.price)}</p>
                                         </div>
                                     </div>
                                 </motion.div>
                             ))}
-                        </motion.div>
+                        </div>
+
+                        {/* Right Navigation Button */}
+                        <button 
+                            onClick={() => scrollSlider(1)}
+                            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 rounded-full shadow-md p-2 hover:bg-white transition-colors"
+                            aria-label="Scroll right"
+                        >
+                            <FaChevronRight className="w-5 h-5" />
+                        </button>
                     </div>
                 )}
             </div>

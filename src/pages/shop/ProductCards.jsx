@@ -1,25 +1,20 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import PropTypes from 'prop-types'
 import RatingStars from '../../components/RatingStars'
-import { useDispatch } from 'react-redux'
-import { addToCart } from '../../redux/features/cart/cartSlice'
 import SocialContactButtons from '../../components/SocialContactButtons'
 import { motion } from 'framer-motion'
 import { springAnimation } from '../../utils/animations';
 import ImagePreviewModal from '../../components/ImagePreviewModal';
+import { useCurrency } from '../../components/CurrencySwitcher';
 
 const ProductCards = ({products}) => {
-    const dispatch = useDispatch()
+    const { formatPrice, currencySymbol } = useCurrency();
     const [previewImage, setPreviewImage] = useState({
         isOpen: false,
         url: '',
         name: ''
     });
-
-    const handleAddToCart = (product) => {
-        dispatch(addToCart(product))
-        alert("Item added to cart");
-    }
 
     const openPreview = (e, imageUrl, productName) => {
         e.preventDefault(); // Prevent navigation
@@ -42,29 +37,27 @@ const ProductCards = ({products}) => {
     return (
         <>
             <motion.div 
-                className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"
+                className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+                initial="hidden"
+                animate="show"
                 variants={{
                     hidden: { opacity: 0 },
                     show: {
                         opacity: 1,
                         transition: {
-                            staggerChildren: 0.1,
-                            delayChildren: 0.3
+                            staggerChildren: 0.1
                         }
                     }
                 }}
-                initial="hidden"
-                animate="show"
             >
-                {products.map((product, index)=>( 
+                {products.map((product) => (
                     <motion.div
-                        key={index}
-                        className="product-card-magnetic glass-morphism"
+                        key={product._id}
                         variants={{
                             hidden: { 
                                 opacity: 0,
                                 y: 50,
-                                rotateX: 80,
+                                rotateX: 5,
                                 scale: 0.9
                             },
                             show: { 
@@ -80,15 +73,15 @@ const ProductCards = ({products}) => {
                             rotateY: 5,
                             boxShadow: "0px 20px 40px rgba(0,0,0,0.15)"
                         }}
+                        className="rounded-lg overflow-hidden shadow-sm"
                     >
-                        <div className='product__card relative group'>
-                            <div className='relative aspect-square overflow-hidden'>
+                        <div className='product__card relative group rounded-lg overflow-hidden'>
+                            <div className='relative overflow-hidden rounded-lg' style={{ aspectRatio: '1/1' }}>
                                 <Link to={`/product/${product._id}`}>
                                     <img 
                                         src={product.image} 
                                         alt={product.name} 
-                                        className='w-full h-full object-cover transition-transform duration-300 group-hover:scale-105'
-                                        style={{ aspectRatio: '1/1' }}
+                                        className='w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 rounded-lg'
                                     />
                                 </Link>
                                 
@@ -109,22 +102,7 @@ const ProductCards = ({products}) => {
                                     </svg>
                                 </div>
                                 
-                                {product.orderType !== 'contact-to-order' ? (
-                                    <button
-                                        onClick={(e)=>{
-                                            e.stopPropagation();
-                                            handleAddToCart(product)
-                                        }}
-                                        className='absolute left-1/2 -translate-x-1/2 bottom-4 
-                                                 px-6 py-2 bg-black/70 text-white
-                                                 transition-colors duration-300 
-                                                 hover:bg-gold rounded-md
-                                                 whitespace-nowrap
-                                                 border-2 border-gold'
-                                    >
-                                        Add to Cart
-                                    </button>
-                                ) : (
+                                {product.orderType === 'contact-to-order' && (
                                     <div className='absolute left-1/2 -translate-x-1/2 bottom-4 
                                                   px-6 py-2 bg-primary text-white rounded-md
                                                   whitespace-nowrap text-center'>
@@ -132,16 +110,16 @@ const ProductCards = ({products}) => {
                                     </div>
                                 )}
                             </div>
-                            <div className='product__card__content mt-4'>
+                            <div className='product__card__content mt-4 p-3'>
                                 <h4 className='text-lg font-semibold truncate'>{product.name}</h4>
                                 <p className='text-primary font-medium'>
                                     {product.orderType === 'contact-to-order' ? (
                                         'Price on Request'
                                     ) : (
                                         <>
-                                            ₦{product.price.toLocaleString()} 
+                                            {currencySymbol}{formatPrice(product.price)} 
                                             {product.oldPrice && 
-                                                <s className='ml-2 text-gray-500'>₦{product.oldPrice.toLocaleString()}</s>
+                                                <s className='ml-2 text-gray-500'>{currencySymbol}{formatPrice(product.oldPrice)}</s>
                                             }
                                         </>
                                     )}
@@ -164,6 +142,20 @@ const ProductCards = ({products}) => {
             />
         </>
     )
+}
+
+ProductCards.propTypes = {
+    products: PropTypes.arrayOf(
+        PropTypes.shape({
+            _id: PropTypes.string.isRequired,
+            name: PropTypes.string.isRequired,
+            image: PropTypes.string.isRequired,
+            price: PropTypes.number.isRequired,
+            oldPrice: PropTypes.number,
+            rating: PropTypes.number,
+            orderType: PropTypes.string
+        })
+    ).isRequired
 }
 
 export default ProductCards

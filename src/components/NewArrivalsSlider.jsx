@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { useFetchAllProductsQuery } from '../redux/features/products/productsApi';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const NewArrivalsSlider = () => {
     const navigate = useNavigate();
@@ -18,19 +19,6 @@ const NewArrivalsSlider = () => {
     }, [isLoading, error, data]);
 
     const products = data?.products || [];
-
-    // Auto-slide functionality
-    useEffect(() => {
-        if (products.length > 0) {
-            const timer = setInterval(() => {
-                setCurrentIndex((prevIndex) => 
-                    prevIndex === products.length - 1 ? 0 : prevIndex + 1
-                );
-            }, 3000); // Change slide every 3 seconds (changed from 3500)
-
-            return () => clearInterval(timer);
-        }
-    }, [products.length]);
 
     // Reset index when products change
     useEffect(() => {
@@ -151,23 +139,35 @@ const NewArrivalsSlider = () => {
         >
             {/* Parallax Background */}
             <motion.div 
-                className="absolute inset-0 bg-gradient-to-r from-primary-light/30 to-white"
+                className="absolute inset-0 bg-gradient-to-r from-gray-100/30 to-white"
                 style={{
                     backgroundSize: "200% 200%",
                     backgroundPosition: "0% 0%"
-                }}
-                animate={{
-                    backgroundPosition: ["0% 0%", "100% 100%"],
-                }}
-                transition={{
-                    duration: 20,
-                    repeat: Infinity,
-                    repeatType: "reverse"
                 }}
             />
 
             {/* Main Content */}
             <div className="relative z-10 max-w-6xl mx-auto px-4 py-16">
+                {/* Previous/Next Arrows */}
+                {products.length > 1 && (
+                    <>
+                        <button 
+                            onClick={() => paginate(-1)}
+                            className="absolute left-4 top-1/2 z-20 transform -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-md hover:bg-white transition-colors"
+                            aria-label="Previous product"
+                        >
+                            <FaChevronLeft className="w-5 h-5 text-gray-800" />
+                        </button>
+                        <button 
+                            onClick={() => paginate(1)}
+                            className="absolute right-4 top-1/2 z-20 transform -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-md hover:bg-white transition-colors"
+                            aria-label="Next product"
+                        >
+                            <FaChevronRight className="w-5 h-5 text-gray-800" />
+                        </button>
+                    </>
+                )}
+
                 <AnimatePresence initial={false} custom={currentIndex}>
                     <motion.div
                         key={currentIndex}

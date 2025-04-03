@@ -1,16 +1,36 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { useFetchAllProductsQuery } from '../redux/features/products/productsApi';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const TrendingProductSlider = () => {
     const navigate = useNavigate();
+    const scrollContainerRef = useRef(null);
     const { data, isLoading, error } = useFetchAllProductsQuery({
         limit: 10,
         sort: '-rating' // Sort by rating to get trending products
     });
 
     const products = data?.products || [];
+
+    const scrollLeft = () => {
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollBy({
+                left: -300,
+                behavior: 'smooth'
+            });
+        }
+    };
+
+    const scrollRight = () => {
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollBy({
+                left: 300,
+                behavior: 'smooth'
+            });
+        }
+    };
 
     if (isLoading) {
         return (
@@ -37,75 +57,82 @@ const TrendingProductSlider = () => {
     }
 
     return (
-        <div className="relative overflow-hidden py-4 max-w-full">
-            <motion.div 
-                className="flex gap-4 overflow-hidden"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-            >
-                <motion.div
-                    animate={{
-                        x: [-100, -(products.length * 320)],
-                    }}
-                    transition={{
-                        x: {
-                            repeat: Infinity,
-                            duration: 60, // Doubled the duration from 30 to 60 to slow it down by 50%
-                            ease: "linear",
-                        },
-                    }}
-                    className="flex gap-4"
+        <div className="relative py-4 max-w-full">
+            {/* Navigation Buttons */}
+            <div className="absolute top-1/2 -left-2 -translate-y-1/2 z-10">
+                <button 
+                    onClick={scrollLeft}
+                    className="bg-white/80 rounded-full p-2 shadow-md hover:bg-white transition-colors"
+                    aria-label="Scroll left"
                 >
-                    {[...products, ...products].map((product, index) => (
-                        <motion.div
-                            key={`${product._id}-${index}`}
-                            whileHover={{ 
-                                scale: 1.05,
-                                y: -5,
-                                transition: { type: "spring", stiffness: 300 }
-                            }}
-                            whileTap={{ scale: 0.95 }}
-                            className="w-72 flex-shrink-0 bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer glass-morphism hover-lift"
-                            onClick={() => navigate(`/product/${product._id}`)}
-                        >
-                            <div className="relative h-48 overflow-hidden">
-                                <img
-                                    src={product.images?.[0] || product.image}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
-                                />
-                                {product.discount > 0 && (
-                                    <div className="absolute top-2 right-2 bg-primary text-white px-2 py-1 rounded-md text-sm font-medium">
-                                        -{product.discount}%
-                                    </div>
-                                )}
-                            </div>
-                            <div className="p-4">
-                                <h3 className="text-lg font-semibold text-gray-800 truncate">
-                                    {product.name}
-                                </h3>
-                                <div className="mt-2 flex justify-between items-center">
-                                    <div className="flex flex-col">
-                                        <span className="text-primary font-bold">
-                                            ₦{product.price.toLocaleString()}
+                    <FaChevronLeft className="w-5 h-5 text-gray-800" />
+                </button>
+            </div>
+            
+            <div className="absolute top-1/2 -right-2 -translate-y-1/2 z-10">
+                <button 
+                    onClick={scrollRight}
+                    className="bg-white/80 rounded-full p-2 shadow-md hover:bg-white transition-colors"
+                    aria-label="Scroll right"
+                >
+                    <FaChevronRight className="w-5 h-5 text-gray-800" />
+                </button>
+            </div>
+            
+            {/* Products Container */}
+            <div 
+                ref={scrollContainerRef}
+                className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+                {products.map((product) => (
+                    <motion.div
+                        key={product._id}
+                        whileHover={{ 
+                            scale: 1.05,
+                            y: -5,
+                            transition: { type: "spring", stiffness: 300 }
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-72 flex-shrink-0 bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer glass-morphism hover-lift"
+                        onClick={() => navigate(`/product/${product._id}`)}
+                    >
+                        <div className="relative h-48 overflow-hidden">
+                            <img
+                                src={product.images?.[0] || product.image}
+                                alt={product.name}
+                                className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                            />
+                            {product.discount > 0 && (
+                                <div className="absolute top-2 right-2 bg-primary text-white px-2 py-1 rounded-md text-sm font-medium">
+                                    -{product.discount}%
+                                </div>
+                            )}
+                        </div>
+                        <div className="p-4">
+                            <h3 className="text-lg font-semibold text-gray-800 truncate">
+                                {product.name}
+                            </h3>
+                            <div className="mt-2 flex justify-between items-center">
+                                <div className="flex flex-col">
+                                    <span className="text-primary font-bold">
+                                        ₦{product.price.toLocaleString()}
+                                    </span>
+                                    {product.oldPrice > 0 && (
+                                        <span className="text-sm text-gray-500 line-through">
+                                            ₦{product.oldPrice.toLocaleString()}
                                         </span>
-                                        {product.oldPrice > 0 && (
-                                            <span className="text-sm text-gray-500 line-through">
-                                                ₦{product.oldPrice.toLocaleString()}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="text-yellow-400">
-                                        {'★'.repeat(Math.floor(product.rating || 0))}
-                                        {'☆'.repeat(5 - Math.floor(product.rating || 0))}
-                                    </div>
+                                    )}
+                                </div>
+                                <div className="text-yellow-400">
+                                    {'★'.repeat(Math.floor(product.rating || 0))}
+                                    {'☆'.repeat(5 - Math.floor(product.rating || 0))}
                                 </div>
                             </div>
-                        </motion.div>
-                    ))}
-                </motion.div>
-            </motion.div>
+                        </div>
+                    </motion.div>
+                ))}
+            </div>
             
             {/* Go to Shop button */}
             <div className="flex justify-center mt-8">

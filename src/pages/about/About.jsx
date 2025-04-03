@@ -13,7 +13,7 @@ const About = () => {
         <div className="pt-24 pb-16">
             {/* Header Section */}
             <motion.div 
-                className="bg-gradient-to-r from-primary-light to-white py-16 mb-12"
+                className="bg-gradient-to-r from-gray-100 to-white py-16 mb-12"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
             >
