@@ -12,7 +12,7 @@ function App() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <Navbar />
-      <main className="min-h-[60vh] pt-2">
+      <main className="min-h-[60vh]">
         <Outlet />
       </main>
       <Footer />

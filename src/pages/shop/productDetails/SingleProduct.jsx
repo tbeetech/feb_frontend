@@ -586,7 +586,7 @@ const SingleProduct = () => {
                                 transition={{ delay: 0.1 }}
                                 className="flex items-center"
                             >
-                                <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                                <span className="px-3 py-1 bg-white text-gray-800 rounded-full text-sm font-medium border border-gray-200">
                                 {singleProduct?.category}
                                 </span>
                                 {singleProduct?.stockStatus === 'In Stock' ? (

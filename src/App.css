@@ -655,9 +655,9 @@ body.menu-open {
     overflow: hidden;
 }
 
-/* Add padding to main content to prevent overlap with fixed navbar */
+/* Remove padding from main content */
 main {
-    padding-top: 80px; /* Match the height of the navbar */
+    padding-top: 0;
 }
 
 /* Mobile menu animation */

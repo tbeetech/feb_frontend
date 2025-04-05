@@ -14,9 +14,14 @@ import {
     FaInfoCircle, 
     FaEnvelope,
     FaShoppingBasket,
-    FaSprayCan
+    FaSprayCan,
+    FaGem,
+    FaTshirt,
+    FaShoePrints,
+    FaBriefcase
 } from 'react-icons/fa';
 import { CiShoppingCart } from 'react-icons/ci';
+import { GiDress } from 'react-icons/gi';
 
 // Country flag emojis for regions
 const REGION_FLAGS = {
@@ -70,7 +75,14 @@ const BottomNav = () => {
     // Simplified category data - only showing main categories that exist in the database
     const categoryData = [
         { name: 'All Products', path: 'shop', icon: <FaShoppingBasket className="text-lg" /> },
-        { name: 'Fragrances', path: 'fragrance', icon: <FaSprayCan className="text-lg" />, hasSubcategories: true }
+        { name: 'New Arrivals', path: 'new', icon: <FaSprayCan className="text-lg" />, hasSubcategories: true },
+        { name: 'Fragrances', path: 'fragrance', icon: <FaSprayCan className="text-lg" />, hasSubcategories: true },
+        { name: 'Accessories', path: 'accessories', icon: <FaGem className="text-lg" />, hasSubcategories: true },
+        { name: 'Bags', path: 'bags', icon: <FaShoppingBag className="text-lg" />, hasSubcategories: true },
+        { name: 'Clothes', path: 'clothes', icon: <FaTshirt className="text-lg" />, hasSubcategories: true },
+        { name: 'Shoes', path: 'shoes', icon: <FaShoePrints className="text-lg" />, hasSubcategories: true },
+        { name: 'Dresses', path: 'dress', icon: <GiDress className="text-lg" />, hasSubcategories: true },
+        { name: 'Corporate Wear', path: 'corporate', icon: <FaBriefcase className="text-lg" />, hasSubcategories: true }
     ];
     
     // Get subcategories from CATEGORIES constant
@@ -80,6 +92,17 @@ const BottomNav = () => {
         const upperCategory = category.toUpperCase();
         return CATEGORIES[upperCategory]?.subcategories || [];
     };
+    
+    // Handle navigation to category path
+    const handleCategoryNavigation = (path) => {
+        if (path === 'shop') {
+            navigate('/shop');
+        } else {
+            navigate(`/categories/${path}`);
+        }
+        setShowMenu(false);
+        setExpandedCategory(null);
+    }
     
     return (
         <>
@@ -136,17 +159,22 @@ const BottomNav = () => {
                             </Link>
                             
                             <button 
-                                onClick={() => setShowMenu(!showMenu)}
+                                onClick={() => setShowMenu(!showMenu)} 
                                 className={`flex flex-col items-center text-xs py-1 ${
                                     showMenu ? 'text-black' : 'text-gray-500'
                                 }`}
                             >
                                 {showMenu ? (
-                                    <FaTimes className="text-lg mb-0.5" />
+                                    <>
+                                        <FaTimes className="text-lg mb-0.5" />
+                                        <span>Close</span>
+                                    </>
                                 ) : (
-                                    <FaBars className="text-lg mb-0.5" />
+                                    <>
+                                        <FaBars className="text-lg mb-0.5" />
+                                        <span>Menu</span>
+                                    </>
                                 )}
-                                <span>Menu</span>
                             </button>
                         </nav>
                     </div>
@@ -265,16 +293,15 @@ const BottomNav = () => {
                                                     </AnimatePresence>
                                                 </>
                                             ) : (
-                                                <Link 
-                                                    to={`/${category.path}`}
-                                                    className="flex items-center py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors group"
-                                                    onClick={() => setShowMenu(false)}
+                                                <div 
+                                                    className="flex items-center py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors group cursor-pointer"
+                                                    onClick={() => handleCategoryNavigation(category.path)}
                                                 >
                                                     <span className="w-6 h-6 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
                                                         {category.icon}
                                                     </span>
                                                     <span className="font-medium uppercase tracking-wide text-sm">{category.name}</span>
-                                                </Link>
+                                                </div>
                                             )}
                                         </div>
                                     ))}

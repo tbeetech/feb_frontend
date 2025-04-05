@@ -23,11 +23,16 @@ import Payments from "../pages/Payments";
 import Reviews from "../pages/Reviews";
 import PrivateRoute from "../routes/PrivateRoute";
 import AdminRoute from "../routes/AdminRoute";
+import ScrollToTop from "../components/ScrollToTopOnNavigate";
 
 const router = createBrowserRouter([
 {
 path: "/",
-element:<App/>,
+element:
+    <>
+        <ScrollToTop />
+        <App/>
+    </>,
 errorElement: <ErrorBoundary />,
 children: [
     {path: "/",element: <Home/>},
@@ -61,11 +66,19 @@ children: [
 },
 {
     path:"/login",
-    element: <Login/>
+    element: 
+    <>
+        <ScrollToTop />
+        <Login/>
+    </>
 },
 {
     path:'/register',
-    element:<Register/>
+    element:
+    <>
+        <ScrollToTop />
+        <Register/>
+    </>
 }
 ]);
 

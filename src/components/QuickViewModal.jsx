@@ -106,11 +106,12 @@ const QuickViewModal = ({ isOpen, product, onClose }) => {
           onClick={handleBackdropClick}
         >
           <motion.div
-            className="bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden"
+            className="bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-auto"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            onClick={e => e.stopPropagation()}
           >
             <div className="flex justify-end p-4">
               <button
@@ -127,12 +128,12 @@ const QuickViewModal = ({ isOpen, product, onClose }) => {
                 <LazyImage
                   src={product.image}
                   alt={product.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               </div>
               
               {/* Product Details */}
-              <div className="flex flex-col overflow-y-auto max-h-[60vh] pr-2">
+              <div className="flex flex-col h-[450px] overflow-y-auto pr-2 pb-4">
                 <h2 className="text-xl font-bold text-gray-900 mb-2">{product.name}</h2>
                 
                 <div className="flex items-center justify-between mb-4">

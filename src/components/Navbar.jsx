@@ -208,9 +208,7 @@ const Navbar = () => {
         { name: "Shoes", path: "shoes", icon: <FaShoePrints className="w-5 h-5 mr-3" /> },
         { name: "Bags", path: "bags", icon: <FaShoppingBag className="w-5 h-5 mr-3" /> },
         { name: "Accessories", path: "accessories", icon: <FaGem className="w-5 h-5 mr-3" /> },
-        { name: "Jewelry", path: "jewelry", icon: <FaGem className="w-5 h-5 mr-3" /> },
-        { name: "Homeware", path: "homeware", icon: <FaHome className="w-5 h-5 mr-3" /> },
-        { name: "Sale", path: "sale", highlight: true, icon: <FaTags className="w-5 h-5 mr-3 text-red-600" /> }
+        { name: "Jewelry", path: "jewelry", icon: <FaGem className="w-5 h-5 mr-3" /> }
     ];
 
     // Function to check if a category has subcategories
@@ -435,7 +433,7 @@ const Navbar = () => {
                         <nav className="p-4">
                             <ul className="space-y-2">
                                 {/* Logo */}
-                                <li className="py-2 border-b border-gray-100">
+                                <li className="py-2">
                                     <Link to="/" className="flex items-center py-2 font-display text-xl font-bold" onClick={handleMobileMenuToggle}>
                                         FEB LUXURY
                                             </Link>
@@ -443,7 +441,7 @@ const Navbar = () => {
                                 
                                 {/* Main categories */}
                                 {mainCategories.map((category, index) => (
-                                    <li key={`main-${index}`} className="border-b border-gray-100 py-1">
+                                    <li key={`main-${index}`} className="py-1">
                                         <Link
                                             to={`/${category.path}`}
                                             className="flex items-center py-2 text-gray-800 font-medium"
@@ -457,7 +455,7 @@ const Navbar = () => {
 
                                 {/* Shopping categories */}
                                 {shoppingCategories.map((category, index) => (
-                                    <li key={`shop-${index}`} className="border-b border-gray-100 py-1">
+                                    <li key={`shop-${index}`} className="py-1">
                                         {hasSubcategories(category.path) ? (
                                             <div>
                                         <button 
@@ -511,7 +509,7 @@ const Navbar = () => {
                                 {/* User account links */}
                                 {user ? (
                                     <>
-                                        <li className="border-b border-gray-100 py-1">
+                                        <li className="py-1">
                                             <Link 
                                                 to="/dashboard" 
                                                 className="flex items-center py-2 text-gray-800"
@@ -521,7 +519,7 @@ const Navbar = () => {
                                                 Dashboard
                                             </Link>
                                         </li>
-                                        <li className="border-b border-gray-100 py-1">
+                                        <li className="py-1">
                                                     <Link
                                                 to="/dashboard/orders" 
                                                 className="flex items-center py-2 text-gray-800"
@@ -531,38 +529,37 @@ const Navbar = () => {
                                                 Orders
                                                     </Link>
                                                 </li>
-                                        <li className="border-b border-gray-100 py-1">
-                                                <button
-                                                onClick={() => {
-                                                    handleLogout();
-                                                    handleMobileMenuToggle();
-                                                }}
+                                        <li className="py-1">
+                                            <button 
                                                 className="flex items-center py-2 text-gray-800 w-full"
+                                                onClick={() => {
+                                                    logoutUser().unwrap()
+                                                        .then(() => {
+                                                            dispatch(logout());
+                                                            handleMobileMenuToggle();
+                                                            navigate('/');
+                                                        });
+                                                }}
                                             >
                                                 <FaSignOutAlt className="w-5 h-5 mr-3" />
-                                                Sign out
+                                                Logout
                                             </button>
                                         </li>
                                         
-                                        {/* Admin mobile menu items */}
-                                        {user?.role === 'admin' && (
+                                        {/* Admin Links */}
+                                        {user.isAdmin && (
                                             <>
-                                                <li className="border-b border-gray-100 py-1 mt-4">
-                                                    <span className="block px-2 py-1 text-xs text-gray-500 font-semibold uppercase">
-                                                        Admin Controls
-                                                    </span>
-                                                </li>
-                                                <li className="border-b border-gray-100 py-1">
+                                                <li className="py-1">
                                                     <Link 
                                                         to="/admin/upload-product" 
                                                         className="flex items-center py-2 text-gray-800"
                                                         onClick={handleMobileMenuToggle}
                                                     >
                                                         <FaPlus className="w-5 h-5 mr-3" />
-                                                        Upload Product
+                                                        Add Product
                                                     </Link>
                                                 </li>
-                                                <li className="border-b border-gray-100 py-1">
+                                                <li className="py-1">
                                                     <Link 
                                                         to="/admin/manage-products" 
                                                         className="flex items-center py-2 text-gray-800"
@@ -572,7 +569,7 @@ const Navbar = () => {
                                                         Manage Products
                                                     </Link>
                                                 </li>
-                                                <li className="border-b border-gray-100 py-1">
+                                                <li className="py-1">
                                                     <Link 
                                                         to="/admin/edit-product" 
                                                         className="flex items-center py-2 text-gray-800"
@@ -587,39 +584,31 @@ const Navbar = () => {
                                     </>
                                 ) : (
                                     <>
-                                        <li className="border-b border-gray-100 py-1">
-                                        <Link
-                                            to="/login"
+                                        <li className="py-1">
+                                            <Link 
+                                                to="/login" 
                                                 className="flex items-center py-2 text-gray-800"
-                                            onClick={handleMobileMenuToggle}
-                                        >
+                                                onClick={handleMobileMenuToggle}
+                                            >
                                                 <FaSignInAlt className="w-5 h-5 mr-3" />
-                                                Sign in
-                                        </Link>
+                                                Login
+                                            </Link>
                                         </li>
-                                        <li className="border-b border-gray-100 py-1">
-                                        <Link
-                                            to="/register"
+                                        <li className="py-1">
+                                            <Link 
+                                                to="/register" 
                                                 className="flex items-center py-2 text-gray-800"
-                                            onClick={handleMobileMenuToggle}
-                                        >
+                                                onClick={handleMobileMenuToggle}
+                                            >
                                                 <FaUserPlus className="w-5 h-5 mr-3" />
                                                 Register
-                                        </Link>
+                                            </Link>
                                         </li>
                                     </>
                                 )}
-                                
-                                {/* Wishlist link */}
-                                <li className="border-b border-gray-100 py-1">
-                                    <Link to="/wishlist" className="flex items-center py-2 text-gray-800" onClick={handleMobileMenuToggle}>
-                                        <CiHeart className="w-5 h-5 mr-3" />
-                                        Wishlist
-                                    </Link>
-                                </li>
                             </ul>
                         </nav>
-                        </motion.div>
+                    </motion.div>
                 )}
             </AnimatePresence>
             
