@@ -8,16 +8,16 @@ import image1 from '../../assets/scroll-1.jpg';
 import image2 from '../../assets/scroll-2.jpg';
 import image3 from '../../assets/scroll-3.jpg';
 
-const categories = [
-  { icon: FaGem, name: 'Accessories', path: '/category/accessories' },
-  { icon: FaSprayCan, name: 'Fragrance', path: '/category/fragrance' },
-  { icon: FaTshirt, name: 'Clothes', path: '/category/clothes' },
-  { icon: FaShoppingBag, name: 'Bags', path: '/category/bags' },
-  { icon: GiNecklace, name: 'Jewelry', path: '/category/jewelry' },
-  { icon: GiDress, name: 'Dresses', path: '/category/dress' },
-  { icon: FaBriefcase, name: 'Corporate Wears', path: '/category/corporate' },
-  { icon: FaShoePrints, name: 'Shoes', path: '/category/shoes' },
-  { icon: FaStar, name: 'New Arrivals', path: '/category/new' },
+const icons = [
+  { icon: FaGem, name: 'Accessories', path: '/categories/accessories' },
+  { icon: FaSprayCan, name: 'Fragrance', path: '/categories/fragrance' },
+  { icon: FaTshirt, name: 'Clothes', path: '/categories/clothes' },
+  { icon: FaShoppingBag, name: 'Bags', path: '/categories/bags' },
+  { icon: GiNecklace, name: 'Jewelry', path: '/categories/jewelry' },
+  { icon: GiDress, name: 'Dresses', path: '/categories/dress' },
+  { icon: FaBriefcase, name: 'Corporate Wears', path: '/categories/corporate' },
+  { icon: FaShoePrints, name: 'Shoes', path: '/categories/shoes' },
+  { icon: FaStar, name: 'New Arrivals', path: '/categories/new' },
 ];
 
 // Carousel text content for each slide
@@ -225,7 +225,7 @@ const InfiniteScrollSection = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              {categories.map((cat, index) => {
+              {icons.map((cat, index) => {
                 const Icon = cat.icon;
                 return (
                   <Link

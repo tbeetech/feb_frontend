@@ -54,7 +54,7 @@ const CartPage = () => {
                         <h2 className="text-xl font-semibold mb-4">Your cart is empty</h2>
                         <p className="text-gray-600 mb-6">Looks like you haven't added any products to your cart yet.</p>
                         <Link to="/shop" className="bg-black text-white px-6 py-3 rounded-md font-medium hover:bg-gray-800 inline-block">
-                            Browse Products
+                            <span className="text-white" style={{color: 'white !important'}}>Browse Products</span>
                         </Link>
                     </div>
                 </div>
@@ -183,7 +183,7 @@ const CartPage = () => {
                                 to="/billing-details"
                                 className="w-full block text-center py-3 px-4 bg-black text-white font-medium hover:bg-gray-800 rounded-md"
                             >
-                                Proceed to Checkout
+                                <span className="text-white" style={{color: 'white !important'}}>Proceed to Checkout</span>
                             </Link>
                         </div>
                     </div>

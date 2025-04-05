@@ -228,11 +228,11 @@ const QuickViewModal = ({ isOpen, product, onClose }) => {
                     className={`flex-1 py-2 px-4 rounded-md flex items-center justify-center gap-2 ${
                       product.stockStatus === 'Out of Stock'
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-primary text-white hover:bg-primary-dark'
+                        : 'bg-black text-white hover:bg-gray-800'
                     } transition-colors`}
                   >
-                    <FaShoppingCart />
-                    <span>{isInCart(product._id) ? 'Add More' : 'Add to Cart'}</span>
+                    <span className="text-white"><FaShoppingCart /></span>
+                    <span className="text-white">{isInCart(product._id) ? 'Add More' : 'Add to Cart'}</span>
                   </button>
                   
                   <button
@@ -250,7 +250,7 @@ const QuickViewModal = ({ isOpen, product, onClose }) => {
                 {/* View Full Details Link */}
                 <Link
                   to={`/product/${product._id}`}
-                  className="mt-4 text-center text-primary hover:text-primary-dark text-sm font-medium"
+                  className="mt-4 text-center text-black hover:text-gray-700 text-sm font-medium"
                   onClick={onClose}
                 >
                   View Full Details

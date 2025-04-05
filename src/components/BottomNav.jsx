@@ -5,8 +5,28 @@ import avatarImg from "../assets/avatar.png";
 import { AnimatePresence, motion } from 'framer-motion';
 import CartModal from '../pages/shop/CartModal';
 import { CATEGORIES } from '../constants/categoryConstants';
-import { FaHome, FaSearch, FaShoppingBag, FaBars, FaTimes, FaChevronRight } from 'react-icons/fa';
+import { 
+    FaHome, 
+    FaSearch, 
+    FaShoppingBag, 
+    FaBars, 
+    FaTimes, 
+    FaInfoCircle, 
+    FaEnvelope,
+    FaShoppingBasket,
+    FaSprayCan
+} from 'react-icons/fa';
 import { CiShoppingCart } from 'react-icons/ci';
+
+// Country flag emojis for regions
+const REGION_FLAGS = {
+    'US': '🇺🇸',
+    'UK': '🇬🇧',
+    'EU': '🇪🇺',
+    'CA': '🇨🇦',
+    'AU': '🇦🇺',
+    'JP': '🇯🇵'
+};
 
 const BottomNav = () => {
     const [isCartOpen, setIsCartOpen] = useState(false);
@@ -17,6 +37,11 @@ const BottomNav = () => {
     const { products } = useSelector((state) => state.cart);
     const location = useLocation();
     const navigate = useNavigate();
+    
+    // For demo purposes, assume the currently selected region is UK
+    // In a real app, this would come from your context/state/redux
+    const currentRegion = 'UK';
+    const regionFlag = REGION_FLAGS[currentRegion] || '🌍';
     
     const productCount = products?.reduce((total, item) => total + item.quantity, 0) || 0;
     
@@ -42,23 +67,16 @@ const BottomNav = () => {
         setExpandedCategory(null);
     };
     
-    // Category data for navigation
+    // Simplified category data - only showing main categories that exist in the database
     const categoryData = [
-        { name: 'Women', path: 'women', icon: '👩' },
-        { name: 'Men', path: 'men', icon: '👨' },
-        { name: 'New', path: 'new', icon: '✨', hasSubcategories: true },
-        { name: 'Clothing', path: 'clothes', icon: '👕', hasSubcategories: false },
-        { name: 'Dresses', path: 'dress', icon: '👗', hasSubcategories: true },
-        { name: 'Shoes', path: 'shoes', icon: '👠', hasSubcategories: true },
-        { name: 'Bags', path: 'bags', icon: '👜', hasSubcategories: false },
-        { name: 'Accessories', path: 'accessories', icon: '⌚', hasSubcategories: true },
-        { name: 'Fragrances', path: 'fragrance', icon: '🧴', hasSubcategories: true },
-        { name: 'Corporate', path: 'corporate', icon: '👔', hasSubcategories: true }
+        { name: 'All Products', path: 'shop', icon: <FaShoppingBasket className="text-lg" /> },
+        { name: 'Fragrances', path: 'fragrance', icon: <FaSprayCan className="text-lg" />, hasSubcategories: true }
     ];
     
     // Get subcategories from CATEGORIES constant
     const getSubcategories = (category) => {
         if (!category) return [];
+        
         const upperCategory = category.toUpperCase();
         return CATEGORIES[upperCategory]?.subcategories || [];
     };
@@ -90,11 +108,26 @@ const BottomNav = () => {
                                 <span>Search</span>
                             </button>
                             
-                            <Link to="/cart" className="flex flex-col items-center px-1">
+                            <Link 
+                                to="/shop" 
+                                className={`flex flex-col items-center text-xs py-1 ${
+                                    location.pathname.includes('/shop') || location.pathname.includes('/product') || location.pathname.includes('/categories') ? 'text-black' : 'text-gray-500'
+                                }`}
+                            >
+                                <FaShoppingBag className="text-lg mb-0.5" />
+                                <span>Shop</span>
+                            </Link>
+
+                            <Link 
+                                to="/cart" 
+                                className={`flex flex-col items-center px-1 ${
+                                    location.pathname === '/cart' ? 'text-black' : 'text-gray-500'
+                                }`}
+                            >
                                 <div className="relative">
                                     <CiShoppingCart className="w-7 h-7" />
                                     {productCount > 0 && (
-                                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
+                                        <span className="absolute -top-1 -right-1 bg-black text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
                                             {productCount}
                                         </span>
                                     )}
@@ -141,104 +174,131 @@ const BottomNav = () => {
                                     type="submit"
                                     className="bg-black text-white py-2 px-4 rounded-r-md"
                                 >
-                                    <FaSearch />
+                                    <FaSearch className="text-white" />
                                 </button>
                             </form>
                         </motion.div>
                     )}
                 </AnimatePresence>
                 
-                {/* Mobile Menu Panel */}
+                {/* Mobile Menu Panel - Simplified */}
                 <AnimatePresence>
                     {showMenu && (
                         <motion.div 
                             initial={{ y: '100%' }}
                             animate={{ y: 0 }}
                             exit={{ y: '100%' }}
-                            transition={{ duration: 0.3 }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                             className="fixed inset-0 top-auto bg-white border-t border-gray-200 shadow-lg z-40 h-[70vh] overflow-y-auto"
                         >
                             <div className="p-4">
-                                <h3 className="text-lg font-medium border-b border-gray-200 pb-2 mb-4">Categories</h3>
-                                
-                                <div className="space-y-1">
-                                    <Link 
-                                        to="/shop" 
-                                        className="flex items-center py-2 px-3 rounded-md hover:bg-gray-100"
+                                {/* Header with close button */}
+                                <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
+                                    <h2 className="text-xl font-bold uppercase tracking-widest">FEB</h2>
+                                    <button 
                                         onClick={() => setShowMenu(false)}
+                                        className="w-8 h-8 rounded-full bg-black flex items-center justify-center"
                                     >
-                                        <span className="mr-2">🛍️</span>
-                                        <span>All Products</span>
-                                    </Link>
-                                    
+                                        <FaTimes className="text-lg text-white" />
+                                    </button>
+                                </div>
+                                
+                                <h3 className="text-lg font-medium uppercase tracking-wide mb-4">Categories</h3>
+                                
+                                {/* Simplified categories list */}
+                                <div className="space-y-1 mb-8">
                                     {categoryData.map(category => (
-                                        <div key={category.path}>
-                                            <div 
-                                                className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-gray-100 cursor-pointer"
-                                                onClick={() => {
-                                                    if (category.hasSubcategories) {
-                                                        handleCategoryClick(category.path);
-                                                    } else {
-                                                        navigate(`/categories/${category.path}`);
-                                                        setShowMenu(false);
-                                                    }
-                                                }}
-                                            >
-                                                <div className="flex items-center">
-                                                    <span className="mr-2">{category.icon}</span>
-                                                    <span>{category.name}</span>
-                                                </div>
-                                                
-                                                {category.hasSubcategories && (
-                                                    <FaChevronRight 
-                                                        className={`w-3 h-3 transition-transform ${
-                                                            expandedCategory === category.path ? 'rotate-90' : ''
-                                                        }`} 
-                                                    />
-                                                )}
-                                            </div>
-                                            
-                                            {/* Subcategories */}
-                                            {expandedCategory === category.path && (
-                                                <div className="ml-8 my-1 border-l-2 border-gray-200 pl-2 space-y-1">
-                                                    {getSubcategories(category.path).map((subcategory) => {
-                                                        const subValue = typeof subcategory === 'string' ? subcategory : subcategory.value;
-                                                        const subLabel = typeof subcategory === 'string' 
-                                                            ? subcategory.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
-                                                            : subcategory.label;
-                                                            
-                                                        return (
-                                                            <div 
-                                                                key={subValue}
-                                                                className="py-2 px-3 text-sm hover:bg-gray-100 rounded-md cursor-pointer"
-                                                                onClick={() => handleSubcategoryClick(category.path, subValue)}
+                                        <div key={category.path} className="overflow-hidden">
+                                            {category.hasSubcategories ? (
+                                                <>
+                                                    <motion.div 
+                                                        className={`flex items-center justify-between py-3 px-4 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors group ${
+                                                            expandedCategory === category.path ? 'bg-gray-50' : ''
+                                                        }`}
+                                                        onClick={() => handleCategoryClick(category.path)}
+                                                        whileTap={{ scale: 0.98 }}
+                                                    >
+                                                        <div className="flex items-center">
+                                                            <span className="w-6 h-6 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                                                                {category.icon}
+                                                            </span>
+                                                            <span className="font-medium uppercase tracking-wide text-sm">{category.name}</span>
+                                                        </div>
+                                                        <span className="text-xs text-gray-400">
+                                                            {expandedCategory === category.path ? '−' : '+'}
+                                                        </span>
+                                                    </motion.div>
+                                                    
+                                                    {/* Subcategories */}
+                                                    <AnimatePresence>
+                                                        {expandedCategory === category.path && (
+                                                            <motion.div 
+                                                                initial={{ height: 0, opacity: 0 }}
+                                                                animate={{ height: 'auto', opacity: 1 }}
+                                                                exit={{ height: 0, opacity: 0, transition: { duration: 0.2 } }}
+                                                                transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+                                                                className="ml-9 border-l border-gray-200 pl-4 space-y-1 overflow-hidden"
                                                             >
-                                                                {subLabel}
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
+                                                                {getSubcategories(category.path).map((subcategory) => {
+                                                                    const subValue = typeof subcategory === 'string' ? subcategory : subcategory.value;
+                                                                    const subLabel = typeof subcategory === 'string' 
+                                                                        ? subcategory.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+                                                                        : subcategory.label;
+                                                                        
+                                                                    return (
+                                                                        <motion.div 
+                                                                            key={subValue}
+                                                                            className="py-2 px-3 text-sm hover:bg-gray-50 rounded-md cursor-pointer transition-colors"
+                                                                            onClick={() => handleSubcategoryClick(category.path, subValue)}
+                                                                            whileHover={{ x: 4 }}
+                                                                            whileTap={{ scale: 0.97 }}
+                                                                            initial={{ opacity: 0, x: -10 }}
+                                                                            animate={{ opacity: 1, x: 0 }}
+                                                                            transition={{ duration: 0.2, delay: 0.05 }}
+                                                                        >
+                                                                            {subLabel}
+                                                                        </motion.div>
+                                                                    );
+                                                                })}
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                </>
+                                            ) : (
+                                                <Link 
+                                                    to={`/${category.path}`}
+                                                    className="flex items-center py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors group"
+                                                    onClick={() => setShowMenu(false)}
+                                                >
+                                                    <span className="w-6 h-6 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                                                        {category.icon}
+                                                    </span>
+                                                    <span className="font-medium uppercase tracking-wide text-sm">{category.name}</span>
+                                                </Link>
                                             )}
                                         </div>
                                     ))}
                                 </div>
                                 
-                                <div className="mt-6 pt-4 border-t border-gray-200">
-                                    <h3 className="text-lg font-medium pb-2 mb-2">Quick Links</h3>
-                                    <div className="grid grid-cols-2 gap-2">
+                                {/* Pages section */}
+                                <div className="pt-4 border-t border-gray-200">
+                                    <h3 className="text-xs font-medium text-gray-500 mb-4 uppercase tracking-wide">Pages</h3>
+                                    <div className="grid grid-cols-2 gap-3">
                                         <Link 
                                             to="/about" 
-                                            className="py-2 px-3 bg-gray-100 rounded-md text-center hover:bg-gray-200"
+                                            className="flex items-center py-3 px-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group"
                                             onClick={() => setShowMenu(false)}
                                         >
-                                            About Us
+                                            <FaInfoCircle className="mr-2 text-gray-700 group-hover:scale-110 transition-transform" />
+                                            <span className="font-medium uppercase tracking-wide text-sm">About</span>
                                         </Link>
                                         <Link 
                                             to="/contact" 
-                                            className="py-2 px-3 bg-gray-100 rounded-md text-center hover:bg-gray-200"
+                                            className="flex items-center py-3 px-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group"
                                             onClick={() => setShowMenu(false)}
                                         >
-                                            Contact
+                                            <FaEnvelope className="mr-2 text-gray-700 group-hover:scale-110 transition-transform" />
+                                            <span className="font-medium uppercase tracking-wide text-sm">Contact</span>
                                         </Link>
                                     </div>
                                 </div>

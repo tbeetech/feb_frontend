@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Slider from 'react-slick';
 import ProductCard from './ProductCard';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const ProductShowcase = ({ title, subtitle, products, viewAllLink, category }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -15,8 +16,7 @@ const ProductShowcase = ({ title, subtitle, products, viewAllLink, category }) =
     speed: 500,
     slidesToShow: 4,
     slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 5000,
+    autoplay: false, // Disable autoplay to let users control sliding
     pauseOnHover: true,
     arrows: false,
     responsive: [
@@ -100,33 +100,33 @@ const ProductShowcase = ({ title, subtitle, products, viewAllLink, category }) =
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          {/* Navigation Arrows */}
+          {/* Navigation Arrows - Always visible on mobile, shown on hover on desktop */}
           <motion.button
             onClick={handlePrev}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-gray-700 hover:bg-gold hover:text-white transition-colors duration-300 -ml-5 lg:-ml-6"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-gray-700 hover:bg-gold hover:text-white transition-colors duration-300 -ml-5 lg:-ml-6 md:opacity-70 md:hover:opacity-100"
             initial={{ opacity: 0, x: 10 }}
             animate={{ 
-              opacity: isHovered ? 1 : 0, 
-              x: isHovered ? 0 : 10 
+              opacity: isHovered ? 1 : (window.innerWidth < 768 ? 0.7 : 0), 
+              x: isHovered ? 0 : (window.innerWidth < 768 ? 0 : 10)  
             }}
             transition={{ duration: 0.3 }}
             aria-label="Previous slide"
           >
-            <span className="material-icons">chevron_left</span>
+            <FaChevronLeft className="w-4 h-4" />
           </motion.button>
           
           <motion.button
             onClick={handleNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-gray-700 hover:bg-gold hover:text-white transition-colors duration-300 -mr-5 lg:-mr-6"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-gray-700 hover:bg-gold hover:text-white transition-colors duration-300 -mr-5 lg:-mr-6 md:opacity-70 md:hover:opacity-100"
             initial={{ opacity: 0, x: -10 }}
             animate={{ 
-              opacity: isHovered ? 1 : 0, 
-              x: isHovered ? 0 : -10 
+              opacity: isHovered ? 1 : (window.innerWidth < 768 ? 0.7 : 0), 
+              x: isHovered ? 0 : (window.innerWidth < 768 ? 0 : -10)
             }}
             transition={{ duration: 0.3 }}
             aria-label="Next slide"
           >
-            <span className="material-icons">chevron_right</span>
+            <FaChevronRight className="w-4 h-4" />
           </motion.button>
           
           {/* Product Slider */}
@@ -147,7 +147,7 @@ const ProductShowcase = ({ title, subtitle, products, viewAllLink, category }) =
               className="inline-flex items-center px-6 py-3 border border-gold text-gold hover:bg-gold hover:text-white transition-colors duration-300 rounded-md font-medium"
             >
               View All {category || 'Products'}
-              <span className="material-icons ml-2">arrow_forward</span>
+              <span className="ml-2">→</span>
             </Link>
           </div>
         )}

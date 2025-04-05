@@ -217,3 +217,133 @@
   text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
   letter-spacing: 0.5px;
 }
+
+/* Simple white text class */
+.text-white {
+  color: #FFFFFF !important;
+}
+
+/* UNIVERSAL SOLUTION FOR BLACK BUTTONS WITH WHITE TEXT AND ICONS */
+/* This simpler approach should work across all devices and situations */
+.bg-black {
+  background-color: #000000 !important;
+}
+
+.bg-black, 
+.bg-black * {
+  color: #FFFFFF !important;
+}
+
+.bg-black svg,
+.bg-black svg path,
+.bg-black svg rect,
+.bg-black svg circle,
+.bg-black svg polygon,
+.bg-black svg line,
+.bg-black i,
+.bg-black span {
+  color: #FFFFFF !important;
+  fill: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+/* Targeting React Icon component libraries specifically */
+.bg-black [class*="Fa"],
+.bg-black [class*="Ci"],
+.bg-black [class*="Md"],
+.bg-black [class*="Io"],
+.bg-black [class*="Fi"],
+.bg-black [class*="Bi"],
+.bg-black [class*="Ri"],
+.bg-black [class*="Wi"],
+.bg-black [class*="Ti"],
+.bg-black [class*="Pi"],
+.bg-black [class*="Si"],
+.bg-black [class*="Ai"],
+.bg-black [class*="Bs"],
+.bg-black [class*="Di"],
+.bg-black [class*="Gi"],
+.bg-black [class*="Hi"],
+.bg-black [class*="Im"],
+.bg-black [class*="Li"],
+.bg-black [class*="Rx"],
+.bg-black [class*="Tb"],
+.bg-black [class*="Vsc"] {
+  color: #FFFFFF !important;
+  fill: #FFFFFF !important;
+}
+
+/* Apply same styles to bg-gray-800 and bg-gray-900 */
+.bg-gray-800,
+.bg-gray-900 {
+  background-color: #1F2937 !important;
+}
+
+.bg-gray-800 *, 
+.bg-gray-900 * {
+  color: #FFFFFF !important;
+}
+
+.bg-gray-800 svg,
+.bg-gray-800 svg path,
+.bg-gray-800 svg rect,
+.bg-gray-800 svg circle,
+.bg-gray-800 svg polygon,
+.bg-gray-800 svg line,
+.bg-gray-800 i,
+.bg-gray-800 span,
+.bg-gray-900 svg,
+.bg-gray-900 svg path,
+.bg-gray-900 svg rect,
+.bg-gray-900 svg circle,
+.bg-gray-900 svg polygon,
+.bg-gray-900 svg line,
+.bg-gray-900 i,
+.bg-gray-900 span {
+  color: #FFFFFF !important;
+  fill: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+/* Ensure hover works as expected */
+.hover\:bg-black:hover,
+.hover\:bg-black:hover * {
+  color: #FFFFFF !important;
+}
+
+.hover\:bg-black:hover svg,
+.hover\:bg-black:hover svg path {
+  color: #FFFFFF !important;
+  fill: #FFFFFF !important;
+}
+
+.hover\:bg-gray-800:hover,
+.hover\:bg-gray-900:hover,
+.hover\:bg-gray-800:hover *,
+.hover\:bg-gray-900:hover * {
+  color: #FFFFFF !important;
+}
+
+.hover\:bg-gray-800:hover svg,
+.hover\:bg-gray-800:hover svg path,
+.hover\:bg-gray-900:hover svg,
+.hover\:bg-gray-900:hover svg path {
+  color: #FFFFFF !important;
+  fill: #FFFFFF !important;
+}
+
+/* Glass effect and contrast classes */
+.glass-effect {
+  backdrop-filter: blur(10px);
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.text-dark-contrast {
+  color: var(--text-primary);
+}
+
+.text-light-contrast {
+  color: var(--white);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}

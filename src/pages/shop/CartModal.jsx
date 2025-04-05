@@ -71,7 +71,7 @@ const CartModal = ({ onClose }) => {
                             onClick={onClose} 
                             className="px-6 py-2 bg-black text-white hover:bg-gray-800 font-medium"
                         >
-                            Continue Shopping
+                            <span className="text-white" style={{color: 'white !important'}}>Continue Shopping</span>
                         </button>
                     </div>
                 ) : (
@@ -172,7 +172,7 @@ const CartModal = ({ onClose }) => {
                                     onClick={onClose}
                                     className="w-full block text-center py-3 px-4 bg-black text-white font-medium hover:bg-gray-900"
                                 >
-                                    Go To Checkout
+                                    <span className="text-white" style={{color: 'white !important'}}>Go To Checkout</span>
                                 </Link>
                                 <button
                                     onClick={onClose}

@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { useFetchAllProductsQuery } from '../redux/features/products/productsApi';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaArrowRight } from 'react-icons/fa';
 
 const TrendingProductSlider = () => {
     const navigate = useNavigate();
@@ -35,7 +35,7 @@ const TrendingProductSlider = () => {
     if (isLoading) {
         return (
             <div className="flex justify-center items-center min-h-[400px]">
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-black border-t-transparent"></div>
             </div>
         );
     }
@@ -57,93 +57,76 @@ const TrendingProductSlider = () => {
     }
 
     return (
-        <div className="relative py-4 max-w-full">
+        <div className="relative py-8 max-w-full">
             {/* Navigation Buttons */}
             <div className="absolute top-1/2 -left-2 -translate-y-1/2 z-10">
                 <button 
                     onClick={scrollLeft}
-                    className="bg-white/80 rounded-full p-2 shadow-md hover:bg-white transition-colors"
+                    className="bg-white/80 rounded-full p-2 shadow-md hover:bg-black hover:text-white transition-colors"
                     aria-label="Scroll left"
                 >
-                    <FaChevronLeft className="w-5 h-5 text-gray-800" />
+                    <FaChevronLeft className="w-5 h-5" />
                 </button>
             </div>
             
             <div className="absolute top-1/2 -right-2 -translate-y-1/2 z-10">
                 <button 
                     onClick={scrollRight}
-                    className="bg-white/80 rounded-full p-2 shadow-md hover:bg-white transition-colors"
+                    className="bg-white/80 rounded-full p-2 shadow-md hover:bg-black hover:text-white transition-colors"
                     aria-label="Scroll right"
                 >
-                    <FaChevronRight className="w-5 h-5 text-gray-800" />
+                    <FaChevronRight className="w-5 h-5" />
                 </button>
             </div>
             
-            {/* Products Container */}
+            {/* Products Container - Minimalist Design */}
             <div 
                 ref={scrollContainerRef}
-                className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
+                className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
                 {products.map((product) => (
                     <motion.div
                         key={product._id}
                         whileHover={{ 
-                            scale: 1.05,
-                            y: -5,
+                            scale: 1.03,
                             transition: { type: "spring", stiffness: 300 }
                         }}
-                        whileTap={{ scale: 0.95 }}
-                        className="w-72 flex-shrink-0 bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer glass-morphism hover-lift"
-                        onClick={() => navigate(`/product/${product._id}`)}
+                        className="w-72 flex-shrink-0 overflow-hidden cursor-pointer relative group"
                     >
-                        <div className="relative h-48 overflow-hidden">
+                        {/* Only show image for cleaner look */}
+                        <div className="relative h-96 overflow-hidden">
                             <img
                                 src={product.images?.[0] || product.image}
                                 alt={product.name}
-                                className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
+                                className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+                                onClick={() => navigate(`/product/${product._id}`)}
                             />
-                            {product.discount > 0 && (
-                                <div className="absolute top-2 right-2 bg-primary text-white px-2 py-1 rounded-md text-sm font-medium">
-                                    -{product.discount}%
-                                </div>
-                            )}
-                        </div>
-                        <div className="p-4">
-                            <h3 className="text-lg font-semibold text-gray-800 truncate">
-                                {product.name}
-                            </h3>
-                            <div className="mt-2 flex justify-between items-center">
-                                <div className="flex flex-col">
-                                    <span className="text-primary font-bold">
-                                        ₦{product.price.toLocaleString()}
-                                    </span>
-                                    {product.oldPrice > 0 && (
-                                        <span className="text-sm text-gray-500 line-through">
-                                            ₦{product.oldPrice.toLocaleString()}
-                                        </span>
-                                    )}
-                                </div>
-                                <div className="text-yellow-400">
-                                    {'★'.repeat(Math.floor(product.rating || 0))}
-                                    {'☆'.repeat(5 - Math.floor(product.rating || 0))}
-                                </div>
+                            
+                            {/* Black overlay with name and shop now button on hover */}
+                            <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <h3 className="text-white font-medium text-xl mb-4 text-center px-4">{product.name}</h3>
+                                <button 
+                                    onClick={() => navigate(`/product/${product._id}`)}
+                                    className="bg-white text-black px-6 py-2 flex items-center gap-2 hover:bg-gray-100 transition-colors"
+                                >
+                                    <span>Shop Now</span>
+                                    <FaArrowRight className="text-sm" />
+                                </button>
                             </div>
                         </div>
                     </motion.div>
                 ))}
             </div>
             
-            {/* Go to Shop button */}
-            <div className="flex justify-center mt-8">
+            {/* Shop All Products button */}
+            <div className="flex justify-center mt-12">
                 <Link 
                     to="/shop" 
-                    className="bg-gold hover:bg-gold-dark text-white font-medium py-3 px-6 rounded-md transition-all duration-300 shadow-luxury flex items-center gap-2 transform hover:scale-105"
+                    className="bg-black text-white font-medium py-3 px-8 flex items-center gap-2 hover:bg-gray-900 transition-all"
                 >
-                    Go to Shop
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
+                    <span className="text-white">Shop All Products</span>
+                    <FaArrowRight className="text-sm text-white" />
                 </Link>
             </div>
         </div>

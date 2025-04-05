@@ -11,9 +11,13 @@ import LazyImage from '../../components/Image';
 import { FaShoppingCart, FaHeart, FaEye } from 'react-icons/fa';
 import ProductCardSkeleton from '../../components/ProductCardSkeleton';
 import QuickViewModal from '../../components/QuickViewModal';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../../redux/features/cart/cartSlice';
+import { toast } from 'react-hot-toast';
 
 const ProductCards = ({ products, isLoading }) => {
     const { formatPrice, currencySymbol } = useCurrency();
+    const dispatch = useDispatch();
     const [previewImage, setPreviewImage] = useState({
         isOpen: false,
         url: '',
@@ -21,6 +25,20 @@ const ProductCards = ({ products, isLoading }) => {
     });
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
+
+    // Handle add to cart
+    const handleAddToCart = (e, product) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (product.stockStatus === 'Out of Stock') return;
+        
+        dispatch(addToCart({
+            ...product,
+            quantity: 1
+        }));
+        toast.success('Added to cart');
+    };
 
     const openPreview = (e, imageUrl, productName) => {
         e.preventDefault(); // Prevent navigation
@@ -108,7 +126,7 @@ const ProductCards = ({ products, isLoading }) => {
 
                                 <div className="mt-4 flex justify-between space-x-2">
                                     <button
-                                        onClick={(e) => openPreview(e, product.image, product.name)}
+                                        onClick={(e) => handleAddToCart(e, product)}
                                         disabled={product.stockStatus === 'Out of Stock'}
                                         className={`flex-1 flex items-center justify-center text-xs sm:text-sm px-2 py-1.5 sm:py-2 rounded-md 
                                             ${product.stockStatus === 'Out of Stock' 
@@ -116,8 +134,8 @@ const ProductCards = ({ products, isLoading }) => {
                                                 : 'bg-black text-white hover:bg-gray-800'
                                             } transition-colors`}
                                     >
-                                        <span className="hidden sm:inline">Add to Cart</span>
-                                        <FaShoppingCart className="sm:ml-1 text-xs sm:text-sm inline-block" />
+                                        <span className="hidden sm:inline text-white" style={{color: 'white !important'}}>Add to Cart</span>
+                                        <span className="text-white" style={{color: 'white !important'}}><FaShoppingCart className="sm:ml-1 text-xs sm:text-sm inline-block" /></span>
                                     </button>
                                     <button
                                         onClick={() => handleQuickView(product)}

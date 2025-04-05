@@ -96,7 +96,7 @@ const Footer = () => {
                     disabled={loading}
                 className="bg-black text-white px-6 py-2 font-medium hover:bg-gray-800 transition-all"
               >
-                {loading ? 'Sending...' : 'Sign Up'}
+                <span className="text-white">{loading ? 'Sending...' : 'Sign Up'}</span>
                   </button>
                 </form>
               ) : (

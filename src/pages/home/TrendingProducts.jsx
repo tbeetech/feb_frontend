@@ -52,7 +52,7 @@ const TrendingProducts = () => {
                     variants={itemVariants}
                     className="section__subheader"
                 >
-                    Discover our most sought-after fashion pieces and accessories
+                    Curated selection of this season's most coveted luxury items
                 </motion.p>
             </motion.div>
 

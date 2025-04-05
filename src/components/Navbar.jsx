@@ -29,7 +29,9 @@ import {
     FaUserPlus,
     FaPlus,
     FaTh,
-    FaEdit
+    FaEdit,
+    FaInfoCircle,
+    FaEnvelope
 } from 'react-icons/fa';
 import MiniCart from './MiniCart';
 
@@ -195,21 +197,19 @@ const Navbar = () => {
     };
 
     const mainCategories = [
-        { name: "Womenswear", path: "women", icon: <FaFemale className="w-5 h-5 mr-3" /> },
-        { name: "Menswear", path: "men", icon: <FaMale className="w-5 h-5 mr-3" /> },
-        { name: "Kidswear", path: "kids", icon: <FaBaby className="w-5 h-5 mr-3" /> }
+        { name: "About", path: "about", icon: <FaInfoCircle className="w-5 h-5 mr-3" /> },
+        { name: "Contact", path: "contact", icon: <FaEnvelope className="w-5 h-5 mr-3" /> }
     ];
 
     const shoppingCategories = [
         { name: "New in", path: "new", icon: <FaGift className="w-5 h-5 mr-3" /> },
         { name: "Brands", path: "brands", icon: <FaGem className="w-5 h-5 mr-3" /> },
-        { name: "Clothing", path: "clothing", icon: <FaTshirt className="w-5 h-5 mr-3" /> },
+        { name: "Clothing", path: "clothes", icon: <FaTshirt className="w-5 h-5 mr-3" /> },
         { name: "Shoes", path: "shoes", icon: <FaShoePrints className="w-5 h-5 mr-3" /> },
         { name: "Bags", path: "bags", icon: <FaShoppingBag className="w-5 h-5 mr-3" /> },
         { name: "Accessories", path: "accessories", icon: <FaGem className="w-5 h-5 mr-3" /> },
         { name: "Jewelry", path: "jewelry", icon: <FaGem className="w-5 h-5 mr-3" /> },
         { name: "Homeware", path: "homeware", icon: <FaHome className="w-5 h-5 mr-3" /> },
-        { name: "Pre-owned", path: "pre-owned", icon: <FaPaintBrush className="w-5 h-5 mr-3" /> },
         { name: "Sale", path: "sale", highlight: true, icon: <FaTags className="w-5 h-5 mr-3 text-red-600" /> }
     ];
 
@@ -365,7 +365,7 @@ const Navbar = () => {
                             <Link to="/cart" className="p-1 text-gray-700 hover:text-black transition-colors relative">
                                 <CiShoppingCart className="h-6 w-6" />
                                 {products.length > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
+                                    <span className="absolute -top-1 -right-1 bg-black text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
                                         {products.reduce((sum, item) => sum + item.quantity, 0)}
                                     </span>
                                 )}
@@ -441,12 +441,11 @@ const Navbar = () => {
                                             </Link>
                                         </li>
                                 
-                                {/* Single linear menu with all links */}
                                 {/* Main categories */}
                                 {mainCategories.map((category, index) => (
                                     <li key={`main-${index}`} className="border-b border-gray-100 py-1">
                                         <Link
-                                            to={`/categories/${category.path}`}
+                                            to={`/${category.path}`}
                                             className="flex items-center py-2 text-gray-800 font-medium"
                                             onClick={handleMobileMenuToggle}
                                         >
