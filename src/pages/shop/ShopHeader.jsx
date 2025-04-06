@@ -18,7 +18,7 @@ const ShopHeader = ({ products = [] }) => {
     };
 
     return (
-        <section className="relative min-h-[500px] mt-16 overflow-hidden">
+        <section className="relative min-h-[400px] overflow-hidden">
             {/* Glassmorphism Background */}
             <motion.div 
                 className="absolute inset-0 bg-gradient-to-r from-gray-100/30 to-white"
@@ -28,11 +28,11 @@ const ShopHeader = ({ products = [] }) => {
             />
 
             {/* Content */}
-            <div className="relative z-10 container mx-auto px-4 py-16">
+            <div className="relative z-10 container mx-auto px-4 py-12">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-center mb-12"
+                    className="text-center mb-10"
                 >
                     <motion.h1 
                         className="text-4xl md:text-6xl font-playfair font-bold text-gray-900 mb-6"
