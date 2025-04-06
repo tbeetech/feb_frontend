@@ -238,7 +238,7 @@ const Navbar = () => {
                         <Link to="/" className="flex-shrink-0">
                             <div className="flex items-center">
                                 <h1 className="text-2xl md:text-3xl font-bold tracking-wider">F.E.B</h1>
-                                <p className="text-sm ml-2 tracking-widest uppercase">LUXURY</p>
+                                <p className="text-2xl md:text-3xl font-bold tracking-wider uppercase ml-2">LUXURY</p>
                             </div>
                         </Link>
                         
