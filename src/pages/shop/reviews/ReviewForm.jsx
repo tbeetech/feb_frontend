@@ -1,32 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import RatingStars from '../../../components/RatingStars';
 import { usePostReviewMutation } from '../../../redux/features/reviews/reviewsApi';
 import { toast } from 'react-hot-toast';
 import { FaPaperPlane } from 'react-icons/fa';
+import { checkAuth } from '../../../redux/features/auth/authSlice';
 
 const ReviewForm = ({ productId, onReviewSubmitted }) => {
-    const { user } = useSelector((state) => state.auth);
+    const dispatch = useDispatch();
+    const { user, isAuthenticated } = useSelector((state) => state.auth);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
     const [postReview, { isLoading: isSubmitting, error: reviewError }] = usePostReviewMutation();
     const navigate = useNavigate();
+
+    // Check authentication on component mount
+    useEffect(() => {
+        dispatch(checkAuth());
+    }, [dispatch]);
 
     // Check if token exists
     const hasToken = !!localStorage.getItem('token');
 
     useEffect(() => {
         // If there's a token error, alert the user
-        if (reviewError && reviewError.status === 401) {
-            toast.error('Your session has expired. Please login again.');
+        if (reviewError) {
+            if (reviewError.status === 401) {
+                toast.error('Your session has expired. Please login again.');
+                navigate('/login');
+            } else if (reviewError.data?.message) {
+                toast.error(reviewError.data.message);
+            } else {
+                toast.error('Error submitting review. Please try again.');
+            }
         }
-    }, [reviewError]);
+    }, [reviewError, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (!user) {
+        // Refresh auth state
+        dispatch(checkAuth());
+        
+        if (!isAuthenticated || !user) {
             toast.error('Please login to submit a review');
             navigate('/login');
             return;
@@ -74,9 +91,8 @@ const ReviewForm = ({ productId, onReviewSubmitted }) => {
                 setComment('');
                 
                 // Update parent component with new reviews
-                if (onReviewSubmitted) {
-                    console.log('Calling onReviewSubmitted with:', response.reviews);
-                    await onReviewSubmitted(response.reviews);
+                if (onReviewSubmitted && response.reviews) {
+                    onReviewSubmitted(response.reviews);
                 }
                 
                 toast.success('Review submitted successfully!');
@@ -100,7 +116,7 @@ const ReviewForm = ({ productId, onReviewSubmitted }) => {
     return (
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
             <h3 className="text-xl font-semibold mb-4">Write a Review</h3>
-            {!user && (
+            {!isAuthenticated && (
                 <div className="mb-4 p-3 bg-yellow-100 text-yellow-800 rounded-md">
                     Please <button onClick={() => navigate('/login')} className="font-medium underline">login</button> to submit a review.
                 </div>
@@ -140,9 +156,9 @@ const ReviewForm = ({ productId, onReviewSubmitted }) => {
                 </div>
                 <button
                     type="submit"
-                    disabled={isSubmitting || !user}
+                    disabled={isSubmitting || !isAuthenticated}
                     className={`w-full py-3 px-6 rounded-md text-white font-medium flex items-center justify-center space-x-2 shadow-md ${
-                        isSubmitting || !user
+                        isSubmitting || !isAuthenticated
                             ? 'bg-gray-400 cursor-not-allowed'
                             : 'bg-black hover:bg-gray-800'
                     } transition-all duration-200 mt-2`}

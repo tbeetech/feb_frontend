@@ -243,9 +243,9 @@ const EditProduct = () => {
       console.error('Update error:', error);
       
       // Display specific validation errors if available
-      if (error.details && Object.keys(error.details).length > 0) {
+      if (error.data?.details && Object.keys(error.data.details).length > 0) {
         // Show each validation error as a separate toast
-        Object.entries(error.details).forEach(([field, message]) => {
+        Object.entries(error.data.details).forEach(([field, message]) => {
           toast.error(`${field}: ${message}`, {
             position: "top-center",
             autoClose: 5000
@@ -253,14 +253,14 @@ const EditProduct = () => {
         });
       } else {
         // Show general error message
-        toast.error(`Failed to update product: ${error.message || 'Unknown error'}`, {
+        toast.error(`Failed to update product: ${error.data?.message || error.message || 'Unknown error'}`, {
           position: "top-center",
           autoClose: 5000
         });
       }
       
       // If there's a sizeType error, reset the sizeType field
-      if (error.details?.sizeType) {
+      if (error.data?.details?.sizeType) {
         setFormData(prev => ({
           ...prev,
           sizeType: 'none',
@@ -284,14 +284,9 @@ const EditProduct = () => {
     }
     
     try {
-      const resultAction = await deleteProduct(id).unwrap();
-      
-      if (resultAction.success) {
-        toast.success('Product deleted successfully!');
-        navigate('/admin/manage-products');
-      } else {
-        toast.error(resultAction.message || 'Failed to delete product');
-      }
+      await deleteProduct(id).unwrap();
+      toast.success('Product deleted successfully!');
+      navigate('/admin/manage-products');
     } catch (error) {
       console.error('Delete failed:', error);
       toast.error(error.data?.message || 'Failed to delete product');
@@ -694,36 +689,6 @@ const EditProduct = () => {
             >
               {showPreview ? 'Hide Preview' : 'Show Preview'}
             </button>
-            
-            {/* Delete Button */}
-            {!deleteConfirmation ? (
-              <button
-                type="button"
-                onClick={(e) => handleDelete(e)}
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-all"
-                disabled={isDeleting}
-              >
-                Delete Product
-              </button>
-            ) : (
-              <div className="flex space-x-2">
-                <button
-                  type="button"
-                  onClick={(e) => cancelDelete(e)}
-                  className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => handleDelete(e)}
-                  className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-all"
-                  disabled={isDeleting}
-                >
-                  Confirm Delete
-                </button>
-              </div>
-            )}
           </div>
           
           {/* Product Preview */}
@@ -816,8 +781,8 @@ const EditProduct = () => {
             </motion.div>
           )}
           
-          {/* Submit Button */}
-          <div className="flex justify-center">
+          {/* Submit Buttons */}
+          <div className="flex flex-col md:flex-row justify-center gap-4 mt-8">
             <button
               type="submit"
               className="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 transition-all"
@@ -825,6 +790,35 @@ const EditProduct = () => {
             >
               {isUpdating ? 'Updating...' : 'Update Product'}
             </button>
+            
+            {!deleteConfirmation ? (
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="bg-red-600 text-white px-8 py-3 rounded-md hover:bg-red-700 transition-all"
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Product'}
+              </button>
+            ) : (
+              <div className="flex flex-col md:flex-row gap-2">
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className="bg-red-600 text-white px-8 py-3 rounded-md hover:bg-red-700 transition-all"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'Deleting...' : 'Confirm Delete'}
+                </button>
+                <button
+                  type="button"
+                  onClick={cancelDelete}
+                  className="bg-gray-300 text-gray-800 px-8 py-3 rounded-md hover:bg-gray-400 transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
         </form>
       </motion.div>

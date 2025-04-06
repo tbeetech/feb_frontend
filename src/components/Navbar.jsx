@@ -31,7 +31,8 @@ import {
     FaTh,
     FaEdit,
     FaInfoCircle,
-    FaEnvelope
+    FaEnvelope,
+    FaHeart
 } from 'react-icons/fa';
 import MiniCart from './MiniCart';
 
@@ -237,8 +238,10 @@ const Navbar = () => {
                     <div className="container mx-auto px-4 flex items-center justify-between">
                         {/* Logo */}
                         <Link to="/" className="flex-shrink-0">
-                            <h1 className="text-2xl md:text-3xl font-bold tracking-wider">FEB</h1>
-                            <p className="text-[9px] tracking-widest uppercase text-center">luxury</p>
+                            <div className="flex items-center">
+                                <h1 className="text-2xl md:text-3xl font-bold tracking-wider">F.E.B</h1>
+                                <p className="text-sm ml-2 tracking-widest uppercase">LUXURY</p>
+                            </div>
                         </Link>
                         
                         {/* Desktop Navigation */}
@@ -311,10 +314,6 @@ const Navbar = () => {
                                 <CiSearch className="w-6 h-6" />
                             </button>
                             
-                            <Link to="/wishlist" className="p-2 text-gray-700 hover:text-black">
-                                <CiHeart className="w-6 h-6" />
-                            </Link>
-                            
                             <button 
                                 onClick={handleCartToggle}
                                 className="p-2 text-gray-700 hover:text-black relative"
@@ -364,39 +363,54 @@ const Navbar = () => {
                                                         
                                                         <div className="pt-3 space-y-2">
                                                             <Link 
-                                                                to="/profile" 
+                                                                to="/dashboard" 
                                                                 className="flex items-center text-gray-700 hover:text-black py-2"
                                                                 onClick={() => setIsDropDownOpen(false)}
                                                             >
                                                                 <FaUser className="w-4 h-4 mr-3" />
-                                                                <span>Profile</span>
+                                                                <span>Dashboard</span>
                                                             </Link>
-                                                            <Link 
-                                                                to="/orders" 
-                                                                className="flex items-center text-gray-700 hover:text-black py-2"
-                                                                onClick={() => setIsDropDownOpen(false)}
-                                                            >
-                                                                <FaShoppingBag className="w-4 h-4 mr-3" />
-                                                                <span>Orders</span>
-                                                            </Link>
-                                                            <Link 
-                                                                to="/wishlist" 
-                                                                className="flex items-center text-gray-700 hover:text-black py-2"
-                                                                onClick={() => setIsDropDownOpen(false)}
-                                                            >
-                                                                <FaHeart className="w-4 h-4 mr-3" />
-                                                                <span>Wishlist</span>
-                                                            </Link>
-                                                            {user.isAdmin && (
-                                                                <Link 
-                                                                    to="/admin" 
-                                                                    className="flex items-center text-gray-700 hover:text-black py-2"
-                                                                    onClick={() => setIsDropDownOpen(false)}
-                                                                >
-                                                                    <FaTh className="w-4 h-4 mr-3" />
-                                                                    <span>Admin Dashboard</span>
-                                                                </Link>
+                                                            
+                                                            {/* Admin menu items */}
+                                                            {user?.role === 'admin' && (
+                                                                <>
+                                                                    <div className="border-t border-gray-100 my-1"></div>
+                                                                    <span className="block px-4 py-1 text-xs text-gray-500">Admin</span>
+                                                                    <Link 
+                                                                        to="/admin/dashboard" 
+                                                                        className="flex items-center text-gray-700 hover:text-black py-2"
+                                                                        onClick={() => setIsDropDownOpen(false)}
+                                                                    >
+                                                                        <FaTh className="w-4 h-4 mr-3" />
+                                                                        <span>Admin Dashboard</span>
+                                                                    </Link>
+                                                                    <Link 
+                                                                        to="/admin/upload-product" 
+                                                                        className="flex items-center text-gray-700 hover:text-black py-2"
+                                                                        onClick={() => setIsDropDownOpen(false)}
+                                                                    >
+                                                                        <FaPlus className="w-4 h-4 mr-3" />
+                                                                        <span>Upload Product</span>
+                                                                    </Link>
+                                                                    <Link 
+                                                                        to="/admin/manage-products" 
+                                                                        className="flex items-center text-gray-700 hover:text-black py-2"
+                                                                        onClick={() => setIsDropDownOpen(false)}
+                                                                    >
+                                                                        <FaTh className="w-4 h-4 mr-3" />
+                                                                        <span>Manage Products</span>
+                                                                    </Link>
+                                                                    <Link 
+                                                                        to="/admin/edit-product" 
+                                                                        className="flex items-center text-gray-700 hover:text-black py-2"
+                                                                        onClick={() => setIsDropDownOpen(false)}
+                                                                    >
+                                                                        <FaEdit className="w-4 h-4 mr-3" />
+                                                                        <span>Edit Product</span>
+                                                                    </Link>
+                                                                </>
                                                             )}
+                                                            
                                                             <button 
                                                                 onClick={handleLogout}
                                                                 className="flex items-center text-red-600 hover:text-red-700 py-2 w-full text-left"

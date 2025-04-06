@@ -63,17 +63,17 @@ export const productsApi = createApi({
         }),
         addProduct: builder.mutation({
             query: (data) => ({
-                url: '/api/products',
+                url: '/api/products/create-product',
                 method: 'POST',
                 body: data,
             }),
             invalidatesTags: ['Products'],
         }),
         updateProduct: builder.mutation({
-            query: ({ id, data }) => ({
-                url: `/api/products/${id}`,
-                method: 'PUT',
-                body: data,
+            query: ({ id, productData }) => ({
+                url: `/api/products/update-product/${id}`,
+                method: 'PATCH',
+                body: productData,
             }),
             invalidatesTags: ['Products', 'Product'],
         }),
@@ -86,7 +86,7 @@ export const productsApi = createApi({
         }),
         searchProducts: builder.query({
             query: (searchQuery = '') => ({
-                url: '/search',
+                url: '/api/products/search',
                 method: 'GET',
                 params: {
                     query: searchQuery

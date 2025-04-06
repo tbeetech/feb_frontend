@@ -21,14 +21,35 @@ export const reviewApi = createApi({
     tagTypes: ["Reviews", "ProductReviews"],
     endpoints: (builder) => ({
         postReview: builder.mutation({
-            query: (reviewData) => ({
-                url: "/post-review",
-                method: "POST",
-                body: reviewData,
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
+            query: (reviewData) => {
+                // Get fresh token from localStorage to ensure it's the latest
+                const token = localStorage.getItem('token');
+                
+                if (!token) {
+                    throw new Error('Authentication required');
                 }
-            }),
+                
+                return {
+                    url: "/post-review",
+                    method: "POST",
+                    body: reviewData,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                };
+            },
+            // Transform response to handle errors consistently
+            transformResponse: (response) => {
+                return response;
+            },
+            // Transform error for better error handling
+            transformErrorResponse: (response) => {
+                return {
+                    status: response.status,
+                    data: response.data || { message: 'An error occurred' }
+                };
+            },
             invalidatesTags: (result, error, { productId }) => [
                 { type: "Reviews" },
                 { type: "ProductReviews", id: productId }
@@ -48,16 +69,34 @@ export const reviewApi = createApi({
             ]
         }),
         likeReview: builder.mutation({
-            query: (reviewId) => ({
-                url: `/${reviewId}/like`,
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
+            query: (reviewId) => {
+                const token = localStorage.getItem('token');
+                
+                if (!token) {
+                    throw new Error('Authentication required');
                 }
-            }),
+                
+                return {
+                    url: `/${reviewId}/like`,
+                    method: "POST",
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                };
+            },
             invalidatesTags: (result, error, reviewId) => [
+                { type: "Reviews" },
                 { type: "ProductReviews" }
             ]
+        }),
+        getUserReviews: builder.query({
+            query: (userId) => ({
+                url: `/${userId}`,
+                method: "GET"
+            }),
+            transformResponse: (response) => {
+                return response || [];
+            }
         }),
         getReviewsCount: builder.query({
             query: () => ({
@@ -89,6 +128,7 @@ export const {
     usePostReviewMutation, 
     useGetProductReviewsQuery,
     useLikeReviewMutation,
+    useGetUserReviewsQuery,
     useGetReviewsCountQuery, 
     useGetReviewsByUserIdQuery,
     useGetUserActivityQuery

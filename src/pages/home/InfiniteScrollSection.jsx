@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useRef, useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaGem, FaSprayCan, FaTshirt, FaShoppingBag, FaChevronLeft, FaChevronRight, FaStar, FaShoePrints, FaBriefcase, FaLongArrowAltRight } from 'react-icons/fa';
 import { GiNecklace, GiDress } from 'react-icons/gi';
@@ -43,15 +43,16 @@ const InfiniteScrollSection = () => {
   const [currentImage, setCurrentImage] = useState(0);
   const images = [image1, image2, image3];
   const scrollContainerRef = useRef(null);
+  const navigate = useNavigate();
   
   // Scroll through images every 6 seconds
-  useState(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % images.length);
     }, 6000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [images.length]);
   
   // Text animation variants
   const textVariants = {
@@ -79,6 +80,10 @@ const InfiniteScrollSection = () => {
   
   const goToNext = () => {
     setCurrentImage((prev) => (prev + 1) % images.length);
+  };
+
+  const handleShopNavigation = () => {
+    navigate('/shop');
   };
 
   return (
@@ -158,17 +163,16 @@ const InfiniteScrollSection = () => {
           </motion.p>
           
           <motion.div variants={textVariants}>
-            <Link to="/shop">
-              <motion.button
-                variants={buttonVariants}
-                whileHover="hover"
-                whileTap="tap"
-                className="bg-white/90 text-primary px-8 py-3 rounded-lg shadow-lg transition-all group flex items-center gap-2 mx-auto"
-              >
-                {carouselContent[currentImage].cta}
-                <FaLongArrowAltRight className="group-hover:translate-x-1 transition-transform" />
-              </motion.button>
-            </Link>
+            <motion.button
+              onClick={handleShopNavigation}
+              variants={buttonVariants}
+              whileHover="hover"
+              whileTap="tap"
+              className="bg-white/90 text-primary px-8 py-3 rounded-lg shadow-lg transition-all group flex items-center gap-2 mx-auto"
+            >
+              {carouselContent[currentImage].cta}
+              <FaLongArrowAltRight className="group-hover:translate-x-1 transition-transform" />
+            </motion.button>
           </motion.div>
         </motion.div>
       </div>

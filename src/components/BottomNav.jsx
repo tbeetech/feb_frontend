@@ -221,7 +221,10 @@ const BottomNav = () => {
                             <div className="p-4">
                                 {/* Header with close button */}
                                 <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
-                                    <h2 className="text-xl font-bold uppercase tracking-widest">FEB</h2>
+                                    <div className="flex items-center">
+                                        <h2 className="text-xl font-bold uppercase tracking-widest">F.E.B</h2>
+                                        <p className="text-sm ml-2 tracking-widest uppercase">LUXURY</p>
+                                    </div>
                                     <button 
                                         onClick={() => setShowMenu(false)}
                                         className="w-8 h-8 rounded-full bg-black flex items-center justify-center"

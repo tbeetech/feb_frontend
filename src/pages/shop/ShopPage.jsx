@@ -5,8 +5,11 @@ import ShopHeader from './ShopHeader'
 import { useFetchAllProductsQuery } from '../../redux/features/products/productsApi'
 import { CATEGORIES } from '../../constants/categoryConstants'
 import { CiFilter, CiGrid41, CiGrid2H, CiCircleChevLeft, CiCircleChevRight } from 'react-icons/ci'
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
+import { FaChevronLeft, FaChevronRight, FaShoppingBag, FaTshirt, FaGem, FaShoePrints, FaTags, FaBriefcase, FaStar, FaSprayCan } from 'react-icons/fa'
 import ProductCardSkeleton from '../../components/ProductCardSkeleton'
+import { Link, useLocation, useSearchParams, useNavigate } from 'react-router-dom'
+import { GiNecklace, GiDress } from 'react-icons/gi'
+import toast from 'react-hot-toast'
 
 const filters = {
   categories: {
@@ -108,15 +111,15 @@ const ShopPage = () => {
   
   // Generate all categories for the slider
   const allCategoryOptions = [
-    { value: 'all', label: 'All Products', icon: '🛍️' },
-    { value: 'new', label: 'New Arrivals', icon: '✨' },
-    { value: 'clothes', label: 'Clothing', icon: '👕' },
-    { value: 'dress', label: 'Dresses', icon: '👗' },
-    { value: 'shoes', label: 'Shoes', icon: '👠' },
-    { value: 'bags', label: 'Bags', icon: '👜' },
-    { value: 'accessories', label: 'Accessories', icon: '⌚' },
-    { value: 'fragrance', label: 'Fragrances', icon: '🧴' },
-    { value: 'corporate', label: 'Corporate Wear', icon: '👔' },
+    { value: 'all', label: 'All Products', icon: <FaShoppingBag className="w-4 h-4" /> },
+    { value: 'new', label: 'New Arrivals', icon: <FaStar className="w-4 h-4" /> },
+    { value: 'clothes', label: 'Clothing', icon: <FaTshirt className="w-4 h-4" /> },
+    { value: 'dress', label: 'Dresses', icon: <GiDress className="w-4 h-4" /> },
+    { value: 'shoes', label: 'Shoes', icon: <FaShoePrints className="w-4 h-4" /> },
+    { value: 'bags', label: 'Bags', icon: <FaShoppingBag className="w-4 h-4" /> },
+    { value: 'accessories', label: 'Accessories', icon: <FaGem className="w-4 h-4" /> },
+    { value: 'fragrance', label: 'Fragrances', icon: <FaSprayCan className="w-4 h-4" /> },
+    { value: 'corporate', label: 'Corporate Wear', icon: <FaBriefcase className="w-4 h-4" /> },
   ];
 
   if(isLoading) return (
@@ -201,7 +204,7 @@ const ShopPage = () => {
                   : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
               }`}
             >
-              <span>{cat.icon}</span>
+              <span className="flex items-center justify-center">{cat.icon}</span>
               <span>{cat.label}</span>
             </button>
           ))}

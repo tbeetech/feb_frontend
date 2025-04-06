@@ -24,6 +24,8 @@ import Reviews from "../pages/Reviews";
 import PrivateRoute from "../routes/PrivateRoute";
 import AdminRoute from "../routes/AdminRoute";
 import ScrollToTop from "../components/ScrollToTopOnNavigate";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 const router = createBrowserRouter([
 {
@@ -69,7 +71,9 @@ children: [
     element: 
     <>
         <ScrollToTop />
+        <Navbar />
         <Login/>
+        <Footer />
     </>
 },
 {
@@ -77,7 +81,9 @@ children: [
     element:
     <>
         <ScrollToTop />
+        <Navbar />
         <Register/>
+        <Footer />
     </>
 }
 ]);
