@@ -24,7 +24,10 @@ export const reviewApi = createApi({
             query: (reviewData) => ({
                 url: "/post-review",
                 method: "POST",
-                body: reviewData
+                body: reviewData,
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
             }),
             invalidatesTags: (result, error, { productId }) => [
                 { type: "Reviews" },
@@ -47,7 +50,10 @@ export const reviewApi = createApi({
         likeReview: builder.mutation({
             query: (reviewId) => ({
                 url: `/${reviewId}/like`,
-                method: "POST"
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
             }),
             invalidatesTags: (result, error, reviewId) => [
                 { type: "ProductReviews" }
@@ -60,13 +66,19 @@ export const reviewApi = createApi({
         }),
         getReviewsByUserId: builder.query({
             query: (userId) => ({
-                url: `/${userId}`
+                url: `/${userId}`,
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
             }),
             providesTags: (result) => result ? [{ type: "Reviews", id: result[0]?.email }] : []
         }),
         getUserActivity: builder.query({
             query: (userId) => ({
-                url: `/user/${userId}/activity`
+                url: `/user/${userId}/activity`,
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
             }),
             providesTags: ["Reviews"]
         })

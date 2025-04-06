@@ -1,38 +1,71 @@
 import { createSlice } from "@reduxjs/toolkit";
+import authApi from "./authApi";
 
-const loadUserFromLocalStorage = () => {
-    try {
-        const serializedState = localStorage.getItem("user");
-        if (serializedState === null) return { user: null, isAuthenticated: false };
-        return { user: JSON.parse(serializedState), isAuthenticated: true };
-    } catch (error) {
-        return { user: null, isAuthenticated: false };
-    }
+const savedToken = localStorage.getItem('token');
+const savedUser = localStorage.getItem('user');
+
+const initialState = {
+    user: savedUser ? JSON.parse(savedUser) : null,
+    token: savedToken || null,
+    isAuthenticated: !!savedToken,
+    loading: false
 };
 
-const initialState = loadUserFromLocalStorage();
-
-const authSlice = createSlice({
+export const authSlice = createSlice({
     name: "auth",
     initialState,
     reducers: {
-        setUser: (state, action) => {
-            state.user = action.payload.user;
-            state.isAuthenticated = !!action.payload.user;
-            localStorage.setItem('user', JSON.stringify(state.user));
-        },
         logout: (state) => {
             state.user = null;
+            state.token = null;
             state.isAuthenticated = false;
+            localStorage.removeItem('token');
             localStorage.removeItem('user');
         },
-        updateUserProfile: (state, action) => {
-            state.user = { ...state.user, ...action.payload.user };
-            state.isAuthenticated = !!state.user;
-            localStorage.setItem('user', JSON.stringify(state.user));
+        setCredentials: (state, { payload }) => {
+            state.user = payload.user;
+            state.token = payload.token;
+            state.isAuthenticated = true;
+            localStorage.setItem('token', payload.token);
+            localStorage.setItem('user', JSON.stringify(payload.user));
+        },
+        checkAuth: (state) => {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            state.token = token;
+            state.user = user ? JSON.parse(user) : null;
+            state.isAuthenticated = !!token;
         }
+    },
+    extraReducers: (builder) => {
+        builder
+            .addMatcher(
+                authApi.endpoints.loginUser.matchFulfilled,
+                (state, { payload }) => {
+                    if (payload.token && payload.user) {
+                        state.token = payload.token;
+                        state.user = payload.user;
+                        state.isAuthenticated = true;
+                        localStorage.setItem('token', payload.token);
+                        localStorage.setItem('user', JSON.stringify(payload.user));
+                    }
+                }
+            )
+            .addMatcher(
+                authApi.endpoints.registerUser.matchFulfilled,
+                (state, { payload }) => {
+                    if (payload.token && payload.user) {
+                        state.token = payload.token;
+                        state.user = payload.user;
+                        state.isAuthenticated = true;
+                        localStorage.setItem('token', payload.token);
+                        localStorage.setItem('user', JSON.stringify(payload.user));
+                    }
+                }
+            );
     }
 });
 
-export const { setUser, logout, updateUserProfile } = authSlice.actions;
+export const { logout, setCredentials, checkAuth } = authSlice.actions;
 export default authSlice.reducer;

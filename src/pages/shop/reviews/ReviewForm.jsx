@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import RatingStars from '../../../components/RatingStars';
 import { usePostReviewMutation } from '../../../redux/features/reviews/reviewsApi';
 import { toast } from 'react-hot-toast';
@@ -9,13 +10,31 @@ const ReviewForm = ({ productId, onReviewSubmitted }) => {
     const { user } = useSelector((state) => state.auth);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
-    const [postReview, { isLoading: isSubmitting }] = usePostReviewMutation();
+    const [postReview, { isLoading: isSubmitting, error: reviewError }] = usePostReviewMutation();
+    const navigate = useNavigate();
+
+    // Check if token exists
+    const hasToken = !!localStorage.getItem('token');
+
+    useEffect(() => {
+        // If there's a token error, alert the user
+        if (reviewError && reviewError.status === 401) {
+            toast.error('Your session has expired. Please login again.');
+        }
+    }, [reviewError]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         
         if (!user) {
             toast.error('Please login to submit a review');
+            navigate('/login');
+            return;
+        }
+
+        if (!hasToken) {
+            toast.error('Authentication required. Please login again.');
+            navigate('/login');
             return;
         }
 
@@ -67,14 +86,25 @@ const ReviewForm = ({ productId, onReviewSubmitted }) => {
             }
         } catch (error) {
             console.error('Error submitting review:', error);
-            const errorMessage = error.data?.message || 'Failed to submit review';
-            toast.error(errorMessage);
+            
+            if (error.status === 401) {
+                toast.error('Your login session has expired. Please login again.');
+                navigate('/login');
+            } else {
+                const errorMessage = error.data?.message || 'Failed to submit review';
+                toast.error(errorMessage);
+            }
         }
     };
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
             <h3 className="text-xl font-semibold mb-4">Write a Review</h3>
+            {!user && (
+                <div className="mb-4 p-3 bg-yellow-100 text-yellow-800 rounded-md">
+                    Please <button onClick={() => navigate('/login')} className="font-medium underline">login</button> to submit a review.
+                </div>
+            )}
             <form onSubmit={handleSubmit}>
                 <div className="mb-5">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -110,9 +140,9 @@ const ReviewForm = ({ productId, onReviewSubmitted }) => {
                 </div>
                 <button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !user}
                     className={`w-full py-3 px-6 rounded-md text-white font-medium flex items-center justify-center space-x-2 shadow-md ${
-                        isSubmitting
+                        isSubmitting || !user
                             ? 'bg-gray-400 cursor-not-allowed'
                             : 'bg-black hover:bg-gray-800'
                     } transition-all duration-200 mt-2`}
