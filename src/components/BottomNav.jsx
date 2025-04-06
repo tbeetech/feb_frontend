@@ -77,7 +77,11 @@ const BottomNav = () => {
         { name: 'All Products', path: 'shop', icon: <FaShoppingBasket className="text-lg" /> },
         { name: 'Fragrances', path: 'fragrance', icon: <FaSprayCan className="text-lg" />, hasSubcategories: true },
         { name: 'Bags', path: 'bags', icon: <FaShoppingBag className="text-lg" /> },
-        { name: 'Clothes', path: 'clothes', icon: <FaTshirt className="text-lg" /> }
+        { name: 'Clothes', path: 'clothes', icon: <FaTshirt className="text-lg" /> },
+        { name: 'Accessories', path: 'accessories', icon: <FaGem className="text-lg" />, hasSubcategories: true },
+        { name: 'Shoes', path: 'shoes', icon: <FaShoePrints className="text-lg" />, hasSubcategories: true },
+        { name: 'Dresses', path: 'dress', icon: <GiDress className="text-lg" />, hasSubcategories: true },
+        { name: 'Corporate Wear', path: 'corporate', icon: <FaBriefcase className="text-lg" />, hasSubcategories: true },
     ];
     
     // Get subcategories from CATEGORIES constant

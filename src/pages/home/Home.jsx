@@ -5,6 +5,7 @@ import TrendingProductSlider from '../../components/TrendingProductSlider'
 import DealsSection from './DealsSection';
 import PromoBanner from './PromoBanner';
 import TestimonialsSlider from '../../components/TestimonialsSlider'
+import ProductQuizComponent from './ProductQuizComponent'
 
 const Home = () => {
   return (
@@ -36,6 +37,20 @@ const Home = () => {
           <TrendingProductSlider />
         </div>
       </section>
+      
+      {/* Product Quiz Section */}
+      <section className="py-12 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-playfair font-bold text-center mb-4">
+            Find Your Perfect Match
+          </h2>
+          <p className="text-gray-600 text-center max-w-2xl mx-auto mb-12">
+            Take our interactive quiz to discover products tailored to your personal style and preferences.
+          </p>
+          <ProductQuizComponent />
+        </div>
+      </section>
+      
       {/* Testimonials Section */}
       <TestimonialsSlider />
       <DealsSection />

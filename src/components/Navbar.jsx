@@ -49,7 +49,6 @@ const Navbar = () => {
     const navigate = useNavigate(); 
 
     const [isDropDownOpen, setIsDropDownOpen] = useState(false);
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
     const [expandedCategories, setExpandedCategories] = useState({});
     
@@ -99,24 +98,6 @@ const Navbar = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [isDropDownOpen, showSearch, isCategoryOpen]);
 
-    // Close mobile menu on route change
-    useEffect(() => {
-        setIsMobileMenuOpen(false);
-    }, [location.pathname]);
-
-    // Toggle body scroll when mobile menu is open
-    useEffect(() => {
-        if (isMobileMenuOpen) {
-            document.body.classList.add('overflow-hidden');
-        } else {
-            document.body.classList.remove('overflow-hidden');
-        }
-        
-        return () => {
-            document.body.classList.remove('overflow-hidden');
-        };
-    }, [isMobileMenuOpen]);
-
     const handleCartToggle = () => {
         setIsCartOpen(!isCartOpen);
     }
@@ -124,10 +105,6 @@ const Navbar = () => {
     const handleDropDownToggle = (e) => {
         e.stopPropagation();
         setIsDropDownOpen(!isDropDownOpen);
-    }
-
-    const handleMobileMenuToggle = () => {
-        setIsMobileMenuOpen(!isMobileMenuOpen);
     }
 
     const handleCategoryToggle = () => {
@@ -179,7 +156,6 @@ const Navbar = () => {
         if (subcategory) {
             const path = `/categories/${category}/${subcategory}`;
             navigate(path);
-            setIsMobileMenuOpen(false);
         } else {
             // Toggle category expansion in mobile menu
             setExpandedCategories(prev => ({
@@ -242,384 +218,261 @@ const Navbar = () => {
                             ))}
                         </nav>
                         
-                        {/* Mobile menu button */}
-                        <button 
-                            className="md:hidden p-2 focus:outline-none" 
-                            onClick={handleMobileMenuToggle}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
-                            </svg>
-                        </button>
-
-                        {/* Logo */}
-                        <Link to="/" className="py-3 font-display text-2xl md:text-3xl font-bold tracking-tighter">
-                            FEB LUXURY
-                        </Link>
-
-                        {/* Right navigation */}
-                        <div className="flex items-center space-x-4">
-                            <ToggleTheme className="text-gray-700" />
-                            
-                            {/* User account */}
-                            <div className="relative user-dropdown">
-                                <button
-                                    onClick={handleDropDownToggle}
-                                    className="p-1 text-gray-700 hover:text-black transition-colors"
-                                >
-                                    <CiUser className="h-6 w-6" />
-                                </button>
-                                
-                                {/* User dropdown */}
-                                    {isDropDownOpen && (
-                                    <div className="absolute right-0 mt-2 w-60 bg-white shadow-lg rounded-md overflow-hidden z-50 border border-gray-200">
-                                        {user ? (
-                                            <div>
-                                                <div className="p-4 border-b border-gray-100">
-                                                    <p className="text-sm font-medium">{user.name}</p>
-                                                    <p className="text-xs text-gray-500">{user.email}</p>
-                                                </div>
-                                                <div className="py-2">
-                                                    <Link 
-                                                        to="/dashboard" 
-                                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                                        onClick={() => setIsDropDownOpen(false)}
-                                                    >
-                                                        Dashboard
-                                                    </Link>
-                                                    <Link
-                                                        to="/dashboard/orders" 
-                                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                                        onClick={() => setIsDropDownOpen(false)}
-                                                    >
-                                                        Orders
-                                                    </Link>
-                                                    
-                                                    {/* Admin menu items */}
-                                                    {user?.role === 'admin' && (
-                                                        <>
-                                                            <div className="border-t border-gray-100 my-1"></div>
-                                                            <span className="block px-4 py-1 text-xs text-gray-500">Admin</span>
-                                                            <Link
-                                                                to="/admin/upload-product" 
-                                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                                                onClick={() => setIsDropDownOpen(false)}
-                                                            >
-                                                                Upload Product
-                                                            </Link>
-                                                            <Link
-                                                                to="/admin/manage-products" 
-                                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                                                onClick={() => setIsDropDownOpen(false)}
-                                                            >
-                                                                Manage Products
-                                                            </Link>
-                                                            <Link
-                                                                to="/admin/edit-product" 
-                                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                                                onClick={() => setIsDropDownOpen(false)}
-                                                            >
-                                                                Edit Product
-                                                            </Link>
-                                                        </>
-                                                    )}
-                                                    
-                                                    <button
-                                                        onClick={handleLogout}
-                                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                                    >
-                                                        Sign out
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="py-2">
-                            <Link 
-                                to="/login"
-                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                                    onClick={() => setIsDropDownOpen(false)}
-                                                >
-                                                    Sign in
-                                                </Link>
-                                                <Link 
-                                                    to="/register" 
-                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                                    onClick={() => setIsDropDownOpen(false)}
-                                                >
-                                                    Register
-                                                </Link>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                            
-                            {/* Wishlist */}
-                            <Link to="/wishlist" className="p-1 text-gray-700 hover:text-black transition-colors">
-                                <CiHeart className="h-6 w-6" />
-                            </Link>
-                            
-                            {/* Cart */}
-                            <Link to="/cart" className="p-1 text-gray-700 hover:text-black transition-colors relative">
-                                <CiShoppingCart className="h-6 w-6" />
-                                {products.length > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-black text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
-                                        {products.reduce((sum, item) => sum + item.quantity, 0)}
-                                    </span>
-                                )}
-                            </Link>
+                        {/* Desktop Search */}
+                        <div className="hidden md:flex items-center space-x-3">
+                            <ToggleTheme />
+                            <button 
+                                onClick={handleSearchToggle} 
+                                className="p-2 text-gray-500 hover:text-black transition-colors"
+                                aria-label="Search"
+                            >
+                                <CiSearch className="w-5 h-5" />
+                            </button>
                         </div>
                     </div>
                 </div>
                 
-                {/* Bottom navigation - Shopping Categories */}
-                <div className="border-b border-gray-200 hidden md:block">
-                    <div className="container mx-auto px-4">
-                        <nav className="flex items-center justify-center space-x-6">
-                            {shoppingCategories.map((category, index) => (
-                                <Link 
-                                    key={index} 
-                                    to={`/categories/${category.path}`}
-                                    className={`py-3 text-sm hover:text-black transition-colors font-sans ${
-                                        category.highlight ? 'text-red-600 hover:text-red-700' : 'text-gray-700'
-                                    }`}
+                {/* Main navigation */}
+                <div className="py-4 border-b border-gray-200">
+                    <div className="container mx-auto px-4 flex items-center justify-between">
+                        {/* Logo */}
+                        <Link to="/" className="flex-shrink-0">
+                            <h1 className="text-2xl md:text-3xl font-bold tracking-wider">FEB</h1>
+                            <p className="text-[9px] tracking-widest uppercase text-center">luxury</p>
+                        </Link>
+                        
+                        {/* Desktop Navigation */}
+                        <div className="hidden lg:flex items-center space-x-8">
+                            <div className="relative category-dropdown">
+                                <button 
+                                    onClick={handleCategoryToggle}
+                                    className="flex items-center space-x-1 font-medium"
                                 >
-                                    {category.name}
-                                </Link>
-                            ))}
-                        </nav>
-                                </div>
+                                    <span>Categories</span>
+                                    <FaChevronDown className={`w-3 h-3 transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`} />
+                                </button>
+                                
+                                {/* Desktop Category dropdown */}
+                                <AnimatePresence>
+                                    {isCategoryOpen && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            className="absolute left-0 mt-5 bg-white rounded-md shadow-lg z-50 w-[650px] border border-gray-100"
+                                        >
+                                            <div className="grid grid-cols-3 gap-6 p-6">
+                                                {Object.keys(CATEGORIES).map((categoryKey) => {
+                                                    const category = CATEGORIES[categoryKey];
+                                                    const subcategories = category.subcategories || [];
+                                                    return (
+                                                        <div key={categoryKey} className="space-y-2">
+                                                            <Link 
+                                                                to={`/categories/${category.name}`} 
+                                                                className="font-semibold text-black block hover:underline"
+                                                                onClick={() => setIsCategoryOpen(false)}
+                                                            >
+                                                                {categoryKey.charAt(0) + categoryKey.slice(1).toLowerCase()}
+                                                            </Link>
+                                                            <ul className="space-y-1 mt-2">
+                                                                {subcategories.map((sub) => (
+                                                                    <li key={sub.value}>
+                                                                        <Link 
+                                                                            to={`/categories/${category.name}/${sub.value}`}
+                                                                            className="text-sm text-gray-600 hover:text-black block py-1"
+                                                                            onClick={() => setIsCategoryOpen(false)}
+                                                                        >
+                                                                            {sub.label}
+                                                                        </Link>
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                             
-                {/* Search bar */}
-                <div className="border-b border-gray-200">
-                    <div className="container mx-auto px-4 py-2">
-                        <form onSubmit={handleSearchSubmit} className="relative flex items-center">
-                                    <input 
-                                        type="text" 
-                            
-                                        value={searchQuery}
-                                        onChange={handleSearchChange}
-                                className="w-full px-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-500 font-sans text-sm"
-                            />
-                            <CiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                                </form>
-                            </div>
-                </div>
-            </header>
-            
-            {/* Mobile menu */}
-            <AnimatePresence>
-                {isMobileMenuOpen && (
-                    <motion.div
-                        className="fixed inset-0 z-50 bg-white overflow-y-auto"
-                        initial={{ x: '100%' }}
-                        animate={{ x: 0 }}
-                        exit={{ x: '100%' }}
-                        transition={{ type: 'tween', duration: 0.3 }}
-                    >
-                        <div className="flex justify-between items-center p-4 border-b border-gray-100">
-                            <h2 className="font-display text-xl font-bold">Menu</h2>
-                            <button 
-                                                onClick={handleMobileMenuToggle}
-                                className="p-2 text-gray-800 focus:outline-none"
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
+                            <Link to="/shop" className="font-medium">Shop All</Link>
+                            <Link to="/categories/new" className="font-medium">New In</Link>
+                            <Link to="/categories/fragrance" className="font-medium">Fragrance</Link>
+                            <Link to="/categories/bags" className="font-medium">Bags</Link>
                         </div>
                         
-                        <nav className="p-4">
-                            <ul className="space-y-2">
-                                {/* Logo */}
-                                <li className="py-2">
-                                    <Link to="/" className="flex items-center py-2 font-display text-xl font-bold" onClick={handleMobileMenuToggle}>
-                                        FEB LUXURY
-                                            </Link>
-                                        </li>
-                                
-                                {/* Main categories */}
-                                {mainCategories.map((category, index) => (
-                                    <li key={`main-${index}`} className="py-1">
-                                        <Link
-                                            to={`/${category.path}`}
-                                            className="flex items-center py-2 text-gray-800 font-medium"
-                                            onClick={handleMobileMenuToggle}
-                                        >
-                                            {category.icon}
-                                            {category.name}
-                                        </Link>
-                                        </li>
-                                    ))}
+                        {/* Action Icons */}
+                        <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
+                            <button 
+                                onClick={handleSearchToggle}
+                                className="p-2 text-gray-700 hover:text-black lg:hidden"
+                            >
+                                <CiSearch className="w-6 h-6" />
+                            </button>
+                            
+                            <Link to="/wishlist" className="p-2 text-gray-700 hover:text-black">
+                                <CiHeart className="w-6 h-6" />
+                            </Link>
+                            
+                            <button 
+                                onClick={handleCartToggle}
+                                className="p-2 text-gray-700 hover:text-black relative"
+                            >
+                                <CiShoppingCart className="w-6 h-6" />
+                                {products?.length > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                                        {products.length}
+                                    </span>
+                                )}
+                            </button>
 
-                                {/* Shopping categories */}
-                                {shoppingCategories.map((category, index) => (
-                                    <li key={`shop-${index}`} className="py-1">
-                                        {hasSubcategories(category.path) ? (
-                                            <div>
-                                        <button 
-                                                    onClick={() => toggleMobileCategory(category.path)}
-                                                    className={`flex items-center justify-between w-full py-2 ${
-                                                        category.highlight ? 'text-red-600' : 'text-gray-800'
-                                                    }`}
+                            <div className="relative user-dropdown">
+                                <button 
+                                    onClick={handleDropDownToggle}
+                                    className="p-2 text-gray-700 hover:text-black flex items-center"
+                                >
+                                    <CiUser className="w-6 h-6" />
+                                </button>
+                                
+                                <AnimatePresence>
+                                    {isDropDownOpen && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-50 border border-gray-100"
                                         >
-                                            <div className="flex items-center">
-                                                        {category.icon}
-                                                        {category.name}
-                                            </div>
-                                                    <FaChevronDown 
-                                                        className={`transition-transform ${
-                                                            expandedCategories[category.path] ? 'rotate-180' : ''
-                                                        }`} 
-                                                    />
-                                        </button>
-                                                
-                                                {expandedCategories[category.path] && (
-                                                    <ul className="pl-8 mt-1 space-y-1">
-                                                        {getSubcategories(category.path).map((subcategory, subIndex) => (
-                                                            <li key={subIndex}>
-                                                                <Link
-                                                                    to={`/categories/${category.path}/${subcategory.value}`}
-                                                                    className="block py-2 text-gray-700 hover:text-black"
-                                                                    onClick={handleMobileMenuToggle}
+                                            <div className="p-4">
+                                                {user ? (
+                                                    <>
+                                                        <div className="flex items-center space-x-3 pb-3 border-b border-gray-100">
+                                                            <img 
+                                                                src={user.avatar || avatarImg} 
+                                                                alt="User" 
+                                                                className="w-10 h-10 rounded-full object-cover"
+                                                            />
+                                                            <div>
+                                                                <p className="font-semibold">
+                                                                    {user.username || user.name || 'User'}
+                                                                </p>
+                                                                <p className="text-xs text-gray-500 truncate">
+                                                                    {user.email}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div className="pt-3 space-y-2">
+                                                            <Link 
+                                                                to="/profile" 
+                                                                className="flex items-center text-gray-700 hover:text-black py-2"
+                                                                onClick={() => setIsDropDownOpen(false)}
+                                                            >
+                                                                <FaUser className="w-4 h-4 mr-3" />
+                                                                <span>Profile</span>
+                                                            </Link>
+                                                            <Link 
+                                                                to="/orders" 
+                                                                className="flex items-center text-gray-700 hover:text-black py-2"
+                                                                onClick={() => setIsDropDownOpen(false)}
+                                                            >
+                                                                <FaShoppingBag className="w-4 h-4 mr-3" />
+                                                                <span>Orders</span>
+                                                            </Link>
+                                                            <Link 
+                                                                to="/wishlist" 
+                                                                className="flex items-center text-gray-700 hover:text-black py-2"
+                                                                onClick={() => setIsDropDownOpen(false)}
+                                                            >
+                                                                <FaHeart className="w-4 h-4 mr-3" />
+                                                                <span>Wishlist</span>
+                                                            </Link>
+                                                            {user.isAdmin && (
+                                                                <Link 
+                                                                    to="/admin" 
+                                                                    className="flex items-center text-gray-700 hover:text-black py-2"
+                                                                    onClick={() => setIsDropDownOpen(false)}
                                                                 >
-                                                                    {subcategory.label}
+                                                                    <FaTh className="w-4 h-4 mr-3" />
+                                                                    <span>Admin Dashboard</span>
                                                                 </Link>
-                                                        </li>
-                                                    ))}
-                                                    </ul>
+                                                            )}
+                                                            <button 
+                                                                onClick={handleLogout}
+                                                                className="flex items-center text-red-600 hover:text-red-700 py-2 w-full text-left"
+                                                            >
+                                                                <FaSignOutAlt className="w-4 h-4 mr-3" />
+                                                                <span>Logout</span>
+                                                            </button>
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <div className="space-y-2">
+                                                        <Link 
+                                                            to="/login" 
+                                                            className="flex items-center text-gray-700 hover:text-black py-2"
+                                                            onClick={() => setIsDropDownOpen(false)}
+                                                        >
+                                                            <FaSignInAlt className="w-4 h-4 mr-3" />
+                                                            <span>Login</span>
+                                                        </Link>
+                                                        <Link 
+                                                            to="/register" 
+                                                            className="flex items-center text-gray-700 hover:text-black py-2"
+                                                            onClick={() => setIsDropDownOpen(false)}
+                                                        >
+                                                            <FaUserPlus className="w-4 h-4 mr-3" />
+                                                            <span>Register</span>
+                                                        </Link>
+                                                    </div>
                                                 )}
                                             </div>
-                                        ) : (
-                                            <Link 
-                                                to={`/categories/${category.path}`}
-                                                className={`flex items-center py-2 ${
-                                                    category.highlight ? 'text-red-600' : 'text-gray-800'
-                                                }`}
-                                                onClick={handleMobileMenuToggle}
-                                            >
-                                                {category.icon}
-                                                {category.name}
-                                            </Link>
-                                        )}
-                                    </li>
-                                ))}
-                                
-                                {/* User account links */}
-                                {user ? (
-                                    <>
-                                        <li className="py-1">
-                                            <Link 
-                                                to="/dashboard" 
-                                                className="flex items-center py-2 text-gray-800"
-                                                onClick={handleMobileMenuToggle}
-                                            >
-                                                <FaUser className="w-5 h-5 mr-3" />
-                                                Dashboard
-                                            </Link>
-                                        </li>
-                                        <li className="py-1">
-                                                    <Link
-                                                to="/dashboard/orders" 
-                                                className="flex items-center py-2 text-gray-800"
-                                                        onClick={handleMobileMenuToggle}
-                                                    >
-                                                <FaShoppingBag className="w-5 h-5 mr-3" />
-                                                Orders
-                                                    </Link>
-                                                </li>
-                                        <li className="py-1">
-                                            <button 
-                                                className="flex items-center py-2 text-gray-800 w-full"
-                                                onClick={() => {
-                                                    logoutUser().unwrap()
-                                                        .then(() => {
-                                                            dispatch(logout());
-                                                            handleMobileMenuToggle();
-                                                            navigate('/');
-                                                        });
-                                                }}
-                                            >
-                                                <FaSignOutAlt className="w-5 h-5 mr-3" />
-                                                Logout
-                                            </button>
-                                        </li>
-                                        
-                                        {/* Admin Links */}
-                                        {user.isAdmin && (
-                                            <>
-                                                <li className="py-1">
-                                                    <Link 
-                                                        to="/admin/upload-product" 
-                                                        className="flex items-center py-2 text-gray-800"
-                                                        onClick={handleMobileMenuToggle}
-                                                    >
-                                                        <FaPlus className="w-5 h-5 mr-3" />
-                                                        Add Product
-                                                    </Link>
-                                                </li>
-                                                <li className="py-1">
-                                                    <Link 
-                                                        to="/admin/manage-products" 
-                                                        className="flex items-center py-2 text-gray-800"
-                                                        onClick={handleMobileMenuToggle}
-                                                    >
-                                                        <FaTh className="w-5 h-5 mr-3" />
-                                                        Manage Products
-                                                    </Link>
-                                                </li>
-                                                <li className="py-1">
-                                                    <Link 
-                                                        to="/admin/edit-product" 
-                                                        className="flex items-center py-2 text-gray-800"
-                                                        onClick={handleMobileMenuToggle}
-                                                    >
-                                                        <FaEdit className="w-5 h-5 mr-3" />
-                                                        Edit Product
-                                                    </Link>
-                                                </li>
-                                            </>
-                                        )}
-                                    </>
-                                ) : (
-                                    <>
-                                        <li className="py-1">
-                                            <Link 
-                                                to="/login" 
-                                                className="flex items-center py-2 text-gray-800"
-                                                onClick={handleMobileMenuToggle}
-                                            >
-                                                <FaSignInAlt className="w-5 h-5 mr-3" />
-                                                Login
-                                            </Link>
-                                        </li>
-                                        <li className="py-1">
-                                            <Link 
-                                                to="/register" 
-                                                className="flex items-center py-2 text-gray-800"
-                                                onClick={handleMobileMenuToggle}
-                                            >
-                                                <FaUserPlus className="w-5 h-5 mr-3" />
-                                                Register
-                                            </Link>
-                                        </li>
-                                    </>
-                                )}
-                            </ul>
-                        </nav>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {/* Search Bar (shown when search is active) */}
+                <AnimatePresence>
+                    {showSearch && (
+                        <motion.div 
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="border-b border-gray-200 search-container"
+                        >
+                            <div className="container mx-auto px-4 py-4">
+                                <form onSubmit={handleSearchSubmit} className="flex items-center">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Search for products..." 
+                                        className="w-full py-3 px-4 border-0 focus:outline-none search-input text-lg"
+                                        value={searchQuery}
+                                        onChange={handleSearchChange}
+                                    />
+                                    <button 
+                                        type="button"
+                                        onClick={() => setShowSearch(false)}
+                                        className="ml-4 text-gray-500 hover:text-black"
+                                    >
+                                        Cancel
+                                    </button>
+                                </form>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </header>
             
-            {/* Cart modal */}
+            {/* Cart Sidebar */}
             <AnimatePresence>
-                {isCartOpen && (
-                    <CartModal onClose={handleCartToggle} />
-                )}
+                {isCartOpen && <CartModal onClose={handleCartToggle} />}
             </AnimatePresence>
         </>
-    );
-};
+    )
+}
 
-export default Navbar;
+export default Navbar

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import RatingStars from '../../components/RatingStars'
 import SocialContactButtons from '../../components/SocialContactButtons'
 import { motion } from 'framer-motion'
 import { springAnimation } from '../../utils/animations';
@@ -110,16 +109,13 @@ const ProductCards = ({ products, isLoading }) => {
                                     <div className="mt-1 flex items-center justify-between">
                                         <div>
                                             <p className="text-sm font-medium text-gray-900">
-                                                {formatPrice(product.price, currencySymbol)}
+                                                {currencySymbol}{formatPrice(product.price)}
                                             </p>
                                             {product.oldPrice > 0 && (
                                                 <p className="text-xs text-gray-500 line-through">
-                                                    {formatPrice(product.oldPrice, currencySymbol)}
+                                                    {currencySymbol}{formatPrice(product.oldPrice)}
                                                 </p>
                                             )}
-                                        </div>
-                                        <div className="flex items-center">
-                                            <RatingStars rating={product.rating || 0} size="small" />
                                         </div>
                                     </div>
                                 </Link>
