@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
 import { FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
-import { updateUserProfile } from '../redux/features/auth/authSlice';
+import { setCredentials } from '../redux/features/auth/authSlice';
 import axios from 'axios';
 
 const Profile = () => {
     const dispatch = useDispatch();
-    const { user } = useSelector((state) => state.auth);
+    const { user, token } = useSelector((state) => state.auth);
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
@@ -76,7 +76,11 @@ const Profile = () => {
                 }
             );
 
-            dispatch(updateUserProfile(response.data.user));
+            const updatedToken = localStorage.getItem('token');
+            dispatch(setCredentials({
+                user: response.data.user,
+                token: updatedToken
+            }));
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
             setIsEditing(false);
         } catch (error) {
