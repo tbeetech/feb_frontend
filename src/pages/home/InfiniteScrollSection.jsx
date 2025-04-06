@@ -61,7 +61,7 @@ const InfiniteScrollSection = () => {
       opacity: 1, 
       y: 0,
       transition: { 
-        duration: 0.8, 
+        duration: 1.2, 
         ease: "easeOut"
       } 
     }
@@ -69,8 +69,11 @@ const InfiniteScrollSection = () => {
   
   // Button animation variants
   const buttonVariants = {
-    hover: { scale: 1.05 },
-    tap: { scale: 0.95 }
+    hover: { 
+      scale: 1.05,
+      transition: { duration: 0.5, ease: "easeOut" }
+    },
+    tap: { scale: 0.98 }
   };
 
   // Handlers for manual navigation
@@ -96,15 +99,15 @@ const InfiniteScrollSection = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 1.5 }}
+          transition={{ duration: 2.0, ease: "easeInOut" }}
         >
           <div 
-            className="w-full h-full bg-cover bg-center transition-transform duration-10000 transform scale-110 animate-slow-zoom"
+            className="w-full h-full bg-cover bg-center transition-transform duration-10000 transform scale-105"
             style={{ 
               backgroundImage: `url(${images[currentImage]})` 
             }}
           />
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"></div>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>
         </motion.div>
       </AnimatePresence>
       
@@ -112,11 +115,12 @@ const InfiniteScrollSection = () => {
       <div className="absolute inset-0 flex items-center justify-between px-4 z-20">
         <motion.button
           onClick={goToPrev}
-          className="bg-white/30 hover:bg-white/60 text-white rounded-full p-2"
+          className="bg-white/20 hover:bg-white/40 text-white rounded-full p-2 transition-all duration-300"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 0.7, x: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -125,11 +129,12 @@ const InfiniteScrollSection = () => {
         
         <motion.button
           onClick={goToNext}
-          className="bg-white/30 hover:bg-white/60 text-white rounded-full p-2"
+          className="bg-white/20 hover:bg-white/40 text-white rounded-full p-2 transition-all duration-300"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 0.7, x: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -168,7 +173,7 @@ const InfiniteScrollSection = () => {
               variants={buttonVariants}
               whileHover="hover"
               whileTap="tap"
-              className="bg-white/90 text-primary px-8 py-3 rounded-lg shadow-lg transition-all group flex items-center gap-2 mx-auto"
+              className="bg-white/90 text-black font-semibold px-8 py-3 rounded-lg shadow-lg transition-all group flex items-center gap-2 mx-auto"
             >
               {carouselContent[currentImage].cta}
               <FaLongArrowAltRight className="group-hover:translate-x-1 transition-transform" />

@@ -47,7 +47,7 @@ const Login = () => {
         }
     }
   
-    return (
+  return (
         <div className="min-h-[calc(100vh-160px)] flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
             <motion.div 
                 initial={{ opacity: 0, y: 20 }}
@@ -150,9 +150,9 @@ const Login = () => {
                                 </svg>
                             ) : null}
                             {loginLoading ? 'Signing in...' : 'Sign in'}
-                        </button>
+                </button>
                     </div>
-                </form>
+            </form>
                 
                 <div className="text-center mt-4">
                     <p className="text-sm text-gray-600">
@@ -164,7 +164,7 @@ const Login = () => {
                 </div>
             </motion.div>
         </div>
-    )
+  )
 }
 
 export default Login

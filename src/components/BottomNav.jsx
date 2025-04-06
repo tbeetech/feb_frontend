@@ -1,7 +1,6 @@
-import React, { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import avatarImg from "../assets/avatar.png";
 import { AnimatePresence, motion } from 'framer-motion';
 import CartModal from '../pages/shop/CartModal';
 import { CATEGORIES } from '../constants/categoryConstants';
@@ -46,7 +45,6 @@ const BottomNav = () => {
     // For demo purposes, assume the currently selected region is UK
     // In a real app, this would come from your context/state/redux
     const currentRegion = 'UK';
-    const regionFlag = REGION_FLAGS[currentRegion] || '🌍';
     
     const productCount = products?.reduce((total, item) => total + item.quantity, 0) || 0;
     
@@ -165,12 +163,12 @@ const BottomNav = () => {
                             >
                                 {showMenu ? (
                                     <>
-                                        <FaTimes className="text-lg mb-0.5" />
+                                        <FaTimes className="text-lg mb-0.5 transition-transform duration-300" />
                                         <span>Close</span>
                                     </>
                                 ) : (
                                     <>
-                                        <FaBars className="text-lg mb-0.5" />
+                                        <FaBars className="text-lg mb-0.5 transition-transform duration-300" />
                                         <span>Menu</span>
                                     </>
                                 )}
@@ -215,7 +213,7 @@ const BottomNav = () => {
                             initial={{ y: '100%' }}
                             animate={{ y: 0 }}
                             exit={{ y: '100%' }}
-                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                            transition={{ type: 'spring', damping: 30, stiffness: 250, duration: 0.5 }}
                             className="fixed inset-0 top-auto bg-white border-t border-gray-200 shadow-lg z-40 h-[70vh] overflow-y-auto"
                         >
                             <div className="p-4">
@@ -227,9 +225,9 @@ const BottomNav = () => {
                                     </div>
                                     <button 
                                         onClick={() => setShowMenu(false)}
-                                        className="w-8 h-8 rounded-full bg-black flex items-center justify-center"
+                                        className="p-1 text-black hover:text-gray-700 transition-colors duration-300"
                                     >
-                                        <FaTimes className="text-lg text-white" />
+                                        <FaTimes className="w-5 h-5" />
                                     </button>
                                 </div>
                                 

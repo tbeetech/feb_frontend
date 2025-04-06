@@ -1,18 +1,13 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import SocialContactButtons from '../../components/SocialContactButtons'
-import { motion } from 'framer-motion'
-import { springAnimation } from '../../utils/animations';
 import ImagePreviewModal from '../../components/ImagePreviewModal';
 import { useCurrency } from '../../components/CurrencySwitcher';
 import LazyImage from '../../components/Image';
-import { FaShoppingCart, FaHeart, FaEye } from 'react-icons/fa';
 import ProductCardSkeleton from '../../components/ProductCardSkeleton';
 import QuickViewModal from '../../components/QuickViewModal';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../../redux/features/cart/cartSlice';
-import { toast } from 'react-hot-toast';
 
 const ProductCards = ({ products, isLoading }) => {
     const { formatPrice, currencySymbol } = useCurrency();
@@ -36,7 +31,15 @@ const ProductCards = ({ products, isLoading }) => {
             ...product,
             quantity: 1
         }));
-        toast.success('Added to cart');
+        // Toast is now handled by the cart slice
+    };
+
+    const closePreview = () => {
+        setPreviewImage({
+            isOpen: false,
+            url: '',
+            name: ''
+        });
     };
 
     const openPreview = (e, imageUrl, productName) => {
@@ -46,14 +49,6 @@ const ProductCards = ({ products, isLoading }) => {
             isOpen: true,
             url: imageUrl,
             name: productName
-        });
-    };
-
-    const closePreview = () => {
-        setPreviewImage({
-            isOpen: false,
-            url: '',
-            name: ''
         });
     };
 
@@ -75,11 +70,11 @@ const ProductCards = ({ products, isLoading }) => {
                     {products.map((product, index) => (
                         <div
                             key={product._id}
-                            className="group relative rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-xl transition duration-300"
+                            className="group relative bg-white border border-gray-200 rounded-none overflow-hidden transition duration-300 hover:shadow-sm"
                         >
                             <Link
                                 to={`/product/${product._id}`}
-                                className="block aspect-square overflow-hidden rounded-t-lg bg-gray-100"
+                                className="block aspect-square overflow-hidden bg-gray-50"
                             >
                                 <LazyImage
                                     src={product.image}
@@ -87,57 +82,48 @@ const ProductCards = ({ products, isLoading }) => {
                                     onError={(e) => {
                                         e.target.src = 'https://placehold.co/400x400/png?text=Image+Not+Available';
                                     }}
-                                    className="h-full w-full object-cover object-center hover:scale-105 transition-transform duration-300"
+                                    className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
                                 />
                                 {product.discount > 0 && (
-                                    <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 text-xs font-medium rounded">
-                                        {Math.round((product.oldPrice - product.price) / product.oldPrice * 100)}% OFF
+                                    <div className="absolute top-0 right-0 bg-black text-white px-3 py-1 text-xs font-medium">
+                                        SALE
                                     </div>
                                 )}
                                 {product.stockStatus === 'Out of Stock' && (
-                                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                                        <p className="text-white font-bold text-lg">Out of Stock</p>
+                                    <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                                        <p className="text-white font-medium text-base uppercase tracking-wide">Out of Stock</p>
                                     </div>
                                 )}
                             </Link>
 
-                            <div className="p-4">
+                            <div className="p-4 text-center">
                                 <Link to={`/product/${product._id}`} className="block">
-                                    <h3 className="text-sm md:text-base font-medium text-gray-900 truncate">
+                                    <h3 className="text-sm md:text-base font-medium text-gray-900 mb-2">
                                         {product.name}
                                     </h3>
-                                    <div className="mt-1 flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm font-medium text-gray-900">
-                                                {currencySymbol}{formatPrice(product.price)}
+                                    <div className="flex items-center justify-center space-x-2">
+                                        <p className="text-sm font-medium text-gray-900">
+                                            {currencySymbol}{formatPrice(product.price)}
+                                        </p>
+                                        {product.oldPrice > 0 && (
+                                            <p className="text-xs text-gray-500 line-through">
+                                                {currencySymbol}{formatPrice(product.oldPrice)}
                                             </p>
-                                            {product.oldPrice > 0 && (
-                                                <p className="text-xs text-gray-500 line-through">
-                                                    {currencySymbol}{formatPrice(product.oldPrice)}
-                                                </p>
-                                            )}
-                                        </div>
+                                        )}
                                     </div>
                                 </Link>
 
-                                <div className="mt-4 flex justify-between space-x-2">
+                                <div className="mt-4 flex justify-center">
                                     <button
                                         onClick={(e) => handleAddToCart(e, product)}
                                         disabled={product.stockStatus === 'Out of Stock'}
-                                        className={`flex-1 flex items-center justify-center text-xs sm:text-sm px-2 py-1.5 sm:py-2 rounded-md 
+                                        className={`flex items-center justify-center text-xs sm:text-sm px-4 py-2 border
                                             ${product.stockStatus === 'Out of Stock' 
-                                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                                                : 'bg-black text-white hover:bg-gray-800'
+                                                ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                                : 'border-black bg-white text-black hover:bg-black hover:text-white'
                                             } transition-colors`}
                                     >
-                                        <span className="hidden sm:inline text-white" style={{color: 'white !important'}}>Add to Cart</span>
-                                        <span className="text-white" style={{color: 'white !important'}}><FaShoppingCart className="sm:ml-1 text-xs sm:text-sm inline-block" /></span>
-                                    </button>
-                                    <button
-                                        onClick={() => handleQuickView(product)}
-                                        className="p-1.5 sm:p-2 rounded-md border border-gray-300 bg-white text-gray-500 hover:text-gray-700 transition-colors"
-                                    >
-                                        <FaEye className="text-xs sm:text-sm" />
+                                        <span>Add to Cart</span>
                                     </button>
                                 </div>
                             </div>
@@ -178,7 +164,8 @@ ProductCards.propTypes = {
             rating: PropTypes.number,
             orderType: PropTypes.string
         })
-    ).isRequired
+    ).isRequired,
+    isLoading: PropTypes.bool
 }
 
 export default ProductCards

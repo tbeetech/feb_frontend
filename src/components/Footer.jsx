@@ -180,6 +180,10 @@ const Footer = () => {
                 <CurrencySwitcher />
               </div>
             </div>
+            
+            <a href="https://tbeetech.com" target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-black transition-colors">
+              Designed by Tbeetech
+            </a>
           </div>
         </div>
       </div>

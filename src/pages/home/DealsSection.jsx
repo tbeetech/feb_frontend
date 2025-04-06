@@ -60,11 +60,11 @@ const DealsSection = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Create fancy number display for countdown
+  // Create classic countdown display for countdown
   const CountdownUnit = ({ value, label }) => (
     <div className="countdown-unit relative">
-      <div className="bg-black p-4 rounded-lg shadow-lg backdrop-blur-md">
-        <div className="text-3xl font-bold text-white mb-1 animate-pulse-slow">{value < 10 ? `0${value}` : value}</div>
+      <div className="bg-black border border-gray-800 p-4 rounded-sm shadow-md transition-all duration-500">
+        <div className="text-2xl md:text-3xl font-bold text-white mb-1">{value < 10 ? `0${value}` : value}</div>
         <div className="text-xs text-gray-400 uppercase tracking-wider">{label}</div>
       </div>
     </div>
@@ -83,11 +83,11 @@ const DealsSection = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-12">
           <motion.div
-            initial={{ y: 50, opacity: 0 }}
+            initial={{ y: 20, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5 }}
             viewport={{ once: true }}
-            className="inline-block bg-white text-black px-4 py-1 rounded-full text-sm font-medium mb-4"
+            className="inline-block bg-white text-black px-4 py-1 rounded-none border border-gray-200 text-sm font-medium mb-4"
           >
             <span className="flex items-center gap-2">
               <FaGift className="text-black" />
@@ -96,7 +96,7 @@ const DealsSection = () => {
           </motion.div>
           
           <motion.h2
-            initial={{ y: 50, opacity: 0 }}
+            initial={{ y: 20, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             viewport={{ once: true }}
@@ -106,7 +106,7 @@ const DealsSection = () => {
           </motion.h2>
           
           <motion.p
-            initial={{ y: 50, opacity: 0 }}
+            initial={{ y: 20, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             viewport={{ once: true }}
@@ -118,16 +118,20 @@ const DealsSection = () => {
           
           {/* Countdown Timer */}
           <motion.div
-            initial={{ y: 50, opacity: 0 }}
+            initial={{ y: 20, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
             viewport={{ once: true }}
-            className="flex justify-center gap-4 md:gap-6 mb-12"
+            className="mb-8"
           >
-            <CountdownUnit value={timeLeft.days} label="days" />
-            <CountdownUnit value={timeLeft.hours} label="hours" />
-            <CountdownUnit value={timeLeft.minutes} label="minutes" />
-            <CountdownUnit value={timeLeft.seconds} label="seconds" />
+            <h3 className="text-white text-xl mb-4 font-serif tracking-wider">COUNTDOWN TILL PROMO</h3>
+            
+            <div className="flex justify-center gap-4 md:gap-6">
+              <CountdownUnit value={timeLeft.days} label="days" />
+              <CountdownUnit value={timeLeft.hours} label="hours" />
+              <CountdownUnit value={timeLeft.minutes} label="minutes" />
+              <CountdownUnit value={timeLeft.seconds} label="seconds" />
+            </div>
           </motion.div>
         </div>
         

@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import toast from 'react-hot-toast'
 
 const initialState = {
     products: [],
@@ -21,9 +22,13 @@ const cartSlice = createSlice({
             if (existingProductIndex >= 0) {
                 // If product exists, increment quantity
                 state.products[existingProductIndex].quantity += 1;
+                // Show a toast
+                toast.success('Product quantity increased');
             } else {
                 // Otherwise add new product
                 state.products.push({ ...action.payload, quantity: 1 });
+                // Show a toast
+                toast.success('Added to cart');
             }
             
             state.total = state.products.reduce(

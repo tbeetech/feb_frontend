@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FaArrowUp } from 'react-icons/fa';
 
 const ScrollToTopButton = () => {
     const [isVisible, setIsVisible] = useState(false);
@@ -41,13 +42,11 @@ const ScrollToTopButton = () => {
                         damping: 20
                     }}
                     onClick={scrollToTop}
-                    className="fixed bottom-20 right-4 z-50 bg-primary/90 text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center backdrop-blur-sm hover:bg-primary transition-all duration-300 animate-float-y"
+                    className="fixed bottom-20 right-4 z-50 bg-black text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center hover:bg-gray-800 transition-all duration-300"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                 >
-                    <span className="material-icons transform transition-transform group-hover:-translate-y-1">
-                        arrow_upward
-                    </span>
+                    <FaArrowUp className="text-lg" />
                 </motion.button>
             )}
         </AnimatePresence>

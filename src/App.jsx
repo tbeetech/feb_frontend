@@ -29,7 +29,31 @@ function App() {
       <Footer />
       <BottomNav className="md:hidden" /> {/* Only show on mobile */}
       <ScrollToTopButton />
-      <Toaster position="top-center" />
+      <Toaster 
+        position="top-center" 
+        toastOptions={{
+          duration: 2000,
+          style: {
+            background: '#000000',
+            color: '#ffffff',
+            border: '1px solid #333',
+            fontWeight: 'medium',
+            padding: '12px 16px',
+          },
+          success: {
+            iconTheme: {
+              primary: '#ffffff',
+              secondary: '#000000',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ffffff',
+              secondary: '#000000',
+            },
+          },
+        }}
+      />
     </div>
   )
 }

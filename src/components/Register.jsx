@@ -162,7 +162,7 @@ const Register = () => {
                                             autoComplete="username"
                                             required
                                             value={username}
-                                            onChange={(e) => setUsername(e.target.value)}
+                        onChange={(e) => setUsername(e.target.value)}
                                             className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-black focus:border-black"
                                             placeholder="Username"
                                         />
@@ -177,7 +177,7 @@ const Register = () => {
                                             autoComplete="email"
                                             required
                                             value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) => setEmail(e.target.value)}
                                             className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-black focus:border-black"
                                             placeholder="Email address"
                                         />
@@ -222,7 +222,7 @@ const Register = () => {
                                             autoComplete="new-password"
                                             required
                                             value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => setPassword(e.target.value)}
                                             className="appearance-none block w-full pr-10 px-3 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-black focus:border-black"
                                             placeholder="Password"
                                         />
@@ -285,8 +285,8 @@ const Register = () => {
                                             I agree to the <Link to="/terms" className="text-black font-medium hover:underline">Terms of Service</Link> and <Link to="/privacy" className="text-black font-medium hover:underline">Privacy Policy</Link>
                                         </label>
                                     </div>
-                                </div>
-                                
+            </div>
+
                                 {message && (
                                     <motion.div 
                                         initial={{ opacity: 0, y: -10 }}

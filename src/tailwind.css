@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .font-royal {
+    font-family: "Cinzel", "Baskerville", "Garamond", serif;
+  }
+} 

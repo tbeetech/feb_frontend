@@ -71,7 +71,7 @@ const QuickViewModal = ({ isOpen, product, onClose }) => {
     };
     
     dispatch(addToCart(productToAdd));
-    toast.success('Added to cart');
+    // Toast notification is now handled by the cart slice reducer
   };
 
   // Handle favorite toggle

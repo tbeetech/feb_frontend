@@ -7,7 +7,6 @@ import avatarImg from "../assets/avatar.png"
 import { useLogoutUserMutation } from '../redux/features/auth/authApi';
 import { logout } from '../redux/features/auth/authSlice';
 import { CATEGORIES } from '../constants/categoryConstants';
-import ToggleTheme from './ToggleTheme';
 import { CiSearch, CiHeart, CiShoppingCart, CiUser } from 'react-icons/ci';
 import { 
     FaChevronDown, 
@@ -220,8 +219,7 @@ const Navbar = () => {
                         </nav>
                         
                         {/* Desktop Search */}
-                        <div className="hidden md:flex items-center space-x-3">
-                            <ToggleTheme />
+                        <div className="hidden md:flex items-center">
                             <button 
                                 onClick={handleSearchToggle} 
                                 className="p-2 text-gray-500 hover:text-black transition-colors"
