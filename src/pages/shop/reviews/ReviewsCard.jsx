@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import RatingStars from '../../../components/RatingStars';
 import { formatDate } from '../../../utils/formatDate';
-import { FaThumbsUp } from 'react-icons/fa';
+import { FaThumbsUp, FaUserCircle } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 
@@ -22,16 +22,23 @@ const ReviewsCard = ({ productReviews, onReviewLike, isLoading }) => {
 
     if (isLoading) {
         return (
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-medium mb-4">Customer Reviews</h3>
-                <div className="animate-pulse space-y-4">
+            <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
+                <div className="animate-pulse space-y-6">
                     {[...Array(3)].map((_, i) => (
-                        <div key={i} className="flex space-x-4">
+                        <div key={i} className="flex space-x-4 border-b border-gray-100 pb-6 last:border-0">
                             <div className="rounded-full bg-gray-200 h-12 w-12"></div>
-                            <div className="flex-1 space-y-2">
-                                <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                            <div className="flex-1 space-y-3">
+                                <div className="flex justify-between">
+                                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                                    <div className="flex space-x-1">
+                                        {[...Array(5)].map((_, j) => (
+                                            <div key={j} className="w-4 h-4 rounded-full bg-gray-200"></div>
+                                        ))}
+                                    </div>
+                                </div>
                                 <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                                <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                                <div className="h-20 bg-gray-200 rounded w-full"></div>
                             </div>
                         </div>
                     ))}
@@ -42,18 +49,21 @@ const ReviewsCard = ({ productReviews, onReviewLike, isLoading }) => {
 
     if (!reviews.length) {
         return (
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-lg font-medium mb-2">Customer Reviews</h3>
-                <p className="text-gray-500 text-center py-4">
-                    No reviews yet. Be the first to review this product!
-                </p>
+            <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
+                <div className="text-center py-8">
+                    <FaUserCircle className="mx-auto h-12 w-12 text-gray-300" />
+                    <p className="text-gray-500 mt-4">
+                        No reviews yet. Be the first to review this product!
+                    </p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h3 className="text-lg font-medium mb-4">Customer Reviews</h3>
+        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+            <h3 className="text-xl font-semibold mb-4">Customer Reviews ({reviews.length})</h3>
             <div className="space-y-6">
                 {reviews.map((review) => (
                     <motion.div 
@@ -74,7 +84,7 @@ const ReviewsCard = ({ productReviews, onReviewLike, isLoading }) => {
                             <div className="flex-1">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="font-medium">{review.userId?.username}</p>
+                                        <p className="font-medium">{review.userId?.username || 'Anonymous'}</p>
                                         <p className="text-sm text-gray-500">
                                             {formatDate(review.createdAt)}
                                             {review.isEdited && (
@@ -86,18 +96,18 @@ const ReviewsCard = ({ productReviews, onReviewLike, isLoading }) => {
                                     </div>
                                     <RatingStars rating={review.rating} />
                                 </div>
-                                <p className="mt-2 text-gray-700">{review.comment}</p>
-                                <div className="mt-3 flex items-center space-x-4">
+                                <p className="mt-3 text-gray-700">{review.comment}</p>
+                                <div className="mt-3 flex items-center">
                                     <button
                                         onClick={() => handleLike(review._id)}
-                                        className={`flex items-center space-x-1 text-sm ${
+                                        className={`flex items-center space-x-1 text-sm px-3 py-1 rounded-full ${
                                             review.likes?.includes(user?._id)
-                                                ? 'text-gold'
-                                                : 'text-gray-500 hover:text-gold'
-                                        }`}
+                                                ? 'text-white bg-black'
+                                                : 'text-gray-500 hover:text-black border border-gray-200 hover:border-black'
+                                        } transition-all duration-200`}
                                     >
-                                        <FaThumbsUp />
-                                        <span>{review.likes?.length || 0}</span>
+                                        <FaThumbsUp className="h-3 w-3" />
+                                        <span className="text-xs">{review.likes?.length || 0} {review.likes?.length === 1 ? 'like' : 'likes'}</span>
                                     </button>
                                 </div>
                             </div>

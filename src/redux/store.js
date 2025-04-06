@@ -16,7 +16,9 @@ export const store = configureStore({
         favorites: favoritesReducer
     },
     middleware: (getDefaultMiddleware) => 
-        getDefaultMiddleware().concat(
+        getDefaultMiddleware({
+            serializableCheck: false,
+        }).concat(
             authApi.middleware, 
             productsApi.middleware, 
             reviewApi.middleware
