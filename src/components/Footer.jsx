@@ -115,9 +115,6 @@ const Footer = () => {
             <ul className="space-y-3 text-sm">
               <li><span className="text-gray-400 cursor-not-allowed">Help & Contact</span></li>
               <li><span className="text-gray-400 cursor-not-allowed">Shipping & Delivery</span></li>
-              <li><span className="text-gray-400 cursor-not-allowed">Returns & Refunds</span></li>
-              <li><span className="text-gray-400 cursor-not-allowed">Order Tracking</span></li>
-              <li><span className="text-gray-400 cursor-not-allowed">Payment Methods</span></li>
             </ul>
           </div>
           
@@ -125,10 +122,6 @@ const Footer = () => {
             <h4 className="text-sm font-medium uppercase mb-4">About FEB Luxury</h4>
             <ul className="space-y-3 text-sm">
               <li><Link to="/about" className="text-gray-500 hover:text-black transition-colors">About Us</Link></li>
-              <li><span className="text-gray-400 cursor-not-allowed">Investors</span></li>
-              <li><span className="text-gray-400 cursor-not-allowed">Careers</span></li>
-              <li><span className="text-gray-400 cursor-not-allowed">Sustainability</span></li>
-              <li><span className="text-gray-400 cursor-not-allowed">Press</span></li>
             </ul>
           </div>
           
@@ -137,8 +130,6 @@ const Footer = () => {
             <ul className="space-y-3 text-sm">
               <li><span className="text-gray-400 cursor-not-allowed">Terms & Conditions</span></li>
               <li><span className="text-gray-400 cursor-not-allowed">Privacy Policy</span></li>
-              <li><span className="text-gray-400 cursor-not-allowed">Cookie Policy</span></li>
-              <li><span className="text-gray-400 cursor-not-allowed">Accessibility</span></li>
             </ul>
           </div>
           

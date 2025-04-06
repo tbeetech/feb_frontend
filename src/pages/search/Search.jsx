@@ -163,7 +163,7 @@ const Search = () => {
                 >
                     <div className="relative w-full max-w-3xl" ref={searchInputRef}>
                         <motion.div 
-                            className={`relative rounded-full overflow-hidden transition-all duration-300 ease-in-out ${
+                            className={`relative overflow-hidden transition-all duration-300 ease-in-out ${
                                 isFocused 
                                     ? 'shadow-lg ring-2 ring-primary/50 bg-white' 
                                     : 'shadow-md hover:shadow-lg bg-white/95'
@@ -191,14 +191,14 @@ const Search = () => {
                                     setShowHistory(true);
                                     setIsFocused(true);
                                 }}
-                                className='w-full py-5 pl-16 pr-14 border-none focus:ring-0 focus:outline-none bg-transparent rounded-full text-gray-800 placeholder-gray-400 transition-all duration-300'
+                                className='w-full py-5 pl-16 pr-16 border-none focus:ring-0 focus:outline-none bg-transparent text-gray-800 placeholder-gray-400 transition-all duration-300'
                                 placeholder='Search for items by name, category, or description...'
                                 style={{ fontSize: '1rem', fontWeight: '400' }}
                             />
                             
                             {searchQuery && (
                                 <motion.button 
-                                    className="absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary"
+                                    className="absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary z-10"
                                     onClick={() => setSearchQuery('')}
                                     initial={{ opacity: 0, scale: 0.8 }}
                                     animate={{ opacity: 1, scale: 1 }}

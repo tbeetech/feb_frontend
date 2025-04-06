@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom'
 import RatingStars from '../../../components/RatingStars';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFetchProductByIdQuery, useUpdateProductRatingMutation, useFetchAllProductsQuery } from '../../../redux/features/products/productsApi';
+import { useGetProductReviewsQuery, useLikeReviewMutation } from '../../../redux/features/reviews/reviewsApi';
 import { addToCart, decrementQuantity } from '../../../redux/features/cart/cartSlice';
 import ReviewsCard from '../reviews/ReviewsCard';
 import { motion } from 'framer-motion';
@@ -155,9 +156,14 @@ const SingleProduct = () => {
     const navigate = useNavigate();
     const { data, error, isLoading } = useFetchProductByIdQuery(id);
     const singleProduct = data?.product || {};
-    const productReviews = data?.reviews || [];
     const { formatPrice, currencySymbol } = useCurrency();
     
+    // Get reviews using RTK Query
+    const { data: reviewsData, isLoading: isLoadingReviews } = useGetProductReviewsQuery(id);
+    const [likeReview] = useLikeReviewMutation();
+    const [updateProductRating] = useUpdateProductRatingMutation();
+    const { user } = useSelector((state) => state.auth);
+
     // Add ref for product recommendation slider
     const recommendationSliderRef = useRef(null);
     
@@ -355,42 +361,9 @@ const SingleProduct = () => {
         }
     };
 
-    const [reviews, setReviews] = useState([]);
-    const { user } = useSelector((state) => state.auth);
-    const [updateProductRating] = useUpdateProductRatingMutation();
-
-    // Fetch reviews when component mounts
-    const fetchReviews = async () => {
-        try {
-            console.log('Fetching reviews for product:', id);
-            const response = await axios.get(
-                `${import.meta.env.VITE_API_URL}/api/reviews/product/${id}`
-            );
-            console.log('Fetched reviews:', response.data);
-            if (response.data.success) {
-                setReviews(response.data.reviews);
-            } else {
-                console.error('Failed to fetch reviews:', response.data.message);
-                toast.error('Failed to load reviews');
-            }
-        } catch (error) {
-            console.error('Error fetching reviews:', error);
-            toast.error('Failed to load reviews');
-        }
-    };
-
-    useEffect(() => {
-        if (id) {
-            fetchReviews();
-        }
-    }, [id]);
-
     const handleReviewSubmitted = async (updatedReviews) => {
         try {
             console.log('Handling review submission with:', updatedReviews);
-            
-            // Update the reviews state with the new reviews
-            setReviews(updatedReviews);
             
             // Update the product rating in the UI
             if (updatedReviews.length > 0) {
@@ -399,7 +372,7 @@ const SingleProduct = () => {
                 
                 console.log('Updating product rating to:', averageRating);
                 // Update the product rating in the backend
-                await updateProductRating({ productId: id, rating: averageRating }).unwrap();
+                await updateProductRating({ id, rating: averageRating }).unwrap();
             }
         } catch (error) {
             console.error('Error updating reviews:', error);
@@ -414,26 +387,8 @@ const SingleProduct = () => {
         }
 
         try {
-            const response = await axios.post(
-                `${import.meta.env.VITE_API_URL}/api/reviews/${reviewId}/like`,
-                {},
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`
-                    }
-                }
-            );
-
-            if (response.data.success) {
-                setReviews(prevReviews =>
-                    prevReviews.map(review =>
-                        review._id === reviewId
-                            ? { ...review, likes: response.data.likes }
-                            : review
-                    )
-                );
-                toast.success('Review liked successfully');
-            }
+            await likeReview(reviewId).unwrap();
+            toast.success('Review liked successfully');
         } catch (error) {
             console.error('Error liking review:', error);
             toast.error('Failed to like review');
@@ -629,7 +584,7 @@ const SingleProduct = () => {
                                 transition={{ delay: 0.3 }}
                             >
                                 <RatingStars rating={singleProduct?.rating} />
-                                <span className="text-gray-500">({productReviews.length} {productReviews.length === 1 ? 'review' : 'reviews'})</span>
+                                <span className="text-gray-500">({reviewsData?.length} {reviewsData?.length === 1 ? 'review' : 'reviews'})</span>
                             </motion.div>
                             
                             <motion.div 
@@ -880,8 +835,9 @@ const SingleProduct = () => {
                         {/* Reviews List */}
                         <div className="lg:col-span-2">
                             <ReviewsCard
-                                productReviews={reviews}
+                                productReviews={reviewsData || []}
                                 onReviewLike={handleReviewLike}
+                                isLoading={isLoadingReviews}
                             />
                         </div>
                     </div>

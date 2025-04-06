@@ -86,7 +86,7 @@ export const productsApi = createApi({
         }),
         searchProducts: builder.query({
             query: (searchQuery = '') => ({
-                url: '/search',
+                url: '/api/products/search',
                 method: 'GET',
                 params: {
                     query: searchQuery

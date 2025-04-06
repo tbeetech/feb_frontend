@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import RatingStars from '../../../components/RatingStars';
-import axios from 'axios';
+import { usePostReviewMutation } from '../../../redux/features/reviews/reviewsApi';
 import { toast } from 'react-hot-toast';
 
 const ReviewForm = ({ productId, onReviewSubmitted }) => {
     const { user } = useSelector((state) => state.auth);
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [postReview, { isLoading: isSubmitting }] = usePostReviewMutation();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -33,7 +33,6 @@ const ReviewForm = ({ productId, onReviewSubmitted }) => {
             return;
         }
 
-        setIsSubmitting(true);
         try {
             console.log('Submitting review:', {
                 rating,
@@ -41,44 +40,34 @@ const ReviewForm = ({ productId, onReviewSubmitted }) => {
                 productId
             });
 
-            const response = await axios.post(
-                `${import.meta.env.VITE_API_URL}/api/reviews/post-review`,
-                {
-                    rating,
-                    comment: comment.trim(),
-                    productId
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`
-                    }
-                }
-            );
+            const response = await postReview({
+                rating,
+                comment: comment.trim(),
+                productId
+            }).unwrap();
 
-            console.log('Review submission response:', response.data);
+            console.log('Review submission response:', response);
 
-            if (response.data.success) {
+            if (response.success) {
                 // Clear form
                 setRating(0);
                 setComment('');
                 
                 // Update parent component with new reviews
                 if (onReviewSubmitted) {
-                    console.log('Calling onReviewSubmitted with:', response.data.reviews);
-                    await onReviewSubmitted(response.data.reviews);
+                    console.log('Calling onReviewSubmitted with:', response.reviews);
+                    await onReviewSubmitted(response.reviews);
                 }
                 
                 toast.success('Review submitted successfully!');
             } else {
-                console.error('Failed to submit review:', response.data.message);
-                toast.error(response.data.message || 'Failed to submit review');
+                console.error('Failed to submit review:', response.message);
+                toast.error(response.message || 'Failed to submit review');
             }
         } catch (error) {
             console.error('Error submitting review:', error);
-            const errorMessage = error.response?.data?.message || 'Failed to submit review';
+            const errorMessage = error.data?.message || 'Failed to submit review';
             toast.error(errorMessage);
-        } finally {
-            setIsSubmitting(false);
         }
     };
 

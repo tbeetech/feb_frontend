@@ -16,5 +16,9 @@ export const store = configureStore({
         favorites: favoritesReducer
     },
     middleware: (getDefaultMiddleware) => 
-        getDefaultMiddleware().concat(authApi.middleware, productsApi.middleware),
+        getDefaultMiddleware().concat(
+            authApi.middleware, 
+            productsApi.middleware, 
+            reviewApi.middleware
+        ),
 });

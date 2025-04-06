@@ -5,7 +5,7 @@ const PromoBanner = () => {
   return (
     <section className="section__container banner__container grid grid-cols-1 md:grid-cols-3 gap-6 py-12">
       <div className="banner__card bg-white p-6 rounded-lg shadow-lg text-center">
-        <span className="text-black text-4xl" style={{color: '#000 !important'}}><FaTruck className="mx-auto" style={{color: '#000 !important'}} /></span>
+        <span className="text-black text-4xl" style={{color: '#000 !important'}}><FaTruck className="mx-auto" style={{color: 'blue !important'}} /></span>
         <h4 className="text-2xl font-bold mt-4">Affordable Delivery</h4>
         <p className="text-gray-600 mt-2">Offers convenience and the ability to shop from anywhere, anytime.</p>
       </div>

@@ -4,8 +4,9 @@ import RatingStars from '../../../components/RatingStars';
 import { formatDate } from '../../../utils/formatDate';
 import { FaThumbsUp } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
+import { motion } from 'framer-motion';
 
-const ReviewsCard = ({ productReviews, onReviewLike }) => {
+const ReviewsCard = ({ productReviews, onReviewLike, isLoading }) => {
     const { user } = useSelector((state) => state.auth);
     const reviews = productReviews || [];
 
@@ -18,6 +19,26 @@ const ReviewsCard = ({ productReviews, onReviewLike }) => {
             onReviewLike(reviewId);
         }
     };
+
+    if (isLoading) {
+        return (
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+                <h3 className="text-lg font-medium mb-4">Customer Reviews</h3>
+                <div className="animate-pulse space-y-4">
+                    {[...Array(3)].map((_, i) => (
+                        <div key={i} className="flex space-x-4">
+                            <div className="rounded-full bg-gray-200 h-12 w-12"></div>
+                            <div className="flex-1 space-y-2">
+                                <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                                <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
     if (!reviews.length) {
         return (
@@ -32,25 +53,24 @@ const ReviewsCard = ({ productReviews, onReviewLike }) => {
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-sm">
-            <div className="mb-6">
-                <h3 className="text-xl font-medium mb-2">Customer Reviews</h3>
-                <p className="text-gray-600">
-                    {reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}
-                </p>
-            </div>
-            
+            <h3 className="text-lg font-medium mb-4">Customer Reviews</h3>
             <div className="space-y-6">
                 {reviews.map((review) => (
-                    <div key={review._id} className="border-b border-gray-200 pb-6 last:border-0">
-                        <div className="flex items-start space-x-4">
-                            <img 
-                                src={review.userId?.profileImage || '/default-avatar.png'} 
-                                alt={review.userId?.username}
-                                className="w-10 h-10 rounded-full object-cover"
-                                onError={(e) => {
-                                    e.target.src = '/default-avatar.png';
-                                }}
-                            />
+                    <motion.div 
+                        key={review._id} 
+                        className="border-b border-gray-100 pb-6 last:border-0 last:pb-0"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <div className="flex gap-4">
+                            <div className="w-12 h-12 flex-shrink-0 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 overflow-hidden">
+                                {review.userId?.username ? (
+                                    <span className="text-lg font-bold uppercase">{review.userId.username.charAt(0)}</span>
+                                ) : (
+                                    <span className="text-lg font-bold">?</span>
+                                )}
+                            </div>
                             <div className="flex-1">
                                 <div className="flex items-center justify-between">
                                     <div>
@@ -82,7 +102,7 @@ const ReviewsCard = ({ productReviews, onReviewLike }) => {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 ))}
             </div>
         </div>

@@ -397,7 +397,7 @@ const Navbar = () => {
                         <form onSubmit={handleSearchSubmit} className="relative flex items-center">
                                     <input 
                                         type="text" 
-                                placeholder="Search"
+                            
                                         value={searchQuery}
                                         onChange={handleSearchChange}
                                 className="w-full px-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-500 font-sans text-sm"

@@ -75,14 +75,9 @@ const BottomNav = () => {
     // Simplified category data - only showing main categories that exist in the database
     const categoryData = [
         { name: 'All Products', path: 'shop', icon: <FaShoppingBasket className="text-lg" /> },
-        { name: 'New Arrivals', path: 'new', icon: <FaSprayCan className="text-lg" />, hasSubcategories: true },
         { name: 'Fragrances', path: 'fragrance', icon: <FaSprayCan className="text-lg" />, hasSubcategories: true },
-        { name: 'Accessories', path: 'accessories', icon: <FaGem className="text-lg" />, hasSubcategories: true },
-        { name: 'Bags', path: 'bags', icon: <FaShoppingBag className="text-lg" />, hasSubcategories: true },
-        { name: 'Clothes', path: 'clothes', icon: <FaTshirt className="text-lg" />, hasSubcategories: true },
-        { name: 'Shoes', path: 'shoes', icon: <FaShoePrints className="text-lg" />, hasSubcategories: true },
-        { name: 'Dresses', path: 'dress', icon: <GiDress className="text-lg" />, hasSubcategories: true },
-        { name: 'Corporate Wear', path: 'corporate', icon: <FaBriefcase className="text-lg" />, hasSubcategories: true }
+        { name: 'Bags', path: 'bags', icon: <FaShoppingBag className="text-lg" /> },
+        { name: 'Clothes', path: 'clothes', icon: <FaTshirt className="text-lg" /> }
     ];
     
     // Get subcategories from CATEGORIES constant

@@ -6,8 +6,19 @@ export const reviewApi = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: `${baseURL}/api/reviews`,
         credentials: 'include',
+        prepareHeaders: (headers) => {
+            // Get token from localStorage
+            const token = localStorage.getItem('token');
+            
+            // If token exists, add to headers
+            if (token) {
+                headers.set('Authorization', `Bearer ${token}`);
+            }
+            
+            return headers;
+        }
     }),
-    tagTypes: ["Reviews"],
+    tagTypes: ["Reviews", "ProductReviews"],
     endpoints: (builder) => ({
         postReview: builder.mutation({
             query: (reviewData) => ({
@@ -15,12 +26,36 @@ export const reviewApi = createApi({
                 method: "POST",
                 body: reviewData
             }),
-            invalidatesTags: (result, error, { postId }) => [{ type: "Reviews", id: postId }]
+            invalidatesTags: (result, error, { productId }) => [
+                { type: "Reviews" },
+                { type: "ProductReviews", id: productId }
+            ]
+        }),
+        getProductReviews: builder.query({
+            query: (productId) => ({
+                url: `/product/${productId}`,
+                method: "GET"
+            }),
+            transformResponse: (response) => {
+                console.log('Product reviews response:', response);
+                return response.reviews || [];
+            },
+            providesTags: (result, error, productId) => [
+                { type: "ProductReviews", id: productId }
+            ]
+        }),
+        likeReview: builder.mutation({
+            query: (reviewId) => ({
+                url: `/${reviewId}/like`,
+                method: "POST"
+            }),
+            invalidatesTags: (result, error, reviewId) => [
+                { type: "ProductReviews" }
+            ]
         }),
         getReviewsCount: builder.query({
             query: () => ({
                 url: "/total-reviews"
-
             })
         }),
         getReviewsByUserId: builder.query({
@@ -28,13 +63,23 @@ export const reviewApi = createApi({
                 url: `/${userId}`
             }),
             providesTags: (result) => result ? [{ type: "Reviews", id: result[0]?.email }] : []
-
+        }),
+        getUserActivity: builder.query({
+            query: (userId) => ({
+                url: `/user/${userId}/activity`
+            }),
+            providesTags: ["Reviews"]
         })
-
     })
-
 })
 
-export const { usePostReviewMutation, useGetReviewsCountQuery, useGetReviewsByUserIdQuery } = reviewApi;
+export const { 
+    usePostReviewMutation, 
+    useGetProductReviewsQuery,
+    useLikeReviewMutation,
+    useGetReviewsCountQuery, 
+    useGetReviewsByUserIdQuery,
+    useGetUserActivityQuery
+} = reviewApi;
 
 export default reviewApi;
