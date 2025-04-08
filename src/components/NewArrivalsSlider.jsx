@@ -244,7 +244,7 @@ const NewArrivalsSlider = () => {
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="bg-primary text-white px-8 py-3 rounded-full font-semibold shadow-lg hover:bg-primary-dark transition-colors"
+                                    className="bg-black text-white px-8 py-3 rounded-full font-semibold shadow-lg hover:bg-gray-800 transition-colors"
                                     onClick={() => navigate(`/product/${products[currentIndex]._id}`)}
                                 >
                                     Shop Now
