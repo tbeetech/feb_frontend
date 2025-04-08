@@ -393,7 +393,7 @@ const ProductUpload = () => {
               <button
                 type="button"
                 onClick={addImageToGallery}
-                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
               >
                 Add
               </button>
@@ -416,7 +416,7 @@ const ProductUpload = () => {
                       />
                       <button
                         type="button"
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => removeImageFromGallery(index)}
                       >
                         ×
@@ -629,7 +629,7 @@ const ProductUpload = () => {
             <button
               type="button"
               onClick={togglePreview}
-              className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+              className="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors font-medium"
             >
               {showPreview ? "Hide Preview" : "Show Preview"}
             </button>
@@ -637,7 +637,7 @@ const ProductUpload = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors disabled:bg-gray-400"
+              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-400 font-semibold text-lg shadow-md"
             >
               {isLoading ? "Uploading..." : "Upload Product"}
             </button>

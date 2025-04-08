@@ -221,19 +221,22 @@ const EditProduct = () => {
         deliveryTimeFrame: deliveryTimeFrame,
         colors: formattedColors,
         gallery: gallery,
-        // Ensure category is always defined for subcategory validation
         category: formData.category || ''
       };
-
-      console.log("Submitting product data:", productDataToSubmit);
 
       const result = await updateProduct({
         id,
         productData: productDataToSubmit
       }).unwrap();
       
-      toast.success('Product updated successfully');
-      console.log("Product updated successfully:", result);
+      toast.success('Product updated successfully!', {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       
       // Add delay before navigation to ensure toast is displayed
       setTimeout(() => {
@@ -241,37 +244,10 @@ const EditProduct = () => {
       }, 1500);
     } catch (error) {
       console.error('Update error:', error);
-      
-      // Display specific validation errors if available
-      if (error.data?.details && Object.keys(error.data.details).length > 0) {
-        // Show each validation error as a separate toast
-        Object.entries(error.data.details).forEach(([field, message]) => {
-          toast.error(`${field}: ${message}`, {
+      toast.error(error.data?.message || 'Failed to update product', {
             position: "top-center",
-            autoClose: 5000
+        autoClose: 5000,
           });
-        });
-      } else {
-        // Show general error message
-        toast.error(`Failed to update product: ${error.data?.message || error.message || 'Unknown error'}`, {
-          position: "top-center",
-          autoClose: 5000
-        });
-      }
-      
-      // If there's a sizeType error, reset the sizeType field
-      if (error.data?.details?.sizeType) {
-        setFormData(prev => ({
-          ...prev,
-          sizeType: 'none',
-          sizes: []
-        }));
-        
-        toast.info('Size type has been reset. Please select a different size type.', {
-          position: "top-center",
-          autoClose: 5000
-        });
-      }
     }
   };
   
@@ -285,11 +261,23 @@ const EditProduct = () => {
     
     try {
       await deleteProduct(id).unwrap();
-      toast.success('Product deleted successfully!');
+      toast.success('Product deleted successfully!', {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      setTimeout(() => {
       navigate('/admin/manage-products');
+      }, 1500);
     } catch (error) {
       console.error('Delete failed:', error);
-      toast.error(error.data?.message || 'Failed to delete product');
+      toast.error(error.data?.message || 'Failed to delete product', {
+        position: "top-center",
+        autoClose: 5000,
+      });
     }
   };
   

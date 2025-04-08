@@ -220,17 +220,17 @@ const Navbar = () => {
                         
                         {/* Desktop Search */}
                         <div className="hidden md:flex items-center">
-                            <button 
+                        <button 
                                 onClick={handleSearchToggle} 
                                 className="p-2 text-gray-500 hover:text-black transition-colors"
                                 aria-label="Search"
-                            >
+                        >
                                 <CiSearch className="w-5 h-5" />
-                            </button>
+                        </button>
                         </div>
                     </div>
                 </div>
-                
+
                 {/* Main navigation */}
                 <div className="py-4 border-b border-gray-200">
                     <div className="container mx-auto px-4 flex items-center justify-between">
@@ -241,7 +241,7 @@ const Navbar = () => {
                                 <p className="text-2xl md:text-3xl font-bold tracking-wider uppercase ml-2">LUXURY</p>
                             </div>
                         </Link>
-                        
+
                         {/* Desktop Navigation */}
                         <div className="hidden lg:flex items-center space-x-8">
                             <div className="relative category-dropdown">
@@ -325,7 +325,7 @@ const Navbar = () => {
                             </button>
 
                             <div className="relative user-dropdown">
-                                <button 
+                                <button
                                     onClick={handleDropDownToggle}
                                     className="p-2 text-gray-700 hover:text-black flex items-center"
                                 >
@@ -341,7 +341,7 @@ const Navbar = () => {
                                             className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-50 border border-gray-100"
                                         >
                                             <div className="p-4">
-                                                {user ? (
+                                        {user ? (
                                                     <>
                                                         <div className="flex items-center space-x-3 pb-3 border-b border-gray-100">
                                                             <img 
@@ -349,7 +349,7 @@ const Navbar = () => {
                                                                 alt="User" 
                                                                 className="w-10 h-10 rounded-full object-cover"
                                                             />
-                                                            <div>
+                                            <div>
                                                                 <p className="font-semibold">
                                                                     {user.username || user.name || 'User'}
                                                                 </p>
@@ -357,23 +357,23 @@ const Navbar = () => {
                                                                     {user.email}
                                                                 </p>
                                                             </div>
-                                                        </div>
+                                                </div>
                                                         
                                                         <div className="pt-3 space-y-2">
-                                                            <Link 
-                                                                to="/dashboard" 
+                                                    <Link 
+                                                        to="/dashboard" 
                                                                 className="flex items-center text-gray-700 hover:text-black py-2"
-                                                                onClick={() => setIsDropDownOpen(false)}
-                                                            >
+                                                        onClick={() => setIsDropDownOpen(false)}
+                                                    >
                                                                 <FaUser className="w-4 h-4 mr-3" />
                                                                 <span>Dashboard</span>
-                                                            </Link>
-                                                            
-                                                            {/* Admin menu items */}
-                                                            {user?.role === 'admin' && (
-                                                                <>
-                                                                    <div className="border-t border-gray-100 my-1"></div>
-                                                                    <span className="block px-4 py-1 text-xs text-gray-500">Admin</span>
+                                                    </Link>
+                                                    
+                                                    {/* Admin menu items */}
+                                                    {user?.role === 'admin' && (
+                                                        <>
+                                                            <div className="border-t border-gray-100 my-1"></div>
+                                                            <span className="block px-4 py-1 text-xs text-gray-500">Admin</span>
                                                                     <Link 
                                                                         to="/admin/dashboard" 
                                                                         className="flex items-center text-gray-700 hover:text-black py-2"
@@ -382,65 +382,65 @@ const Navbar = () => {
                                                                         <FaTh className="w-4 h-4 mr-3" />
                                                                         <span>Admin Dashboard</span>
                                                                     </Link>
-                                                                    <Link 
-                                                                        to="/admin/upload-product" 
+                                                            <Link
+                                                                to="/admin/upload-product" 
                                                                         className="flex items-center text-gray-700 hover:text-black py-2"
-                                                                        onClick={() => setIsDropDownOpen(false)}
-                                                                    >
+                                                                onClick={() => setIsDropDownOpen(false)}
+                                                            >
                                                                         <FaPlus className="w-4 h-4 mr-3" />
                                                                         <span>Upload Product</span>
-                                                                    </Link>
-                                                                    <Link 
-                                                                        to="/admin/manage-products" 
+                                                            </Link>
+                                                            <Link
+                                                                to="/admin/manage-products" 
                                                                         className="flex items-center text-gray-700 hover:text-black py-2"
-                                                                        onClick={() => setIsDropDownOpen(false)}
-                                                                    >
+                                                                onClick={() => setIsDropDownOpen(false)}
+                                                            >
                                                                         <FaTh className="w-4 h-4 mr-3" />
                                                                         <span>Manage Products</span>
-                                                                    </Link>
-                                                                    <Link 
-                                                                        to="/admin/edit-product" 
+                                                            </Link>
+                                                            <Link
+                                                                to="/admin/edit-product" 
                                                                         className="flex items-center text-gray-700 hover:text-black py-2"
-                                                                        onClick={() => setIsDropDownOpen(false)}
-                                                                    >
+                                                                onClick={() => setIsDropDownOpen(false)}
+                                                            >
                                                                         <FaEdit className="w-4 h-4 mr-3" />
                                                                         <span>Edit Product</span>
-                                                                    </Link>
-                                                                </>
-                                                            )}
-                                                            
-                                                            <button 
-                                                                onClick={handleLogout}
+                                                            </Link>
+                                                        </>
+                                                    )}
+                                                    
+                                                    <button
+                                                        onClick={handleLogout}
                                                                 className="flex items-center text-red-600 hover:text-red-700 py-2 w-full text-left"
-                                                            >
+                                                    >
                                                                 <FaSignOutAlt className="w-4 h-4 mr-3" />
                                                                 <span>Logout</span>
-                                                            </button>
-                                                        </div>
+                                                    </button>
+                                                </div>
                                                     </>
-                                                ) : (
+                                        ) : (
                                                     <div className="space-y-2">
-                                                        <Link 
-                                                            to="/login" 
+                            <Link 
+                                to="/login"
                                                             className="flex items-center text-gray-700 hover:text-black py-2"
-                                                            onClick={() => setIsDropDownOpen(false)}
-                                                        >
+                                                    onClick={() => setIsDropDownOpen(false)}
+                                                >
                                                             <FaSignInAlt className="w-4 h-4 mr-3" />
                                                             <span>Login</span>
-                                                        </Link>
-                                                        <Link 
-                                                            to="/register" 
+                                                </Link>
+                                                <Link 
+                                                    to="/register" 
                                                             className="flex items-center text-gray-700 hover:text-black py-2"
-                                                            onClick={() => setIsDropDownOpen(false)}
-                                                        >
+                                                    onClick={() => setIsDropDownOpen(false)}
+                                                >
                                                             <FaUserPlus className="w-4 h-4 mr-3" />
                                                             <span>Register</span>
-                                                        </Link>
-                                                    </div>
-                                                )}
+                                                </Link>
                                             </div>
+                                        )}
+                                    </div>
                                         </motion.div>
-                                    )}
+                                )}
                                 </AnimatePresence>
                             </div>
                         </div>
@@ -475,8 +475,8 @@ const Navbar = () => {
                                 </form>
                             </div>
                         </motion.div>
-                    )}
-                </AnimatePresence>
+                )}
+            </AnimatePresence>
             </header>
             
             {/* Cart Sidebar */}

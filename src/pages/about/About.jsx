@@ -76,7 +76,7 @@ const About = () => {
                         />
                     </motion.div>
                 </div>
-                
+
                 {/* Mission and Values */}
                 <div className="mb-16">
                     <div className="text-center mb-12">
@@ -126,9 +126,9 @@ const About = () => {
                         >
                             <FaHandshake className="text-4xl text-black mb-4" />
                             <h3 className="text-xl font-bold text-gray-900 mb-2">Trust</h3>
-                            <p className="text-gray-600">
+                        <p className="text-gray-600">
                                 We build lasting relationships with our customers based on transparency, integrity, and exceptional service.
-                            </p>
+                        </p>
                         </motion.div>
                     </div>
                 </div>

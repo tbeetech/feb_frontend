@@ -18,7 +18,7 @@ export const productsApi = createApi({
                 minPrice,
                 maxPrice,
                 sort = '-createdAt',
-                query = ''
+                searchQuery = ''
             } = {}) => {
                 // Build the query parameters
                 let queryParams = new URLSearchParams();
@@ -30,7 +30,7 @@ export const productsApi = createApi({
                 if (minPrice !== undefined) queryParams.append('minPrice', minPrice);
                 if (maxPrice !== undefined) queryParams.append('maxPrice', maxPrice);
                 if (sort) queryParams.append('sort', sort);
-                if (query) queryParams.append('query', query);
+                if (searchQuery) queryParams.append('search', searchQuery);
                 
                 return {
                     url: `/api/products?${queryParams}`,

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useFetchAllProductsQuery } from '../../redux/features/products/productsApi'
 import { CATEGORIES } from '../../constants/categoryConstants'
@@ -7,6 +7,7 @@ import { springAnimation } from '../../utils/animations'
 import RatingStars from '../../components/RatingStars'
 import ImagePreviewModal from '../../components/ImagePreviewModal'
 import ProductCardSkeleton from '../../components/ProductCardSkeleton'
+import { FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 
 const filters = {
   categories: {
@@ -29,8 +30,10 @@ const ProductManagement = () => {
   const [filtersState, setFiltersState] = useState({
     category: 'all',
     subcategory: '',
-    priceRange: ''
+    priceRange: '',
+    searchQuery: ''
   })
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [productsPerPage] = useState(8)
@@ -39,6 +42,16 @@ const ProductManagement = () => {
     url: '',
     name: ''
   })
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(filtersState.searchQuery)
+      setCurrentPage(1) // Reset to first page when search changes
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [filtersState.searchQuery])
 
   const { category, subcategory, priceRange } = filtersState
   
@@ -60,6 +73,7 @@ const ProductManagement = () => {
     subcategory: subcategory || '',
     minPrice,
     maxPrice,
+    searchQuery: debouncedSearch,
     page: currentPage,
     limit: productsPerPage,
   })
@@ -68,7 +82,8 @@ const ProductManagement = () => {
     setFiltersState({
       category: 'all',
       subcategory: '',
-      priceRange: ''
+      priceRange: '',
+      searchQuery: ''
     })
     setCurrentPage(1)
   }
@@ -76,6 +91,13 @@ const ProductManagement = () => {
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleSearch = (e) => {
+    setFiltersState(prev => ({
+      ...prev,
+      searchQuery: e.target.value
+    }))
   }
 
   const handlePriceRangeChange = (range) => {
@@ -124,6 +146,20 @@ const ProductManagement = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8 text-center">Product Management</h1>
+      
+      {/* Search Bar */}
+      <div className="mb-8">
+        <div className="relative">
+          <input
+            type="text"
+            value={filtersState.searchQuery}
+            onChange={handleSearch}
+            placeholder="Search products by name..."
+            className="w-full px-4 py-2 pl-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <FiSearch className="absolute left-3 top-3 text-gray-400" />
+        </div>
+      </div>
       
       {/* Filters */}
       <div className="mb-8">
@@ -276,10 +312,18 @@ const ProductManagement = () => {
             ))}
           </div>
           
-          {/* Pagination */}
+          {/* Improved Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-center mt-8">
-              <div className="flex space-x-2">
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FiChevronLeft className="w-5 h-5" />
+                </button>
+                
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                   <button
                     key={page}
@@ -293,6 +337,14 @@ const ProductManagement = () => {
                     {page}
                   </button>
                 ))}
+                
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FiChevronRight className="w-5 h-5" />
+                </button>
               </div>
             </div>
           )}

@@ -82,18 +82,18 @@ const DealsSection = () => {
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-12">
-          <motion.div
+      <motion.div 
             initial={{ y: 20, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
+        viewport={{ once: true }}
             className="inline-block bg-white text-black px-4 py-1 rounded-none border border-gray-200 text-sm font-medium mb-4"
-          >
+      >
             <span className="flex items-center gap-2">
               <FaGift className="text-black" />
               Limited Time Offer
             </span>
-          </motion.div>
+      </motion.div>
           
           <motion.h2
             initial={{ y: 20, opacity: 0 }}
@@ -117,11 +117,11 @@ const DealsSection = () => {
           </motion.p>
           
           {/* Countdown Timer */}
-          <motion.div
+      <motion.div 
             initial={{ y: 20, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            viewport={{ once: true }}
+        viewport={{ once: true }}
             className="mb-8"
           >
             <h3 className="text-white text-xl mb-4 font-serif tracking-wider">COUNTDOWN TILL PROMO</h3>
@@ -187,7 +187,7 @@ const DealsSection = () => {
                           <span className="text-white font-bold">{currencySymbol}{formatPrice(product.price)}</span>
                           <span className="text-gray-400 text-sm line-through">{currencySymbol}{formatPrice(product.oldPrice)}</span>
                         </div>
-                      </div>
+          </div>
                       
                       <Link 
                         to={`/product/${product._id}`}
@@ -195,11 +195,11 @@ const DealsSection = () => {
                       >
                         <FaShoppingBag className="mr-2" /> View Deal
                       </Link>
-                    </div>
+          </div>
                   </motion.div>
                 );
               })}
-            </div>
+          </div>
           </div>
         )}
         
@@ -218,7 +218,7 @@ const DealsSection = () => {
             Explore All Deals
           </Link>
         </motion.div>
-      </div>
+        </div>
     </section>
   );
 };
