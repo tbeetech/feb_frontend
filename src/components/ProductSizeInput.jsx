@@ -60,10 +60,10 @@ const ProductSizeInput = ({ sizeType, sizes, onChange }) => {
             key={size}
             type="button"
             onClick={() => handleSizeToggle(size)}
-            className={`px-3 py-1 rounded-full text-sm border ${
+            className={`px-3 py-1 rounded-full text-sm border transition-all duration-200 ${
               selectedSizes.includes(size)
-                ? 'bg-primary text-white border-primary'
-                : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+                ? 'bg-black text-white border-black font-medium shadow-md'
+                : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400 hover:bg-gray-50'
             }`}
           >
             {size}

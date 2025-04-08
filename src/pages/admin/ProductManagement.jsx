@@ -7,7 +7,7 @@ import { springAnimation } from '../../utils/animations'
 import RatingStars from '../../components/RatingStars'
 import ImagePreviewModal from '../../components/ImagePreviewModal'
 import ProductCardSkeleton from '../../components/ProductCardSkeleton'
-import { FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
+import { FiSearch, FiChevronLeft, FiChevronRight, FiX } from 'react-icons/fi'
 
 const filters = {
   categories: {
@@ -34,6 +34,7 @@ const ProductManagement = () => {
     searchQuery: ''
   })
   const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [productsPerPage] = useState(8)
@@ -45,9 +46,11 @@ const ProductManagement = () => {
 
   // Debounce search input
   useEffect(() => {
+    setIsSearching(true)
     const timer = setTimeout(() => {
       setDebouncedSearch(filtersState.searchQuery)
       setCurrentPage(1) // Reset to first page when search changes
+      setIsSearching(false)
     }, 500)
 
     return () => clearTimeout(timer)
@@ -93,11 +96,12 @@ const ProductManagement = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleSearch = (e) => {
+  const clearSearch = () => {
     setFiltersState(prev => ({
       ...prev,
-      searchQuery: e.target.value
+      searchQuery: ''
     }))
+    setCurrentPage(1)
   }
 
   const handlePriceRangeChange = (range) => {
@@ -149,15 +153,30 @@ const ProductManagement = () => {
       
       {/* Search Bar */}
       <div className="mb-8">
-        <div className="relative">
-          <input
-            type="text"
-            value={filtersState.searchQuery}
-            onChange={handleSearch}
-            placeholder="Search products by name..."
-            className="w-full px-4 py-2 pl-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-          <FiSearch className="absolute left-3 top-3 text-gray-400" />
+        <div className="relative max-w-2xl mx-auto">
+          <div className="relative">
+            <input
+              type="text"
+              value={filtersState.searchQuery}
+              onChange={handleSearch}
+              placeholder="Search products by name, category, or description..."
+              className="w-full px-4 py-2 pl-10 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <FiSearch className="absolute left-3 top-3 text-gray-400" />
+            {filtersState.searchQuery && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+          {isSearching && (
+            <div className="absolute top-full left-0 right-0 mt-1 text-sm text-gray-500">
+              Searching...
+            </div>
+          )}
         </div>
       </div>
       
