@@ -65,7 +65,7 @@ const Checkout = () => {
       navigate('/shop');
     }
   }, [cartItems, location.state, navigate]);
-
+  
   const handleWhatsAppClick = () => {
     window.open(`https://wa.me/${whatsappNumber}`, '_blank');
   };
@@ -508,34 +508,34 @@ const Checkout = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm">
-              <div>
+            <div>
                 <p><span className="font-medium">Receipt No:</span> {receiptNumber}</p>
                 <p><span className="font-medium">Date:</span> {currentDate}</p>
                 <p><span className="font-medium">Payment Method:</span> Bank Transfer</p>
                 <p><span className="font-medium">Order Date:</span> {orderDate}</p>
                 <p><span className="font-medium">Expected Delivery:</span> {deliveryDate}</p>
                 {isPreOrder && <p><span className="font-medium">Order Type:</span> Pre-Order</p>}
-              </div>
-              <div>
-                <p className="font-medium">BILL TO:</p>
-                {billingDetails ? (
-                  <>
-                    <p>{billingDetails.firstName} {billingDetails.lastName}</p>
-                    <p>{billingDetails.email}</p>
-                    <p>{billingDetails.phone}</p>
-                    <p>{billingDetails.address}</p>
-                    <p>{billingDetails.city}, {billingDetails.state}</p>
-                  </>
-                ) : (
-                  <p>Customer</p>
-                )}
-              </div>
             </div>
+            <div>
+                <p className="font-medium">BILL TO:</p>
+              {billingDetails ? (
+                <>
+                  <p>{billingDetails.firstName} {billingDetails.lastName}</p>
+                  <p>{billingDetails.email}</p>
+                    <p>{billingDetails.phone}</p>
+                  <p>{billingDetails.address}</p>
+                  <p>{billingDetails.city}, {billingDetails.state}</p>
+                </>
+              ) : (
+                <p>Customer</p>
+              )}
+            </div>
+                        </div>
             
             <div className="text-center text-xs text-gray-500 mt-6">
-              <p>Thank you for shopping with F.E.B Luxury!</p>
-              <p>For inquiries, please contact us at +2348033825144</p>
-              <p>Visit us at: www.febluxury.com</p>
+            <p>Thank you for shopping with F.E.B Luxury!</p>
+            <p>For inquiries, please contact us at +2348033825144</p>
+            <p>Visit us at: www.febluxury.com</p>
             </div>
             
             <div className="mt-6 flex flex-col sm:flex-row gap-4">
@@ -547,8 +547,8 @@ const Checkout = () => {
                 <FaDownload className="mr-2" />
                 {isGenerating ? 'Generating PDF...' : 'Download Receipt'}
               </button>
-              
-              {pdfUrl && (
+            
+            {pdfUrl && (
                 <a 
                   href={pdfUrl} 
                   download={`FEB_Luxury_Receipt_${receiptNumber}.pdf`} 
@@ -610,12 +610,12 @@ const Checkout = () => {
             <div className="bg-gray-50 p-4 rounded-md">
               <h3 className="font-medium mb-3">How to Complete Your Order</h3>
               <ol className="list-decimal list-inside text-sm text-gray-700 space-y-2">
-                <li>Make a bank transfer for the total amount shown above</li>
+              <li>Make a bank transfer for the total amount shown above</li>
                 <li>Download your receipt</li>
-                <li>Send proof of payment via WhatsApp</li>
-                <li>Your order will be processed after payment confirmation</li>
-              </ol>
-            </div>
+              <li>Send proof of payment via WhatsApp</li>
+              <li>Your order will be processed after payment confirmation</li>
+            </ol>
+        </div>
           </div>
         </div>
       </div>

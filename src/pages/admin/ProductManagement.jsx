@@ -51,6 +51,11 @@ const ProductManagement = () => {
       setDebouncedSearch(filtersState.searchQuery)
       setCurrentPage(1) // Reset to first page when search changes
       setIsSearching(false)
+      
+      // Log search query for debugging
+      if (filtersState.searchQuery) {
+        console.log('Searching for:', filtersState.searchQuery);
+      }
     }, 500)
 
     return () => clearTimeout(timer)
@@ -102,6 +107,13 @@ const ProductManagement = () => {
       searchQuery: ''
     }))
     setCurrentPage(1)
+  }
+
+  const handleSearch = (e) => {
+    setFiltersState(prev => ({
+      ...prev,
+      searchQuery: e.target.value
+    }))
   }
 
   const handlePriceRangeChange = (range) => {
