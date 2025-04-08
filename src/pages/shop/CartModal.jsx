@@ -168,7 +168,7 @@ const CartModal = ({ onClose }) => {
                             
                             <div className="space-y-3">
                                 <Link
-                                    to="/checkout"
+                                    to="/billing-details"
                                     onClick={onClose}
                                     className="w-full block text-center py-3 px-4 bg-black text-white font-medium hover:bg-gray-900"
                                 >

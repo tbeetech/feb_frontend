@@ -169,8 +169,8 @@ const BillingDetails = ({ isPreOrder = false }) => {
         navigate('/checkout', { 
           state: { 
             billingDetails: formData,
-            cartItems,
-            total,
+            cartItems: cartItems,
+            total: total,
             isPreOrder,
             orderDate: formatDate(orderDate),
             deliveryDate: formatDate(deliveryDate)
@@ -541,7 +541,7 @@ const BillingDetails = ({ isPreOrder = false }) => {
               initial="idle"
               whileHover="hover"
               whileTap="tap"
-              className="w-full md:w-auto px-8 py-3 bg-gold text-white font-medium rounded-md shadow-md hover:bg-gold-dark transition-colors duration-300 flex items-center justify-center"
+              className="w-full md:w-auto px-8 py-3 bg-black text-white font-medium rounded-md shadow-md hover:bg-gray-800 transition-colors duration-300 flex items-center justify-center"
             >
               {isSubmitting ? (
                 <>

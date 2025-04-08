@@ -37,8 +37,8 @@ const Checkout = () => {
     return calculateCartTotal(cartItems);
   }, [cartItems]);
   
-  // Use the total from location state, or calculate it from cart items, or fall back to Redux total
-  const cartTotal = location.state?.total || cartItemsTotal || cartState.total || 0;
+  // Use the total from location state, or calculate it from cart items
+  const cartTotal = location.state?.total || cartItemsTotal;
   
   const isPreOrder = location.state?.isPreOrder || false;
   const billingDetails = location.state?.billingDetails || null;
