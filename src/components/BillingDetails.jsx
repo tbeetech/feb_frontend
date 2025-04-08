@@ -8,9 +8,18 @@ const BillingDetails = ({ isPreOrder = false }) => {
   const location = useLocation();
   const { user } = useSelector((state) => state.auth);
   
-  // Get cart items and total from location state
-  const cartItems = location.state?.cartItems || [];
-  const total = location.state?.total || 0;
+  // Get cart items and total from location state or Redux store
+  const cartItems = location.state?.cartItems || useSelector((state) => state.cart.products) || [];
+  const total = location.state?.total || useSelector((state) => 
+    state.cart.products.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  ) || 0;
+
+  // For debugging
+  useEffect(() => {
+    console.log("BillingDetails - Location state:", location.state);
+    console.log("BillingDetails - Cart items:", cartItems);
+    console.log("BillingDetails - Total:", total);
+  }, [location.state, cartItems, total]);
   
   // Form state
   const [formData, setFormData] = useState({

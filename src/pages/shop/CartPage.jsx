@@ -181,6 +181,10 @@ const CartPage = () => {
                             
                             <Link
                                 to="/billing-details"
+                                state={{ 
+                                    cartItems: products,
+                                    total: total
+                                }}
                                 className="w-full block text-center py-3 px-4 bg-black text-white font-medium hover:bg-gray-800 rounded-md"
                             >
                                 <span className="text-white" style={{color: 'white !important'}}>Proceed to Checkout</span>

@@ -1,16 +1,14 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { FaWhatsapp, FaEye, FaEyeSlash, FaDownload, FaExternalLinkAlt } from 'react-icons/fa';
-import styled from 'styled-components';
-import { useSelector, useDispatch } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { FaWhatsapp, FaEye, FaEyeSlash, FaDownload, FaExternalLinkAlt, FaArrowLeft } from 'react-icons/fa';
+import { useSelector } from 'react-redux';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { saveAs } from 'file-saver';
-import { formatDate, formatPrice, formatReceiptNumber } from '../../utils/formatters';
+import { formatReceiptNumber } from '../../utils/formatters';
 import { toast } from 'react-hot-toast';
 
 const Checkout = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showAccountNumber, setShowAccountNumber] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -29,7 +27,7 @@ const Checkout = () => {
     return items.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
   };
   
-  // Get cart items from Redux store or from location state
+  // Get cart items from location state or Redux store (with priority to location state)
   const cartItems = location.state?.cartItems || useSelector((state) => state.cart.products);
   
   // Calculate the total from the cart items in real-time
@@ -37,7 +35,7 @@ const Checkout = () => {
     return calculateCartTotal(cartItems);
   }, [cartItems]);
   
-  // Use the total from location state, or calculate it from cart items
+  // Use the total from location state or calculated total (with priority to location state)
   const cartTotal = location.state?.total || cartItemsTotal;
   
   const isPreOrder = location.state?.isPreOrder || false;
@@ -68,44 +66,6 @@ const Checkout = () => {
     }
   }, [cartItems, location.state, navigate]);
 
-  // For debugging and verification
-  useEffect(() => {
-    console.log("Cart total:", cartTotal);
-    console.log("Calculated cart items total:", cartItemsTotal);
-    console.log("Cart items:", cartItems);
-    console.log("Redux cart state:", cartState);
-    
-    // Alert if the totals don't match
-    if (cartTotal !== cartItemsTotal && cartItems.length > 0) {
-      console.warn("Cart total mismatch. Using calculated total instead.");
-    }
-  }, [cartTotal, cartItemsTotal, cartItems, cartState]);
-  
-  // Pre-load libraries to ensure they're available
-  useEffect(() => {
-    // Load jsPDF scripts asynchronously to ensure they're ready
-    const loadScripts = async () => {
-      try {
-        // Dynamic import as a backup to ensure the library is properly loaded
-        const jspdfModule = await import('jspdf');
-        const autotableModule = await import('jspdf-autotable');
-        
-        // Verify the library is loaded correctly
-        if (typeof jsPDF !== 'function') {
-          console.warn('jsPDF is not available as a global function, trying to use the imported module');
-          window.jsPDF = jspdfModule.jsPDF; // Make it globally available
-        }
-        
-        console.log('PDF libraries loaded successfully');
-      } catch (err) {
-        console.error('Error loading PDF libraries:', err);
-        setErrorDetails('Failed to load PDF libraries. Please try refreshing the page.');
-      }
-    };
-    
-    loadScripts();
-  }, []);
-  
   const handleWhatsAppClick = () => {
     window.open(`https://wa.me/${whatsappNumber}`, '_blank');
   };
@@ -193,7 +153,7 @@ const Checkout = () => {
       });
       
       // Add logo placeholder (could be replaced with an actual logo)
-      doc.setFillColor(240, 240, 240);
+      doc.setFillColor(245, 245, 245);
       doc.rect(15, 15, 180, 25, 'F');
       
       // Set up the document
@@ -216,7 +176,7 @@ const Checkout = () => {
       if (billingDetails) {
         doc.text(`${billingDetails.firstName} ${billingDetails.lastName}`, 140, 62);
         doc.text(`${billingDetails.email}`, 140, 69);
-        doc.text(`${billingDetails.phoneNumber}`, 140, 76);
+        doc.text(`${billingDetails.phone}`, 140, 76);
         doc.text(`${billingDetails.address}`, 140, 83);
         doc.text(`${billingDetails.city}, ${billingDetails.state}`, 140, 90);
       } else {
@@ -255,14 +215,14 @@ const Checkout = () => {
       
       // Create a manual table instead of using autoTable to avoid compatibility issues
       // Set up table styles
-      const startY = 80;
+      const startY = 100;
       const cellPadding = 5;
       const tableWidth = 180;
       // Adjust column widths to provide more space for the price columns
       const colWidths = [50, 20, 20, 15, 35, 40]; // Column widths that sum to tableWidth
       
       // Draw table header with background
-      doc.setFillColor(33, 150, 243);
+      doc.setFillColor(0, 0, 0);
       doc.setTextColor(255, 255, 255);
       doc.rect(15, startY, tableWidth, 10, 'F');
       
@@ -287,7 +247,7 @@ const Checkout = () => {
       tableRows.forEach(row => {
         // Alternate row colors
         if (isGray) {
-          doc.setFillColor(240, 240, 240);
+          doc.setFillColor(245, 245, 245);
           doc.rect(15, currentY, tableWidth, 10, 'F');
         }
         isGray = !isGray;
@@ -428,508 +388,239 @@ const Checkout = () => {
   };
 
   return (
-    <CheckoutContainer>
+    <div className="container mx-auto px-4 py-6 max-w-6xl">
+      {/* Alert messages */}
       {showSuccessMessage && (
-        <SuccessMessage>
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-md shadow-lg z-50 animate-fade-in-out">
           <p>Receipt downloaded successfully!</p>
-        </SuccessMessage>
+        </div>
       )}
-      {showErrorMessage && (
-        <ErrorMessage>
-          <p>{errorDetails || 'Error downloading receipt. Please try again.'}</p>
-        </ErrorMessage>
-      )}
-      <div className="flex flex-col lg:flex-row gap-6 w-full max-w-5xl">
-        {/* Receipt Preview */}
-        <ReceiptCard ref={receiptRef}>
-          <ReceiptHeader>
-            <h1>F.E.B LUXURY</h1>
-            <p>Receipt / Invoice</p>
-          </ReceiptHeader>
-          
-          <ReceiptDetails>
-            <div>
-              <p><strong>Receipt No:</strong> {receiptNumber}</p>
-              <p><strong>Date:</strong> {currentDate}</p>
-              <p><strong>Payment Method:</strong> Bank Transfer</p>
-              <p><strong>Order Date:</strong> {orderDate}</p>
-              <p><strong>Expected Delivery:</strong> {deliveryDate}</p>
-              {isPreOrder && <p><strong>Order Type:</strong> Pre-Order</p>}
-            </div>
-            <div>
-              <p><strong>BILL TO:</strong></p>
-              {billingDetails ? (
-                <>
-                  <p>{billingDetails.firstName} {billingDetails.lastName}</p>
-                  <p>{billingDetails.email}</p>
-                  <p>{billingDetails.phoneNumber}</p>
-                  <p>{billingDetails.address}</p>
-                  <p>{billingDetails.city}, {billingDetails.state}</p>
-                </>
-              ) : (
-                <p>Customer</p>
-              )}
-            </div>
-          </ReceiptDetails>
-          
-          <ItemsTable>
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Size</th>
-                <th>Color</th>
-                <th>Qty</th>
-                <th>Unit Price (₦)</th>
-                <th>Total (₦)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cartItems && cartItems.length > 0 ? (
-                cartItems.map((item, index) => (
-                  <tr key={`${item._id || index}-${index}`}>
-                    <td>{item.name}</td>
-                    <td>{item.selectedSize || 'N/A'}</td>
-                    <td>
-                      {item.selectedColor ? (
-                        <div className="flex items-center space-x-2">
-                          <div 
-                            className="w-4 h-4 rounded-md border border-gray-300 inline-block" 
-                            style={{ backgroundColor: item.selectedColor }}
-                            title={item.selectedColor}
-                          />
-                        </div>
-                      ) : 'N/A'}
-                    </td>
-                    <td>{item.quantity}</td>
-                    <td>{item.price.toLocaleString()}</td>
-                    <td>{(item.price * item.quantity).toLocaleString()}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="text-center py-4">No items in cart</td>
-                </tr>
-              )}
-            </tbody>
-          </ItemsTable>
-          
-          <TotalRow>
-            <span>Total:</span>
-            <span>₦{cartTotal.toLocaleString()}</span>
-          </TotalRow>
-          
-          <ReceiptFooter>
-            <p>Thank you for shopping with F.E.B Luxury!</p>
-            <p>For inquiries, please contact us at +2348033825144</p>
-            <p>Visit us at: www.febluxury.com</p>
-          </ReceiptFooter>
-          
-          <ButtonsContainer>
-            <DownloadButton onClick={downloadReceiptPDF} disabled={isGenerating}>
-              <FaDownload />
-              <span>{isGenerating ? 'Generating PDF...' : 'Download Receipt'}</span>
-            </DownloadButton>
-            
-            {pdfUrl && (
-              <DirectDownloadLink href={pdfUrl} download={`FEB_Luxury_Receipt_${receiptNumber}.pdf`} target="_blank" rel="noopener noreferrer">
-                <FaExternalLinkAlt />
-                <span>Direct Download</span>
-              </DirectDownloadLink>
-            )}
-          </ButtonsContainer>
-        </ReceiptCard>
       
-        {/* Payment Details Card */}
-        <AccountDetailsCard>
-          <TotalAmount>Total Amount: ₦{cartTotal.toLocaleString()}</TotalAmount>
-          <h2>Payment Details</h2>
-          <DetailRow>
-            <Label>Bank Name:</Label>
-            <Value>Stanbic IBTC Bank</Value>
-          </DetailRow>
-          <DetailRow>
-            <Label>Account Name:</Label>
-            <Value>Jumoke Obembe</Value>
-          </DetailRow>
-          <DetailRow>
-            <Label>Account Number:</Label>
-            <AccountNumberContainer>
-              <Value>{showAccountNumber ? accountNumber : '••••••••••'}</Value>
-              <ToggleButton onClick={toggleAccountNumber}>
-                {showAccountNumber ? <FaEyeSlash /> : <FaEye />}
-              </ToggleButton>
-            </AccountNumberContainer>
-          </DetailRow>
-          <WhatsAppButton onClick={handleWhatsAppClick}>
-            <FaWhatsapp size={24} />
-            <span>Send Payment Receipt</span>
-          </WhatsAppButton>
-          <PaymentInstructions>
-            <h3>How to Complete Your Order:</h3>
-            <ol>
-              <li>Make a bank transfer for the total amount shown above</li>
-              <li>Download your receipt by clicking the button</li>
-              <li>Send proof of payment via WhatsApp</li>
-              <li>Your order will be processed after payment confirmation</li>
-            </ol>
-          </PaymentInstructions>
-        </AccountDetailsCard>
+      {showErrorMessage && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-md shadow-lg z-50 animate-fade-in-out">
+          <p>{errorDetails || 'Error downloading receipt. Please try again.'}</p>
+        </div>
+      )}
+      
+      {/* Back to billing details link */}
+      <div className="mb-6">
+        <Link to="/billing-details" className="inline-flex items-center text-gray-600 hover:text-black text-sm">
+          <FaArrowLeft className="mr-2" />
+          Back to Billing Details
+        </Link>
       </div>
       
-      {/* Summary area with correct total display */}
-      <div className="mt-8 p-6 bg-gray-50 rounded-lg">
-        <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-        <div className="flex justify-between mb-2">
-          <span>Subtotal</span>
-          <span>₦{cartItemsTotal.toLocaleString()}</span>
+      <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">Complete Your Order</h1>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        {/* Order Summary - Left Column on Desktop, Top on Mobile */}
+        <div className="lg:col-span-3 lg:order-1 order-2">
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <h2 className="text-xl font-bold mb-4 pb-2 border-b">Order Summary</h2>
+            
+            <div className="mb-6">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                      <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                      <th className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {cartItems && cartItems.length > 0 ? (
+                      cartItems.map((item, index) => (
+                        <tr key={`${item._id || index}-${index}`} className="hover:bg-gray-50">
+                          <td className="py-4 px-4">
+                            <div className="flex items-center">
+                              <div className="h-16 w-16 flex-shrink-0 mr-4 bg-gray-100 rounded-md overflow-hidden">
+                                <img
+                                  src={item.image}
+                                  alt={item.name}
+                                  className="h-full w-full object-cover"
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = "https://via.placeholder.com/64?text=Product";
+                                  }}
+                                />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">{item.name}</p>
+                                <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="text-sm text-gray-500">
+                              {item.selectedSize && <p>Size: {item.selectedSize}</p>}
+                              {item.selectedColor && (
+                                <div className="flex items-center mt-1">
+                                  <span className="mr-1">Color:</span>
+                                  <div 
+                                    className="w-4 h-4 rounded-full border border-gray-300" 
+                                    style={{ backgroundColor: item.selectedColor }}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-4 px-4 text-sm text-right font-medium">
+                            ₦{(item.price * item.quantity).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="3" className="py-4 px-4 text-center text-gray-500">
+                          No items in cart
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <div className="border-t pt-4">
+              <div className="flex justify-between py-2">
+                <span className="text-gray-600">Subtotal</span>
+                <span className="font-medium">₦{cartTotal.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-gray-600">Shipping</span>
+                <span className="font-medium">₦0.00</span>
+              </div>
+              <div className="flex justify-between py-3 border-t mt-2 text-lg font-bold">
+                <span>Total</span>
+                <span>₦{cartTotal.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Receipt Preview */}
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6" ref={receiptRef}>
+            <h2 className="text-xl font-bold mb-4 pb-2 border-b">Receipt Preview</h2>
+            
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-semibold">F.E.B LUXURY</h3>
+              <p className="text-gray-600">Receipt / Invoice</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm">
+              <div>
+                <p><span className="font-medium">Receipt No:</span> {receiptNumber}</p>
+                <p><span className="font-medium">Date:</span> {currentDate}</p>
+                <p><span className="font-medium">Payment Method:</span> Bank Transfer</p>
+                <p><span className="font-medium">Order Date:</span> {orderDate}</p>
+                <p><span className="font-medium">Expected Delivery:</span> {deliveryDate}</p>
+                {isPreOrder && <p><span className="font-medium">Order Type:</span> Pre-Order</p>}
+              </div>
+              <div>
+                <p className="font-medium">BILL TO:</p>
+                {billingDetails ? (
+                  <>
+                    <p>{billingDetails.firstName} {billingDetails.lastName}</p>
+                    <p>{billingDetails.email}</p>
+                    <p>{billingDetails.phone}</p>
+                    <p>{billingDetails.address}</p>
+                    <p>{billingDetails.city}, {billingDetails.state}</p>
+                  </>
+                ) : (
+                  <p>Customer</p>
+                )}
+              </div>
+            </div>
+            
+            <div className="text-center text-xs text-gray-500 mt-6">
+              <p>Thank you for shopping with F.E.B Luxury!</p>
+              <p>For inquiries, please contact us at +2348033825144</p>
+              <p>Visit us at: www.febluxury.com</p>
+            </div>
+            
+            <div className="mt-6 flex flex-col sm:flex-row gap-4">
+              <button 
+                onClick={downloadReceiptPDF} 
+                disabled={isGenerating}
+                className="flex items-center justify-center w-full sm:w-auto px-6 py-3 bg-black text-white rounded-md hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                <FaDownload className="mr-2" />
+                {isGenerating ? 'Generating PDF...' : 'Download Receipt'}
+              </button>
+              
+              {pdfUrl && (
+                <a 
+                  href={pdfUrl} 
+                  download={`FEB_Luxury_Receipt_${receiptNumber}.pdf`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center w-full sm:w-auto px-6 py-3 bg-white text-black border border-black rounded-md hover:bg-gray-100 transition-colors"
+                >
+                  <FaExternalLinkAlt className="mr-2" />
+                  Direct Download
+                </a>
+              )}
+            </div>
+          </div>
         </div>
-        <div className="flex justify-between mb-2">
-          <span>Shipping</span>
-          <span>₦0.00</span>
-        </div>
-        <div className="border-t border-gray-200 pt-4 mt-4">
-          <div className="flex justify-between font-bold">
-            <span>Total</span>
-            <span>₦{cartItemsTotal.toLocaleString()}</span>
+        
+        {/* Payment Details - Right Column on Desktop, Bottom on Mobile */}
+        <div className="lg:col-span-2 lg:order-2 order-1">
+          <div className="bg-white rounded-lg shadow-sm p-6 sticky top-24">
+            <h2 className="text-xl font-bold mb-4 pb-2 border-b">Payment Details</h2>
+            
+            <div className="mb-6">
+              <div className="bg-gray-50 p-4 rounded-md text-center mb-6">
+                <p className="text-lg font-bold">Total Amount</p>
+                <p className="text-2xl font-bold">₦{cartTotal.toLocaleString()}</p>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <p className="text-gray-600 text-sm mb-1">Bank Name</p>
+                  <p className="font-medium">Stanbic IBTC Bank</p>
+                </div>
+                <div>
+                  <p className="text-gray-600 text-sm mb-1">Account Name</p>
+                  <p className="font-medium">Jumoke Obembe</p>
+                </div>
+                <div>
+                  <p className="text-gray-600 text-sm mb-1">Account Number</p>
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium">{showAccountNumber ? accountNumber : '••••••••••'}</p>
+                    <button 
+                      onClick={toggleAccountNumber}
+                      className="text-gray-500 hover:text-black"
+                    >
+                      {showAccountNumber ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <button
+              onClick={handleWhatsAppClick}
+              className="w-full flex items-center justify-center px-6 py-3 bg-[#25D366] text-white rounded-md hover:bg-[#128C7E] transition-colors mb-6"
+            >
+              <FaWhatsapp className="mr-2 text-xl" />
+              Send Payment Receipt
+            </button>
+            
+            <div className="bg-gray-50 p-4 rounded-md">
+              <h3 className="font-medium mb-3">How to Complete Your Order</h3>
+              <ol className="list-decimal list-inside text-sm text-gray-700 space-y-2">
+                <li>Make a bank transfer for the total amount shown above</li>
+                <li>Download your receipt</li>
+                <li>Send proof of payment via WhatsApp</li>
+                <li>Your order will be processed after payment confirmation</li>
+              </ol>
+            </div>
           </div>
         </div>
       </div>
-    </CheckoutContainer>
+    </div>
   );
 };
-
-const CheckoutContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: calc(100vh - 180px);
-  padding: 2rem;
-  margin-top: 80px;
-  margin-bottom: 80px;
-  background: #f8f9fa;
-
-  @media (max-width: 768px) {
-    margin-bottom: 100px;
-    padding: 1rem;
-  }
-`;
-
-const AccountDetailsCard = styled.div`
-  background: white;
-  padding: 2rem;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 500px;
-
-  h2 {
-    color: #1a1a1a;
-    font-size: 1.8rem;
-    margin-bottom: 2rem;
-    text-align: center;
-    font-weight: 600;
-  }
-`;
-
-const DetailRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 0;
-  border-bottom: 1px solid #eee;
-`;
-
-const Label = styled.span`
-  color: #666;
-  font-weight: 500;
-`;
-
-const Value = styled.span`
-  color: #1a1a1a;
-  font-weight: 600;
-`;
-
-const WhatsAppButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  padding: 1rem;
-  margin-top: 2rem;
-  background: #25D366;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background: #128C7E;
-    transform: translateY(-2px);
-  }
-
-  svg {
-    margin-right: 8px;
-  }
-`;
-
-const TotalAmount = styled.div`
-  background: #f8f9fa;
-  padding: 1rem;
-  border-radius: 8px;
-  text-align: center;
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 2rem;
-  border: 2px solid #e9ecef;
-`;
-
-const AccountNumberContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-`;
-
-const ToggleButton = styled.button`
-  background: none;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  transition: color 0.3s ease;
-
-  &:hover {
-    color: var(--primary-color);
-  }
-`;
-
-// New styled components for receipt
-const ReceiptCard = styled.div`
-  background: white;
-  padding: 2rem;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 700px;
-`;
-
-const ReceiptHeader = styled.div`
-  text-align: center;
-  margin-bottom: 1.5rem;
-  
-  h1 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    color: #1a1a1a;
-  }
-  
-  p {
-    font-size: 1.2rem;
-    color: #666;
-  }
-`;
-
-const ReceiptDetails = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 2rem;
-  
-  div {
-    p {
-      margin-bottom: 0.5rem;
-      color: #666;
-    }
-  }
-`;
-
-const ItemsTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 2rem;
-  
-  th, td {
-    padding: 0.75rem;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-  }
-  
-  th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    color: #1a1a1a;
-  }
-  
-  td {
-    color: #666;
-  }
-  
-  @media (max-width: 768px) {
-    th, td {
-      padding: 0.5rem;
-      font-size: 0.9rem;
-    }
-  }
-`;
-
-const TotalRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  padding: 1rem 0;
-  border-top: 2px solid #eee;
-  margin-bottom: 2rem;
-  font-weight: 700;
-  font-size: 1.2rem;
-  color: #1a1a1a;
-`;
-
-const ReceiptFooter = styled.div`
-  text-align: center;
-  margin-bottom: 2rem;
-  color: #666;
-  
-  p {
-    margin-bottom: 0.5rem;
-  }
-`;
-
-const DownloadButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  padding: 1rem;
-  background: #4285F4;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  opacity: ${props => props.disabled ? 0.7 : 1};
-  pointer-events: ${props => props.disabled ? 'none' : 'auto'};
-
-  &:hover {
-    background: ${props => props.disabled ? '#4285F4' : '#3367D6'};
-    transform: ${props => props.disabled ? 'none' : 'translateY(-2px)'};
-  }
-
-  svg {
-    margin-right: 8px;
-  }
-`;
-
-// Add new styled components for success message and payment instructions
-const SuccessMessage = styled.div`
-  position: fixed;
-  top: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #4CAF50;
-  color: white;
-  padding: 15px 25px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  animation: fadeIn 0.3s, fadeOut 0.3s 4.7s;
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  @keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
-  }
-  
-  p {
-    margin: 0;
-    font-weight: 500;
-  }
-`;
-
-const ErrorMessage = styled.div`
-  position: fixed;
-  top: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #f44336;
-  color: white;
-  padding: 15px 25px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  animation: fadeIn 0.3s, fadeOut 0.3s 4.7s;
-  
-  p {
-    margin: 0;
-    font-weight: 500;
-  }
-`;
-
-const PaymentInstructions = styled.div`
-  margin-top: 2rem;
-  padding: 1.5rem;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  
-  h3 {
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
-    color: #333;
-  }
-  
-  ol {
-    padding-left: 1.2rem;
-    
-    li {
-      margin-bottom: 0.5rem;
-      color: #555;
-    }
-  }
-`;
-
-// Update styled components to include new button container and direct download link
-const ButtonsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`;
-
-const DirectDownloadLink = styled.a`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  padding: 1rem;
-  background: #34A853;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background: #2E8B57;
-    transform: translateY(-2px);
-  }
-
-  svg {
-    margin-right: 8px;
-  }
-`;
 
 export default Checkout;

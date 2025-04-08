@@ -169,7 +169,13 @@ const CartModal = ({ onClose }) => {
                             <div className="space-y-3">
                                 <Link
                                     to="/billing-details"
-                                    onClick={onClose}
+                                    onClick={() => {
+                                        onClose();
+                                    }}
+                                    state={{ 
+                                        cartItems: products,
+                                        total: total + shippingCost
+                                    }}
                                     className="w-full block text-center py-3 px-4 bg-black text-white font-medium hover:bg-gray-900"
                                 >
                                     <span className="text-white" style={{color: 'white !important'}}>Go To Checkout</span>
