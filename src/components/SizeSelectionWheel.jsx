@@ -197,7 +197,7 @@ const SizeSelectionWheel = ({ sizes = [], sizeType = 'none', onSizeSelect, outOf
         transition={{ duration: 0.4, ease: "easeOut" }}
       >
         <div className="flex items-center justify-center overflow-x-auto py-4 px-2 scrollbar-hide">
-          <div className="flex space-x-3">
+          <div className="flex flex-wrap gap-3 justify-center">
             {sizes.map((size) => {
               const isOutOfStock = outOfStock.includes(size);
               const isSelected = selectedSize === size;
@@ -219,7 +219,7 @@ const SizeSelectionWheel = ({ sizes = [], sizeType = 'none', onSizeSelect, outOf
                   onMouseLeave={handleMouseLeave}
                   className={`relative flex items-center justify-center h-14 min-w-[50px] px-4 rounded-lg border-2 transition-all duration-300
                     ${isSelected && !isOutOfStock
-                      ? 'border-black bg-black text-white'
+                      ? 'border-black bg-black text-white font-bold'
                       : isOutOfStock
                         ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed opacity-70'
                         : 'border-gray-300 bg-white text-gray-800 hover:border-gray-800'

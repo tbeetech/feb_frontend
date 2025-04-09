@@ -213,7 +213,15 @@ const EditProduct = () => {
         productData
       }).unwrap();
       
-      toast.success('Product updated successfully');
+      toast.success('Product updated successfully!', {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        style: { backgroundColor: '#4CAF50', color: 'white' }
+      });
       navigate('/admin/products');
     } catch (error) {
       console.error('Failed to update product:', error);

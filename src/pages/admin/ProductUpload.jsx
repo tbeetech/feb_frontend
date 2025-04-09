@@ -176,7 +176,15 @@ const ProductUpload = () => {
       
       const result = await addProduct(productDataToSubmit).unwrap();
       
-      toast.success('Product added successfully');
+      toast.success('Product added successfully!', {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        style: { backgroundColor: '#4CAF50', color: 'white' }
+      });
       console.log("Product uploaded successfully:", result);
       
       // Clear form after successful submission

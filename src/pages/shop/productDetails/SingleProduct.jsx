@@ -511,7 +511,7 @@ const SingleProduct = () => {
                         </div>
 
                         {/* Thumbnail Gallery */}
-                        <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
+                        <div className="flex gap-2 mt-4 overflow-x-auto pb-2 justify-center">
                             {allImages.map((image, index) => (
                                 <div
                                     key={index}
@@ -619,14 +619,17 @@ const SingleProduct = () => {
                             
                             {/* Delivery Information Card */}
                             <div 
-                                className={`mt-6 p-4 rounded-lg border bg-${deliveryInfo.color}-50 border-${deliveryInfo.color}-200`}
+                                className="mt-6 p-4 rounded-lg border bg-gray-50 border-gray-200"
                             >
                                 <div className="flex items-start space-x-3">
-                                    <span className={`material-icons text-${deliveryInfo.color}-500 text-xl`}>
-                                        {deliveryInfo.icon}
-                                    </span>
+                                    <div className="bg-blue-100 p-2 rounded-full">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                                            <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1v-1h6a1 1 0 001-1v-6a1 1 0 00-.293-.707L15.293 4.793A1 1 0 0014.586 4H13V3a1 1 0 00-1-1H8a1 1 0 00-1 1v1H3z" />
+                                        </svg>
+                                    </div>
                                     <div>
-                                        <h3 className={`font-medium text-${deliveryInfo.color}-700`}>{deliveryInfo.title}</h3>
+                                        <h3 className="font-medium text-gray-900">{deliveryInfo.title}</h3>
                                         <p className="text-gray-600 text-sm mt-1">{deliveryInfo.message}</p>
                                     </div>
                                 </div>
