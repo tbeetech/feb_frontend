@@ -112,52 +112,24 @@ const SizeGuideModal = ({ isOpen, onClose, sizeType }) => {
   );
 };
 
-const SizeSelectionWheel = ({ sizes = [], sizeType = 'none', onSizeSelect, outOfStock = [] }) => {
-  const [selectedSize, setSelectedSize] = useState(sizes.length > 0 ? sizes[0] : null);
-  const [hoverInfo, setHoverInfo] = useState({ visible: false, size: null, position: { x: 0, y: 0 } });
+const SizeSelectionWheel = ({ sizes = [], sizeType = 'none', onSizeSelect, outOfStock = [], selectedSizeFromParent }) => {
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
-
-  // Set initial selected size when component mounts
+  const [localSelectedSize, setLocalSelectedSize] = useState(selectedSizeFromParent || '');
+  
+  // Update local state when parent prop changes
   useEffect(() => {
-    if (sizes.length > 0) {
-      // Find first available size (not out of stock)
+    if (selectedSizeFromParent) {
+      setLocalSelectedSize(selectedSizeFromParent);
+    } else if (sizes.length > 0) {
+      // If no size selected yet, find first available size
       const firstAvailableSize = sizes.find(size => !outOfStock.includes(size));
-      setSelectedSize(firstAvailableSize || sizes[0]);
-      if (onSizeSelect) {
-        onSizeSelect(firstAvailableSize || sizes[0]);
+      if (firstAvailableSize && onSizeSelect) {
+        onSizeSelect(firstAvailableSize);
       }
     }
-  }, [sizes, outOfStock, onSizeSelect]);
-
-  if (!sizes.length || sizeType === 'none') {
-    return null;
-  }
-
-  const handleSizeSelect = (size) => {
-    // Don't allow selecting out of stock sizes
-    if (outOfStock.includes(size)) return;
-    
-    setSelectedSize(size);
-    if (onSizeSelect) {
-      onSizeSelect(size);
-    }
-  };
-
-  const handleMouseEnter = (size, e) => {
-    if (outOfStock.includes(size)) {
-      setHoverInfo({
-        visible: true,
-        size,
-        position: { x: e.clientX, y: e.clientY }
-      });
-    }
-  };
-
-  const handleMouseLeave = () => {
-    setHoverInfo({ ...hoverInfo, visible: false });
-  };
-
-  // Get the appropriate label for the size type
+  }, [selectedSizeFromParent, sizes, outOfStock, onSizeSelect]);
+  
+  // Determine the size label based on size type
   const getSizeTypeLabel = () => {
     switch(sizeType) {
       case 'roman': return 'Size';
@@ -166,142 +138,83 @@ const SizeSelectionWheel = ({ sizes = [], sizeType = 'none', onSizeSelect, outOf
       default: return 'Size';
     }
   };
-
+  
+  // Don't render if no sizes or size type is none
+  if (!sizes.length || sizeType === 'none') {
+    return null;
+  }
+  
+  // Handler for size selection from dropdown
+  const handleSizeChange = (e) => {
+    const size = e.target.value;
+    console.log("Size selected in dropdown:", size);
+    setLocalSelectedSize(size);
+    if (size && onSizeSelect) {
+      onSizeSelect(size);
+    }
+  };
+  
+  // Filter out sizes that are in stock
+  const availableSizes = sizes.filter(size => !outOfStock.includes(size));
+  
   return (
-    <div className="my-6">
-      <div className="flex items-center justify-between mb-4">
+    <div className="my-4">
+      {/* Header with size type label and guide button */}
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center">
-          <h3 className="text-sm font-medium text-gray-700">{getSizeTypeLabel()}:</h3>
+          <label htmlFor="size-select" className="block text-sm font-medium text-gray-700">
+            {getSizeTypeLabel()}:
+          </label>
           <button 
-            className="ml-2 text-xs text-black underline font-medium hover:text-gray-700 transition-colors"
+            className="ml-3 text-xs text-black underline font-medium hover:text-gray-700 transition-colors"
             onClick={() => setIsSizeGuideOpen(true)}
           >
             Size Guide
           </button>
         </div>
-        <motion.span 
-          className="text-xs text-gray-600 font-medium px-3 py-1 bg-gray-50 rounded-full"
-          initial={{ opacity: 0, x: 10 }}
-          animate={{ opacity: 1, x: 0 }}
-          key={selectedSize}
-          transition={{ duration: 0.3 }}
-        >
-          {selectedSize ? `Selected: ${selectedSize}` : 'Select a size'}
-        </motion.span>
-      </div>
-
-      <motion.div 
-        className="relative"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-      >
-        <div className="flex items-center justify-center overflow-x-auto py-4 px-2 scrollbar-hide">
-          <div className="flex flex-wrap gap-3 justify-center">
-            {sizes.map((size) => {
-              const isOutOfStock = outOfStock.includes(size);
-              const isSelected = selectedSize === size;
-              
-              return (
-                <motion.button
-                  key={size}
-                  type="button"
-                  whileHover={!isOutOfStock ? { y: -8, scale: 1.08 } : {}}
-                  whileTap={!isOutOfStock ? { scale: 0.92 } : {}}
-                  initial={false}
-                  animate={{
-                    scale: isSelected && !isOutOfStock ? 1.05 : 1,
-                    y: isSelected && !isOutOfStock ? -5 : 0,
-                    boxShadow: isSelected && !isOutOfStock ? '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' : 'none'
-                  }}
-                  onClick={() => handleSizeSelect(size)}
-                  onMouseEnter={(e) => handleMouseEnter(size, e)}
-                  onMouseLeave={handleMouseLeave}
-                  className={`relative flex items-center justify-center h-14 min-w-[50px] px-4 rounded-lg border-2 transition-all duration-300
-                    ${isSelected && !isOutOfStock
-                      ? 'border-black bg-black text-white font-bold'
-                      : isOutOfStock
-                        ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed opacity-70'
-                        : 'border-gray-300 bg-white text-gray-800 hover:border-gray-800'
-                    }`}
-                  disabled={isOutOfStock}
-                >
-                  <span className="text-sm font-medium">
-                    {size}
-                  </span>
-                  
-                  {isOutOfStock && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <motion.div 
-                        className="absolute inset-0 border-t-2 border-gray-300"
-                        initial={{ width: 0 }}
-                        animate={{ width: '100%' }}
-                        transition={{ duration: 0.2 }}
-                        style={{ 
-                          transform: 'rotate(45deg)',
-                          transformOrigin: 'center'
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  {/* Selected indicator dot */}
-                  {isSelected && !isOutOfStock && (
-                    <motion.div 
-                      className="absolute -bottom-3 w-1.5 h-1.5 rounded-full bg-black"
-                      layoutId="selectedDot"
-                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                    />
-                  )}
-                </motion.button>
-              );
-            })}
+        {localSelectedSize && (
+          <div className="text-sm bg-gray-100 px-2 py-1 rounded-full">
+            <span className="font-medium">Selected: {localSelectedSize}</span>
           </div>
-        </div>
-
-        {/* Selected size indicator */}
-        <motion.div 
-          className="mt-6 h-0.5 bg-gradient-to-r from-transparent via-black to-transparent rounded-full mx-auto"
-          initial={{ width: 0, opacity: 0 }}
-          animate={{ 
-            width: selectedSize ? '30%' : 0,
-            opacity: selectedSize ? 1 : 0 
-          }}
-          transition={{ duration: 0.4 }}
-        />
-
-        {/* Tooltip for out of stock sizes */}
-        <AnimatePresence>
-          {hoverInfo.visible && (
-            <motion.div
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 5 }}
-              className="absolute z-10 px-3 py-2 bg-black text-white text-xs rounded-lg shadow-xl pointer-events-none"
-              style={{
-                top: '-40px',
-                left: '50%',
-                transform: 'translateX(-50%)'
-              }}
-            >
-              <div className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                Size {hoverInfo.size} is out of stock
-              </div>
-              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-black"></div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Helper text */}
-        <p className="text-xs text-gray-500 mt-4 text-center italic">
-          {outOfStock.length > 0 ? "Crossed out sizes are currently unavailable" : "All sizes currently in stock"}
-        </p>
-      </motion.div>
+        )}
+      </div>
       
-      {/* Size Guide Modal */}
+      {/* Simple dropdown selector */}
+      <div className="relative">
+        <select
+          id="size-select"
+          name="size"
+          value={localSelectedSize}
+          onChange={handleSizeChange}
+          className="block w-full mt-1 pl-3 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-black sm:text-sm rounded-md appearance-none"
+        >
+          <option value="" disabled>Select a size</option>
+          {sizes.map(size => (
+            <option 
+              key={size}
+              value={size}
+              disabled={outOfStock.includes(size)}
+            >
+              {size}{outOfStock.includes(size) ? ' (Out of Stock)' : ''}
+            </option>
+          ))}
+        </select>
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+          <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        </div>
+      </div>
+      
+      {/* Availability status */}
+      <p className="text-xs text-gray-500 mt-2">
+        {availableSizes.length === 0 ? 
+          "All sizes are currently out of stock" : 
+          `${availableSizes.length} size${availableSizes.length !== 1 ? 's' : ''} available`
+        }
+      </p>
+      
+      {/* Size guide modal */}
       <AnimatePresence>
         {isSizeGuideOpen && (
           <SizeGuideModal 

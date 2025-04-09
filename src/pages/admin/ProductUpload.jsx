@@ -183,7 +183,13 @@ const ProductUpload = () => {
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-        style: { backgroundColor: '#4CAF50', color: 'white' }
+        style: { 
+          backgroundColor: '#3f8e47', 
+          color: 'white',
+          padding: '16px',
+          borderRadius: '8px'
+        },
+        icon: '✅'
       });
       console.log("Product uploaded successfully:", result);
       

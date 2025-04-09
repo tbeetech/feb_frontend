@@ -220,7 +220,13 @@ const EditProduct = () => {
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-        style: { backgroundColor: '#4CAF50', color: 'white' }
+        style: { 
+          backgroundColor: '#3f8e47', 
+          color: 'white',
+          padding: '16px',
+          borderRadius: '8px'
+        },
+        icon: '✅'
       });
       navigate('/admin/products');
     } catch (error) {
@@ -246,6 +252,13 @@ const EditProduct = () => {
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
+        style: { 
+          backgroundColor: '#e74c3c', 
+          color: 'white',
+          padding: '16px',
+          borderRadius: '8px'
+        },
+        icon: '🗑️'
       });
       setTimeout(() => {
       navigate('/admin/manage-products');

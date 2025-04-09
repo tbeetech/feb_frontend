@@ -219,10 +219,11 @@ const SingleProduct = () => {
     // Set initial selected image, size, and color when product loads
     useEffect(() => {
         if (singleProduct?.image) {
+            console.log("Setting initial image:", singleProduct.image);
             setSelectedImage(singleProduct.image);
         }
         
-        // Set the first available size as default if sizes exist
+        // Reset selections when product changes
         if (singleProduct?.sizes?.length > 0) {
             const firstAvailableSize = singleProduct.sizes.find(size => 
                 !outOfStockSizes.includes(size)
@@ -232,13 +233,12 @@ const SingleProduct = () => {
             setSelectedSize(null);
         }
 
-        // Set the first available color as default if colors exist
         if (singleProduct?.colors?.length > 0) {
             setSelectedColor(singleProduct.colors[0].hexCode);
         } else {
             setSelectedColor(null);
         }
-    }, [singleProduct, outOfStockSizes]);
+    }, [singleProduct?._id, singleProduct?.image, singleProduct?.sizes, singleProduct?.colors, outOfStockSizes]);
 
     // Animation variants
     const fadeInUp = {
@@ -352,9 +352,9 @@ const SingleProduct = () => {
         dispatch(decrementQuantity(product));
     };
 
-    // Handler for size selection
+    // Handler for size selection - simplified
     const handleSizeSelect = (size) => {
-        if (outOfStockSizes.includes(size)) return;
+        console.log("Size selected:", size);
         setSelectedSize(size);
     };
 
@@ -434,12 +434,13 @@ const SingleProduct = () => {
         </div>
     );
 
-    // Gallery setup
-    const gallery = singleProduct.gallery || singleProduct.images || [];
+    // Gallery setup - clarified variable names and added logging
+    const galleryImages = singleProduct.gallery || singleProduct.images || [];
+    console.log('Gallery images sources:', galleryImages);
     
     // Include color variant images in gallery if they have imageUrl
     const colorVariantImages = singleProduct.colors?.filter(c => c.imageUrl)?.map(c => c.imageUrl) || [];
-    const allImages = [singleProduct.image, ...gallery, ...colorVariantImages].filter(Boolean);
+    const allImages = [singleProduct.image, ...galleryImages, ...colorVariantImages].filter(Boolean);
     
     // Get delivery information
     const deliveryInfo = getDeliveryInfo();
@@ -447,7 +448,9 @@ const SingleProduct = () => {
     // Log gallery data for debugging
     console.log('Product gallery field:', singleProduct.gallery);
     console.log('Product images field:', singleProduct.images); 
+    console.log('Main product image:', singleProduct.image);
     console.log('Combined images for display:', allImages);
+    console.log('Currently selected image:', selectedImage);
 
     return (
         <motion.div
@@ -502,12 +505,18 @@ const SingleProduct = () => {
                     <motion.div variants={fadeInUp} className="bg-white rounded-lg shadow-xl overflow-hidden">
                         {/* Main Product Image */}
                         <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-50">
-                            <img
-                                src={getImageUrl(selectedImage || (allImages.length > 0 ? allImages[0] : singleProduct.image))}
-                                alt={singleProduct.name}
-                                className="w-full h-full object-contain"
-                                onClick={() => setPreviewOpen(true)}
-                            />
+                            {selectedImage && (
+                                <img
+                                    src={getImageUrl(selectedImage)}
+                                    alt={singleProduct.name}
+                                    className="w-full h-full object-contain"
+                                    onClick={() => setPreviewOpen(true)}
+                                    onError={(e) => {
+                                        console.error("Image failed to load:", selectedImage);
+                                        e.target.src = "https://via.placeholder.com/600x600?text=Image+Not+Available";
+                                    }}
+                                />
+                            )}
                         </div>
 
                         {/* Thumbnail Gallery */}
@@ -518,12 +527,19 @@ const SingleProduct = () => {
                                     className={`relative aspect-square w-20 flex-shrink-0 cursor-pointer rounded-lg overflow-hidden border-2 ${
                                         selectedImage === image ? 'border-black' : 'border-transparent'
                                     }`}
-                                    onClick={() => setSelectedImage(image)}
+                                    onClick={() => {
+                                        console.log('Thumbnail clicked:', image);
+                                        setSelectedImage(image);
+                                    }}
                                 >
                                     <img
                                         src={getImageUrl(image)}
                                         alt={`${singleProduct.name} - View ${index + 1}`}
                                         className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            console.error("Thumbnail failed to load:", image);
+                                            e.target.src = "https://via.placeholder.com/100x100?text=Thumbnail";
+                                        }}
                                     />
                                 </div>
                             ))}
@@ -652,6 +668,7 @@ const SingleProduct = () => {
                                     sizeType={singleProduct.sizeType}
                                     onSizeSelect={handleSizeSelect}
                                     outOfStock={outOfStockSizes}
+                                    selectedSizeFromParent={selectedSize}
                                 />
                                 </div>
                             )}
@@ -915,7 +932,7 @@ const SingleProduct = () => {
             {/* Image Preview Modal */}
             <ImagePreviewModal 
                 isOpen={previewOpen}
-                imageUrl={selectedImage || singleProduct.image}
+                imageUrl={selectedImage}
                 productName={singleProduct.name}
                 onClose={() => setPreviewOpen(false)}
             />

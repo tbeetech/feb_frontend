@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getImageUrl } from '../utils/imageUrl';
 
 const ImagePreviewModal = ({ isOpen, imageUrl, onClose, productName }) => {
+  console.log("ImagePreviewModal showing:", imageUrl);
+  
   if (!isOpen) return null;
-
+  
   return (
     <AnimatePresence>
       {isOpen && (
@@ -35,10 +37,19 @@ const ImagePreviewModal = ({ isOpen, imageUrl, onClose, productName }) => {
               alt={productName || "Product image"} 
               className="w-full h-full object-contain bg-white"
               onError={(e) => {
+                console.error("Preview image failed to load:", imageUrl);
                 e.target.onerror = null;
-                e.target.src = "https://via.placeholder.com/600x600?text=Image+Not+Available";
+                e.target.src = "https://via.placeholder.com/800x800?text=Image+Not+Available";
               }}
             />
+            
+            {productName && (
+              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 p-4 text-white">
+                <h3 className="text-xl font-medium">
+                  {productName}
+                </h3>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}
