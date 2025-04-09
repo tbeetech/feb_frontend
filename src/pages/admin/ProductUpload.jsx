@@ -167,6 +167,7 @@ const ProductUpload = () => {
         deliveryTimeFrame: deliveryTimeFrame,
         colors: formattedColors,
         gallery: gallery,
+        images: gallery, // Add compatibility for both fields
         // Ensure category is always defined for subcategory validation
         category: formData.category || ''
       };

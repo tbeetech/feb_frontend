@@ -156,6 +156,8 @@ const SingleProduct = () => {
     const navigate = useNavigate();
     const { data, error, isLoading } = useFetchProductByIdQuery(id);
     const singleProduct = data?.product || {};
+    console.log('SingleProduct data from API:', data);
+    console.log('SingleProduct object:', singleProduct);
     const { formatPrice, currencySymbol } = useCurrency();
     
     // Get reviews using RTK Query
@@ -222,7 +224,10 @@ const SingleProduct = () => {
         
         // Set the first available size as default if sizes exist
         if (singleProduct?.sizes?.length > 0) {
-            setSelectedSize(singleProduct.sizes[0]);
+            const firstAvailableSize = singleProduct.sizes.find(size => 
+                !outOfStockSizes.includes(size)
+            );
+            setSelectedSize(firstAvailableSize || singleProduct.sizes[0]);
         } else {
             setSelectedSize(null);
         }
@@ -233,7 +238,7 @@ const SingleProduct = () => {
         } else {
             setSelectedColor(null);
         }
-    }, [singleProduct]);
+    }, [singleProduct, outOfStockSizes]);
 
     // Animation variants
     const fadeInUp = {
@@ -349,6 +354,7 @@ const SingleProduct = () => {
 
     // Handler for size selection
     const handleSizeSelect = (size) => {
+        if (outOfStockSizes.includes(size)) return;
         setSelectedSize(size);
     };
 
@@ -429,13 +435,19 @@ const SingleProduct = () => {
     );
 
     // Gallery setup
-    const gallery = singleProduct.gallery || [];
+    const gallery = singleProduct.gallery || singleProduct.images || [];
+    
     // Include color variant images in gallery if they have imageUrl
     const colorVariantImages = singleProduct.colors?.filter(c => c.imageUrl)?.map(c => c.imageUrl) || [];
     const allImages = [singleProduct.image, ...gallery, ...colorVariantImages].filter(Boolean);
     
     // Get delivery information
     const deliveryInfo = getDeliveryInfo();
+
+    // Log gallery data for debugging
+    console.log('Product gallery field:', singleProduct.gallery);
+    console.log('Product images field:', singleProduct.images); 
+    console.log('Combined images for display:', allImages);
 
     return (
         <motion.div
@@ -491,7 +503,7 @@ const SingleProduct = () => {
                         {/* Main Product Image */}
                         <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-50">
                             <img
-                                src={getImageUrl(selectedImage || (singleProduct.images && singleProduct.images.length > 0 ? singleProduct.images[0] : singleProduct.image))}
+                                src={getImageUrl(selectedImage || (allImages.length > 0 ? allImages[0] : singleProduct.image))}
                                 alt={singleProduct.name}
                                 className="w-full h-full object-contain"
                                 onClick={() => setPreviewOpen(true)}
@@ -500,35 +512,21 @@ const SingleProduct = () => {
 
                         {/* Thumbnail Gallery */}
                         <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
-                            {singleProduct.images && singleProduct.images.length > 0 ? (
-                                singleProduct.images.map((image, index) => (
-                                    <div
-                                        key={index}
-                                        className={`relative aspect-square w-20 flex-shrink-0 cursor-pointer rounded-lg overflow-hidden border-2 ${
-                                            selectedImage === image ? 'border-black' : 'border-transparent'
-                                        }`}
-                                        onClick={() => setSelectedImage(image)}
-                                    >
-                                        <img
-                                            src={getImageUrl(image)}
-                                            alt={`${singleProduct.name} - View ${index + 1}`}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                ))
-                            ) : (
-                                singleProduct.image && (
-                                    <div
-                                        className="relative aspect-square w-20 flex-shrink-0 cursor-pointer rounded-lg overflow-hidden border-2 border-black"
-                                    >
-                                        <img
-                                            src={getImageUrl(singleProduct.image)}
-                                            alt={singleProduct.name}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                )
-                            )}
+                            {allImages.map((image, index) => (
+                                <div
+                                    key={index}
+                                    className={`relative aspect-square w-20 flex-shrink-0 cursor-pointer rounded-lg overflow-hidden border-2 ${
+                                        selectedImage === image ? 'border-black' : 'border-transparent'
+                                    }`}
+                                    onClick={() => setSelectedImage(image)}
+                                >
+                                    <img
+                                        src={getImageUrl(image)}
+                                        alt={`${singleProduct.name} - View ${index + 1}`}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            ))}
                         </div>
                     </motion.div>
                     

@@ -203,8 +203,8 @@ const SizeSelectionWheel = ({ sizes = [], sizeType = 'none', onSizeSelect, outOf
               const isSelected = selectedSize === size;
               
               return (
-            <motion.button
-              key={size}
+                <motion.button
+                  key={size}
                   type="button"
                   whileHover={!isOutOfStock ? { y: -8, scale: 1.08 } : {}}
                   whileTap={!isOutOfStock ? { scale: 0.92 } : {}}
@@ -214,7 +214,7 @@ const SizeSelectionWheel = ({ sizes = [], sizeType = 'none', onSizeSelect, outOf
                     y: isSelected && !isOutOfStock ? -5 : 0,
                     boxShadow: isSelected && !isOutOfStock ? '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' : 'none'
                   }}
-              onClick={() => handleSizeSelect(size)}
+                  onClick={() => handleSizeSelect(size)}
                   onMouseEnter={(e) => handleMouseEnter(size, e)}
                   onMouseLeave={handleMouseLeave}
                   className={`relative flex items-center justify-center h-14 min-w-[50px] px-4 rounded-lg border-2 transition-all duration-300
@@ -223,11 +223,11 @@ const SizeSelectionWheel = ({ sizes = [], sizeType = 'none', onSizeSelect, outOf
                       : isOutOfStock
                         ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed opacity-70'
                         : 'border-gray-300 bg-white text-gray-800 hover:border-gray-800'
-              }`}
+                    }`}
                   disabled={isOutOfStock}
                 >
-                  <span className={`text-sm font-medium`}>
-              {size}
+                  <span className="text-sm font-medium">
+                    {size}
                   </span>
                   
                   {isOutOfStock && (
@@ -253,7 +253,7 @@ const SizeSelectionWheel = ({ sizes = [], sizeType = 'none', onSizeSelect, outOf
                       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                     />
                   )}
-            </motion.button>
+                </motion.button>
               );
             })}
           </div>
@@ -289,7 +289,7 @@ const SizeSelectionWheel = ({ sizes = [], sizeType = 'none', onSizeSelect, outOf
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
                 Size {hoverInfo.size} is out of stock
-      </div>
+              </div>
               <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-black"></div>
             </motion.div>
           )}

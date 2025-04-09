@@ -186,12 +186,6 @@ const EditProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Show alert when button is clicked
-    toast.info('Processing product update...', {
-      position: "top-center",
-      autoClose: 2000,
-    });
-    
     // Validate required fields
     if (!formData.name || !formData.category || !formData.price) {
       toast.error('Please fill in all required fields');
@@ -205,49 +199,25 @@ const EditProduct = () => {
       imageUrl: '' // You can add image upload for each color variant if needed
     }));
 
-    // Ensure deliveryTimeFrame is properly structured with both fields defined
-    const currentDate = new Date().toISOString().split('T')[0];
-    const oneWeekLater = new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0];
-    
-    const deliveryTimeFrame = {
-      startDate: formData.deliveryTimeFrame?.startDate || currentDate,
-      endDate: formData.deliveryTimeFrame?.endDate || oneWeekLater
-    };
-
     try {
-      // Create a structured object for submission to ensure all required fields are present
-      const productDataToSubmit = {
+      // Create the formatted product data
+      const productData = {
         ...formData,
-        deliveryTimeFrame: deliveryTimeFrame,
         colors: formattedColors,
         gallery: gallery,
-        category: formData.category || ''
+        images: gallery, // Add compatibility for both fields
       };
-
-      const result = await updateProduct({
-        id,
-        productData: productDataToSubmit
+      
+      const result = await updateProduct({ 
+        id: id,
+        productData
       }).unwrap();
       
-      toast.success('Product updated successfully!', {
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-      
-      // Add delay before navigation to ensure toast is displayed
-      setTimeout(() => {
-        navigate('/admin/manage-products');
-      }, 1500);
+      toast.success('Product updated successfully');
+      navigate('/admin/products');
     } catch (error) {
-      console.error('Update error:', error);
-      toast.error(error.data?.message || 'Failed to update product', {
-            position: "top-center",
-        autoClose: 5000,
-          });
+      console.error('Failed to update product:', error);
+      toast.error('Failed to update product');
     }
   };
   

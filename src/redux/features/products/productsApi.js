@@ -59,6 +59,34 @@ export const productsApi = createApi({
                 url: `/api/products/${id}`,
                 method: 'GET',
             }),
+            transformResponse: (response) => {
+                console.log('Product API Response:', response);
+                
+                // Ensure both images and gallery fields exist
+                if (response.product) {
+                    const product = response.product;
+                    
+                    // If gallery exists but images doesn't, copy gallery to images
+                    if (product.gallery && !product.images) {
+                        product.images = [...product.gallery];
+                    }
+                    
+                    // If images exists but gallery doesn't, copy images to gallery
+                    if (product.images && !product.gallery) {
+                        product.gallery = [...product.images];
+                    }
+                    
+                    // If neither exists, initialize both as empty arrays
+                    if (!product.gallery && !product.images) {
+                        product.gallery = [];
+                        product.images = [];
+                    }
+                    
+                    console.log('Product with normalized image fields:', product);
+                }
+                
+                return response;
+            },
             providesTags: ['Product'],
         }),
         addProduct: builder.mutation({
