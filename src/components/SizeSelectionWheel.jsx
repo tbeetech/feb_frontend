@@ -1,6 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import PropTypes from 'prop-types';
 
+/**
+ * Size Guide Modal Component
+ * Shows a modal with size chart information
+ */
 const SizeGuideModal = ({ isOpen, onClose, sizeType }) => {
   if (!isOpen) return null;
   
@@ -112,24 +117,57 @@ const SizeGuideModal = ({ isOpen, onClose, sizeType }) => {
   );
 };
 
+/**
+ * SizeSelectionWheel Component
+ * Allows users to select a size from available options
+ */
 const SizeSelectionWheel = ({ sizes = [], sizeType = 'none', onSizeSelect, outOfStock = [], selectedSizeFromParent }) => {
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
-  const [localSelectedSize, setLocalSelectedSize] = useState(selectedSizeFromParent || '');
+  const [localSelectedSize, setLocalSelectedSize] = useState('');
   
-  // Update local state when parent prop changes
+  // Use a ref to track if this is the initial render
+  const initialRenderRef = useRef(true);
+  
+  // Effect to handle synchronization with parent component
   useEffect(() => {
+    // If parent provides a size, use that (this takes precedence)
     if (selectedSizeFromParent) {
+      console.log("Parent provided size:", selectedSizeFromParent);
       setLocalSelectedSize(selectedSizeFromParent);
-    } else if (sizes.length > 0) {
-      // If no size selected yet, find first available size
-      const firstAvailableSize = sizes.find(size => !outOfStock.includes(size));
-      if (firstAvailableSize && onSizeSelect) {
+      return;
+    }
+    
+    // If we have sizes but no selection, find the first available size
+    if (sizes.length > 0 && !localSelectedSize && initialRenderRef.current) {
+      const firstAvailableSize = sizes.find(size => !outOfStock.includes(size)) || sizes[0];
+      
+      console.log("Setting initial size:", firstAvailableSize);
+      setLocalSelectedSize(firstAvailableSize);
+      
+      // Only notify parent if we're initializing the selection
+      if (onSizeSelect) {
         onSizeSelect(firstAvailableSize);
       }
+      
+      // Mark that we've handled the initial render
+      initialRenderRef.current = false;
     }
-  }, [selectedSizeFromParent, sizes, outOfStock, onSizeSelect]);
+  }, [sizes, selectedSizeFromParent, outOfStock, onSizeSelect, localSelectedSize]);
   
-  // Determine the size label based on size type
+  // Reset initial render flag when product/sizes change
+  useEffect(() => {
+    // Reset the ref when sizes change to handle product changes
+    if (sizes.length > 0) {
+      initialRenderRef.current = true;
+    }
+  }, [sizes]);
+  
+  // Don't render if no sizes or size type is none
+  if (!sizes.length || sizeType === 'none') {
+    return null;
+  }
+  
+  // Determine size label based on type
   const getSizeTypeLabel = () => {
     switch(sizeType) {
       case 'roman': return 'Size';
@@ -139,22 +177,32 @@ const SizeSelectionWheel = ({ sizes = [], sizeType = 'none', onSizeSelect, outOf
     }
   };
   
-  // Don't render if no sizes or size type is none
-  if (!sizes.length || sizeType === 'none') {
-    return null;
-  }
-  
-  // Handler for size selection from dropdown
-  const handleSizeChange = (e) => {
-    const size = e.target.value;
-    console.log("Size selected in dropdown:", size);
+  // Handler for size selection
+  const handleSizeSelect = (size) => {
+    console.log("Size button clicked:", size);
+    
+    // Don't update if it's the same size (prevents unnecessary renders)
+    if (size === localSelectedSize) {
+        console.log("Size already selected, skipping update");
+        return;
+    }
+    
+    // Update local state first
     setLocalSelectedSize(size);
-    if (size && onSizeSelect) {
-      onSizeSelect(size);
+    
+    // Notify parent component immediately with delay to ensure visibility
+    if (onSizeSelect) {
+        console.log("Notifying parent of size selection:", size);
+        // Small timeout to ensure the local state updates first
+        // This helps with visual feedback and prevents race conditions
+        setTimeout(() => {
+            onSizeSelect(size);
+            console.log("Parent notification complete for size:", size);
+        }, 50);
     }
   };
   
-  // Filter out sizes that are in stock
+  // Get available sizes (not out of stock)
   const availableSizes = sizes.filter(size => !outOfStock.includes(size));
   
   return (
@@ -162,7 +210,7 @@ const SizeSelectionWheel = ({ sizes = [], sizeType = 'none', onSizeSelect, outOf
       {/* Header with size type label and guide button */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center">
-          <label htmlFor="size-select" className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700">
             {getSizeTypeLabel()}:
           </label>
           <button 
@@ -172,39 +220,45 @@ const SizeSelectionWheel = ({ sizes = [], sizeType = 'none', onSizeSelect, outOf
             Size Guide
           </button>
         </div>
-        {localSelectedSize && (
-          <div className="text-sm bg-gray-100 px-2 py-1 rounded-full">
-            <span className="font-medium">Selected: {localSelectedSize}</span>
-          </div>
-        )}
       </div>
       
-      {/* Simple dropdown selector */}
-      <div className="relative">
-        <select
-          id="size-select"
-          name="size"
-          value={localSelectedSize}
-          onChange={handleSizeChange}
-          className="block w-full mt-1 pl-3 pr-10 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-black sm:text-sm rounded-md appearance-none"
-        >
-          <option value="" disabled>Select a size</option>
-          {sizes.map(size => (
-            <option 
-              key={size}
-              value={size}
-              disabled={outOfStock.includes(size)}
+      {/* Size selection as buttons */}
+      <div className="flex flex-wrap gap-2 mt-3">
+        {sizes.map(size => {
+          const isDisabled = outOfStock.includes(size);
+          const isSelected = localSelectedSize === size;
+          
+          return (
+            <button
+              key={`size-btn-${size}`}
+              type="button"
+              disabled={isDisabled}
+              onClick={() => handleSizeSelect(size)}
+              className={`
+                min-w-[3rem] h-10 px-3 rounded-md text-sm font-medium
+                ${isDisabled ? 
+                  'bg-gray-100 text-gray-400 cursor-not-allowed' : 
+                  isSelected ? 
+                    'bg-black text-white ring-2 ring-black' : 
+                    'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                }
+                transition-all focus:outline-none
+              `}
+              aria-pressed={isSelected}
             >
-              {size}{outOfStock.includes(size) ? ' (Out of Stock)' : ''}
-            </option>
-          ))}
-        </select>
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-          <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-          </svg>
-        </div>
+              {size}
+              {isDisabled && <span className="sr-only"> (Out of Stock)</span>}
+            </button>
+          );
+        })}
       </div>
+      
+      {/* Selected size indicator - only show when we have a valid selection */}
+      {localSelectedSize && (
+        <div className="mt-3 text-sm text-gray-800">
+          <span>Selected size: <strong>{localSelectedSize}</strong></span>
+        </div>
+      )}
       
       {/* Availability status */}
       <p className="text-xs text-gray-500 mt-2">
@@ -226,6 +280,21 @@ const SizeSelectionWheel = ({ sizes = [], sizeType = 'none', onSizeSelect, outOf
       </AnimatePresence>
     </div>
   );
+};
+
+// PropTypes validation
+SizeGuideModal.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
+    sizeType: PropTypes.string
+};
+
+SizeSelectionWheel.propTypes = {
+    sizes: PropTypes.array,
+    sizeType: PropTypes.string,
+    onSizeSelect: PropTypes.func,
+    outOfStock: PropTypes.array,
+    selectedSizeFromParent: PropTypes.string
 };
 
 export default SizeSelectionWheel; 

@@ -11,74 +11,56 @@ import ImagePreviewModal from '../../../components/ImagePreviewModal';
 import SizeSelectionWheel from '../../../components/SizeSelectionWheel';
 import ColorPalette from '../../../components/ColorPalette';
 import { toast } from 'react-hot-toast';
-import ImageSlider from '../../../components/ImageSlider';
 import ReviewForm from '../reviews/ReviewForm';
-import axios from 'axios';
 import { useCurrency } from '../../../components/CurrencySwitcher';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import LazyImage from '../../../components/Image';
 import { getImageUrl } from '../../../utils/imageUrl';
 
-// Add this recommendation engine
+/**
+ * Custom hook for product recommendations
+ */
 const useRecommendationEngine = (currentProductId, productCategory) => {
-    // Recommendation states
+    // State
     const [recommendations, setRecommendations] = useState([]);
     const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(true);
     
-    // Get data for recommendations
+    // Fetch data
     const { data: allProductsData } = useFetchAllProductsQuery({
         limit: 20,
         category: productCategory || '',
     }, { skip: !productCategory });
     
+    // Effect for processing recommendations
     useEffect(() => {
-        // Start loading
-        setIsLoadingRecommendations(true);
-        
-        // Function to get browsing history from localStorage
-        const getBrowsingHistory = () => {
-            try {
-                const history = localStorage.getItem('browsingHistory');
-                return history ? JSON.parse(history) : [];
-            } catch (error) {
-                console.error('Error parsing browsing history:', error);
-                return [];
-            }
-        };
-        
-        // Function to update browsing history
-        const updateBrowsingHistory = (productId) => {
-            try {
-                const history = getBrowsingHistory();
-                // Add current product to history if not already there
-                if (!history.includes(productId)) {
-                    // Keep only last 20 items
-                    const updatedHistory = [productId, ...history].slice(0, 20);
-                    localStorage.setItem('browsingHistory', JSON.stringify(updatedHistory));
-                } else {
-                    // Move current product to the top
-                    const filteredHistory = history.filter(id => id !== productId);
-                    const updatedHistory = [productId, ...filteredHistory];
-                    localStorage.setItem('browsingHistory', JSON.stringify(updatedHistory));
-                }
-            } catch (error) {
-                console.error('Error updating browsing history:', error);
-            }
-        };
-        
-        // Update browsing history with current product
-        if (currentProductId) {
-            updateBrowsingHistory(currentProductId);
+        if (!currentProductId || !allProductsData?.products) {
+            return;
         }
         
-        // Generate recommendations if we have products data
-        if (allProductsData?.products) {
-            const allProducts = allProductsData.products;
-            const history = getBrowsingHistory();
+        setIsLoadingRecommendations(true);
+        
+        try {
+            // Get browsing history
+            const history = (() => {
+                try {
+                    const stored = localStorage.getItem('browsingHistory');
+                    return stored ? JSON.parse(stored) : [];
+                } catch (e) {
+                    console.error('Error reading browsing history:', e);
+                    return [];
+                }
+            })();
             
-            // Filter out current product
-            const availableProducts = allProducts.filter(product => 
-                product._id !== currentProductId
+            // Update browsing history
+            const updatedHistory = [
+                currentProductId,
+                ...history.filter(id => id !== currentProductId)
+            ].slice(0, 20);
+            
+            localStorage.setItem('browsingHistory', JSON.stringify(updatedHistory));
+            
+            // Filter and score products
+            const availableProducts = allProductsData.products.filter(
+                product => product._id !== currentProductId
             );
             
             if (availableProducts.length === 0) {
@@ -87,62 +69,45 @@ const useRecommendationEngine = (currentProductId, productCategory) => {
                 return;
             }
             
-            // Create personalized recommendations:
-            // 1. Products from same category as recently viewed items
-            // 2. Products with similar price range
-            // 3. Fallback to random products from the same category
-            
-            // Get the categories of recently viewed products
-            const recentlyViewedProducts = availableProducts.filter(
-                product => history.includes(product._id)
+            // Get current product details for comparison
+            const currentProduct = allProductsData.products.find(
+                p => p._id === currentProductId
             );
             
-            // Get current product's price for price-based recommendations
-            const currentProduct = allProducts.find(p => p._id === currentProductId);
-            const currentPrice = currentProduct?.price || 0;
+            if (!currentProduct) {
+                setRecommendations(availableProducts.slice(0, 8));
+                setIsLoadingRecommendations(false);
+                return;
+            }
             
-            // Price range: 75% to 150% of current product price
-            const minPrice = currentPrice * 0.75;
-            const maxPrice = currentPrice * 1.5;
+            // Price range for recommendations
+            const minPrice = currentProduct.price * 0.75;
+            const maxPrice = currentProduct.price * 1.5;
             
-            // Score products based on multiple factors
+            // Score and sort products
             const scoredProducts = availableProducts.map(product => {
                 let score = 0;
                 
-                // Same category as current product
-                if (product.category === productCategory) {
-                    score += 5;
-                }
-                
-                // Within similar price range
-                if (product.price >= minPrice && product.price <= maxPrice) {
-                    score += 3;
-                }
-                
-                // Has been viewed recently
-                if (history.includes(product._id)) {
-                    score += 1;
-                }
-                
-                // Same brand as current product
-                if (product.brand === currentProduct?.brand) {
-                    score += 3;
-                }
-                
-                // New products get a boost
-                if (product.isNew) {
-                    score += 2;
-                }
+                // Scoring criteria
+                if (product.category === productCategory) score += 5;
+                if (product.price >= minPrice && product.price <= maxPrice) score += 3;
+                if (history.includes(product._id)) score += 1;
+                if (product.brand === currentProduct.brand) score += 3;
+                if (product.isNew) score += 2;
                 
                 return { ...product, score };
             });
             
-            // Sort by score and take top 8
             const sortedRecommendations = scoredProducts
                 .sort((a, b) => b.score - a.score)
                 .slice(0, 8);
             
             setRecommendations(sortedRecommendations);
+        } catch (e) {
+            console.error('Error generating recommendations:', e);
+            // Fallback to empty recommendations
+            setRecommendations([]);
+        } finally {
             setIsLoadingRecommendations(false);
         }
     }, [currentProductId, productCategory, allProductsData]);
@@ -154,11 +119,21 @@ const SingleProduct = () => {
     const { id } = useParams();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { formatPrice, currencySymbol } = useCurrency();
+    
+    // Fetch product data
     const { data, error, isLoading } = useFetchProductByIdQuery(id);
     const singleProduct = data?.product || {};
+    
+    // Log product data for debugging
     console.log('SingleProduct data from API:', data);
     console.log('SingleProduct object:', singleProduct);
-    const { formatPrice, currencySymbol } = useCurrency();
+
+    // Initialize image and gallery variables
+    // Move this BEFORE any useEffect hooks that reference it
+    const galleryImages = singleProduct?.gallery || singleProduct?.images || [];
+    const colorVariantImages = singleProduct?.colors?.filter(c => c.imageUrl)?.map(c => c.imageUrl) || [];
+    const allImages = [singleProduct?.image, ...galleryImages, ...colorVariantImages].filter(Boolean);
     
     // Get reviews using RTK Query
     const { data: reviewsData, isLoading: isLoadingReviews } = useGetProductReviewsQuery(id);
@@ -169,14 +144,14 @@ const SingleProduct = () => {
     // Add ref for product recommendation slider
     const recommendationSliderRef = useRef(null);
     
-    // Get similar products (for now just use a subset of the same data since we don't have a dedicated API)
+    // Get similar products
     const { data: allProductsData } = useFetchAllProductsQuery({
         limit: 10,
         category: singleProduct?.category || '',
     }, { skip: !singleProduct?.category });
     
     // Filter out the current product
-    const similarProducts = allProductsData?.products.filter(product => 
+    const similarProducts = allProductsData?.products?.filter(product => 
         product._id !== id
     ) || [];
     
@@ -216,29 +191,80 @@ const SingleProduct = () => {
     const [selectedSize, setSelectedSize] = useState(null);
     const [selectedColor, setSelectedColor] = useState(null);
     
+    // Image slider state
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    // Update selectedImage when currentImageIndex changes OR when allImages changes
+    useEffect(() => {
+        console.log("Image gallery effect running - currentImageIndex:", currentImageIndex);
+        console.log("Image gallery effect running - allImages:", allImages);
+        
+        if (allImages && allImages.length > 0) {
+            // First, ensure index is within bounds
+            const safeIndex = Math.min(currentImageIndex, allImages.length - 1);
+            if (safeIndex !== currentImageIndex) {
+                console.log("Fixing out of bounds index:", currentImageIndex, "->", safeIndex);
+                setCurrentImageIndex(safeIndex);
+            }
+            
+            // Set the selected image directly from the array
+            const newSelectedImage = allImages[safeIndex];
+            console.log("Setting selected image to:", newSelectedImage);
+            setSelectedImage(newSelectedImage);
+        }
+    }, [currentImageIndex, allImages]);
+
+    // Image navigation handlers
+    const goToNextImage = () => {
+        console.log("Going to next image from index:", currentImageIndex);
+        if (!allImages || allImages.length === 0) return;
+        
+        const nextIndex = currentImageIndex === allImages.length - 1 ? 0 : currentImageIndex + 1;
+        console.log("Next image index:", nextIndex);
+        setCurrentImageIndex(nextIndex);
+    };
+
+    const goToPrevImage = () => {
+        console.log("Going to previous image from index:", currentImageIndex);
+        if (!allImages || allImages.length === 0) return;
+        
+        const prevIndex = currentImageIndex === 0 ? allImages.length - 1 : currentImageIndex - 1;
+        console.log("Previous image index:", prevIndex);
+        setCurrentImageIndex(prevIndex);
+    };
+
+    // Set initial image only when it changes
+    useEffect(() => {
+        if (singleProduct?.image && (!selectedImage || allImages.length === 1)) {
+            console.log("Setting initial image from product:", singleProduct.image);
+            setSelectedImage(singleProduct.image);
+            setCurrentImageIndex(0); // Reset to first image when product changes
+        }
+    }, [singleProduct?._id, singleProduct?.image, selectedImage, allImages]);
+
     // Set initial selected image, size, and color when product loads
     useEffect(() => {
-        if (singleProduct?.image) {
-            console.log("Setting initial image:", singleProduct.image);
-            setSelectedImage(singleProduct.image);
+        // Skip if product hasn't loaded or is invalid
+        if (!singleProduct || !singleProduct._id) {
+            return;
         }
         
-        // Reset selections when product changes
+        console.log("Product changed, initializing selections:", singleProduct._id);
+        
+        // Reset selections when product changes - but only if there are new values to set
         if (singleProduct?.sizes?.length > 0) {
             const firstAvailableSize = singleProduct.sizes.find(size => 
                 !outOfStockSizes.includes(size)
             );
+            console.log("Setting initial size on product change:", firstAvailableSize || singleProduct.sizes[0]);
             setSelectedSize(firstAvailableSize || singleProduct.sizes[0]);
-        } else {
-            setSelectedSize(null);
         }
 
         if (singleProduct?.colors?.length > 0) {
+            console.log("Setting initial color:", singleProduct.colors[0].hexCode);
             setSelectedColor(singleProduct.colors[0].hexCode);
-        } else {
-            setSelectedColor(null);
         }
-    }, [singleProduct?._id, singleProduct?.image, singleProduct?.sizes, singleProduct?.colors, outOfStockSizes]);
+    }, [singleProduct?._id]); // Only run when product ID changes
 
     // Animation variants
     const fadeInUp = {
@@ -300,31 +326,39 @@ const SingleProduct = () => {
 
     // Handlers
     const handleAddToCart = (product) => {
-        if (!selectedSize && product.sizes?.length > 0) {
+        console.log("Adding to cart with size:", selectedSize);
+        
+        // Verify we have a size selected if product has sizes
+        if (product.sizes?.length > 0 && !selectedSize) {
             toast.error('Please select a size');
             return;
         }
 
-        if (!selectedColor && product.colors?.length > 0) {
+        // Verify we have a color selected if product has colors
+        if (product.colors?.length > 0 && !selectedColor) {
             toast.error('Please select a color');
             return;
         }
 
+        // Create the product object with the selected options
         const productToAdd = {
-                ...product,
-            selectedSize,
-            selectedColor,
-                quantity: 1
-            };
+            ...product,
+            selectedSize: selectedSize,
+            selectedColor: selectedColor,
+            quantity: 1
+        };
 
+        console.log("Product being added to cart:", productToAdd);
+        
+        // Add to cart and show confirmation
         dispatch(addToCart(productToAdd));
-        // Toast is now handled by the cart slice
+        toast.success('Added to cart successfully');
     };
 
     const handlePreOrder = (product) => {
         const productWithSize = {
             ...product,
-            selectedSize: selectedSize,
+            selectedSize,
             quantity: 1
         };
         dispatch(addToCart(productWithSize));
@@ -338,11 +372,10 @@ const SingleProduct = () => {
     };
 
     const handleIncrement = (product) => {
-        // Only allow increment if we haven't reached stock limit
         if (!hasReachedStockLimit) {
             const productWithSize = {
                 ...product,
-                selectedSize: selectedSize
+                selectedSize
             };
             dispatch(addToCart(productWithSize));
         }
@@ -354,8 +387,24 @@ const SingleProduct = () => {
 
     // Handler for size selection - simplified
     const handleSizeSelect = (size) => {
-        console.log("Size selected:", size);
+        console.log("Size selected in SingleProduct:", size);
+        
+        // Guard against invalid sizes
+        if (!size || typeof size !== 'string') {
+            console.error("Invalid size selected:", size);
+            return;
+        }
+        
+        // Force update the selectedSize state
         setSelectedSize(size);
+        
+        // Show visual confirmation with longer duration
+        toast.success(`Size ${size} selected`, {
+            id: 'size-selection-toast',
+            duration: 2000
+        });
+        
+        console.log("Selected size after update:", size);
     };
 
     const handleColorSelect = (color) => {
@@ -369,15 +418,10 @@ const SingleProduct = () => {
 
     const handleReviewSubmitted = async (updatedReviews) => {
         try {
-            console.log('Handling review submission with:', updatedReviews);
-            
-            // Update the product rating in the UI
             if (updatedReviews.length > 0) {
                 const totalRating = updatedReviews.reduce((acc, review) => acc + review.rating, 0);
                 const averageRating = totalRating / updatedReviews.length;
                 
-                console.log('Updating product rating to:', averageRating);
-                // Update the product rating in the backend
                 await updateProductRating({ id, rating: averageRating }).unwrap();
             }
         } catch (error) {
@@ -434,23 +478,16 @@ const SingleProduct = () => {
         </div>
     );
 
-    // Gallery setup - clarified variable names and added logging
-    const galleryImages = singleProduct.gallery || singleProduct.images || [];
+    // Debug logging for image data
     console.log('Gallery images sources:', galleryImages);
-    
-    // Include color variant images in gallery if they have imageUrl
-    const colorVariantImages = singleProduct.colors?.filter(c => c.imageUrl)?.map(c => c.imageUrl) || [];
-    const allImages = [singleProduct.image, ...galleryImages, ...colorVariantImages].filter(Boolean);
-    
-    // Get delivery information
-    const deliveryInfo = getDeliveryInfo();
-
-    // Log gallery data for debugging
-    console.log('Product gallery field:', singleProduct.gallery);
-    console.log('Product images field:', singleProduct.images); 
-    console.log('Main product image:', singleProduct.image);
+    console.log('Product gallery field:', singleProduct?.gallery);
+    console.log('Product images field:', singleProduct?.images); 
+    console.log('Main product image:', singleProduct?.image);
     console.log('Combined images for display:', allImages);
     console.log('Currently selected image:', selectedImage);
+
+    // Get delivery information
+    const deliveryInfo = getDeliveryInfo();
 
     return (
         <motion.div
@@ -503,47 +540,67 @@ const SingleProduct = () => {
                 <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
                     {/* Image gallery in left column */}
                     <motion.div variants={fadeInUp} className="bg-white rounded-lg shadow-xl overflow-hidden">
-                        {/* Main Product Image */}
+                        {/* Main Product Image with slider */}
                         <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-50">
                             {selectedImage && (
-                                <img
-                                    src={getImageUrl(selectedImage)}
-                                    alt={singleProduct.name}
-                                    className="w-full h-full object-contain"
-                                    onClick={() => setPreviewOpen(true)}
-                                    onError={(e) => {
-                                        console.error("Image failed to load:", selectedImage);
-                                        e.target.src = "https://via.placeholder.com/600x600?text=Image+Not+Available";
-                                    }}
-                                />
+                                <>
+                                    <img
+                                        src={getImageUrl(selectedImage)}
+                                        alt={singleProduct.name}
+                                        className="w-full h-full object-contain transition-opacity duration-300"
+                                        onClick={() => setPreviewOpen(true)}
+                                        onError={(e) => {
+                                            console.error("Image failed to load:", selectedImage);
+                                            e.target.src = "https://via.placeholder.com/600x600?text=Image+Not+Available";
+                                        }}
+                                    />
+                                    
+                                    {/* Navigation arrows for image slider */}
+                                    {allImages.length > 1 && (
+                                        <>
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    goToPrevImage();
+                                                }}
+                                                className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-md hover:bg-white transition-colors"
+                                                aria-label="Previous image"
+                                            >
+                                                <FaChevronLeft className="w-4 h-4 text-gray-800" />
+                                            </button>
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    goToNextImage();
+                                                }}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-md hover:bg-white transition-colors"
+                                                aria-label="Next image"
+                                            >
+                                                <FaChevronRight className="w-4 h-4 text-gray-800" />
+                                            </button>
+                                        </>
+                                    )}
+                                </>
                             )}
                         </div>
 
-                        {/* Thumbnail Gallery */}
-                        <div className="flex gap-2 mt-4 overflow-x-auto pb-2 justify-center">
-                            {allImages.map((image, index) => (
-                                <div
-                                    key={index}
-                                    className={`relative aspect-square w-20 flex-shrink-0 cursor-pointer rounded-lg overflow-hidden border-2 ${
-                                        selectedImage === image ? 'border-black' : 'border-transparent'
-                                    }`}
-                                    onClick={() => {
-                                        console.log('Thumbnail clicked:', image);
-                                        setSelectedImage(image);
-                                    }}
-                                >
-                                    <img
-                                        src={getImageUrl(image)}
-                                        alt={`${singleProduct.name} - View ${index + 1}`}
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                            console.error("Thumbnail failed to load:", image);
-                                            e.target.src = "https://via.placeholder.com/100x100?text=Thumbnail";
-                                        }}
+                        {/* Slider indicators */}
+                        {allImages.length > 1 && (
+                            <div className="flex justify-center mt-4 gap-2">
+                                {allImages.map((_, index) => (
+                                    <button
+                                        key={`indicator-${index}`}
+                                        onClick={() => setCurrentImageIndex(index)}
+                                        className={`w-2 h-2 rounded-full transition-colors ${
+                                            currentImageIndex === index 
+                                                ? 'bg-black' 
+                                                : 'bg-gray-300 hover:bg-gray-400'
+                                        }`}
+                                        aria-label={`Go to image ${index + 1}`}
                                     />
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                     </motion.div>
                     
                     {/* Product details in right column */}
@@ -663,13 +720,21 @@ const SingleProduct = () => {
                             {singleProduct?.sizeType !== 'none' && singleProduct?.sizes?.length > 0 && (
                                 <div className="mb-8">
                                     <h3 className="text-lg font-bold mb-4 text-gray-800">Select Size</h3>
-                                <SizeSelectionWheel 
-                                    sizes={singleProduct.sizes} 
-                                    sizeType={singleProduct.sizeType}
-                                    onSizeSelect={handleSizeSelect}
-                                    outOfStock={outOfStockSizes}
-                                    selectedSizeFromParent={selectedSize}
-                                />
+                                    <SizeSelectionWheel 
+                                        sizes={singleProduct.sizes} 
+                                        sizeType={singleProduct.sizeType}
+                                        onSizeSelect={handleSizeSelect}
+                                        outOfStock={outOfStockSizes}
+                                        selectedSizeFromParent={selectedSize}
+                                        key={`size-wheel-${singleProduct._id}`}
+                                    />
+                                    
+                                    {/* Display selected size for extra confirmation */}
+                                    {selectedSize && (
+                                        <div className="mt-4 inline-flex items-center px-3 py-1 bg-gray-100 rounded-full text-sm font-medium text-gray-800">
+                                            Selected size: {selectedSize}
+                                        </div>
+                                    )}
                                 </div>
                             )}
                             
@@ -926,6 +991,64 @@ const SingleProduct = () => {
                             <FaChevronRight className="w-5 h-5" />
                         </button>
                     </div>
+                </motion.section>
+            )}
+            
+            {/* Recommendations Section - Based on browsing history */}
+            {!isLoading && !error && recommendations.length > 0 && (
+                <motion.section
+                    className="py-12 mt-8 border-t border-gray-200"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.8 }}
+                >
+                    <h2 className="text-2xl md:text-3xl font-bold mb-2">Recommended For You</h2>
+                    <p className="text-gray-600 mb-8">Based on your browsing history</p>
+                    
+                    {isLoadingRecommendations ? (
+                        <div className="flex justify-center py-10">
+                            <motion.div 
+                                className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full"
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            />
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {recommendations.slice(0, 4).map((product) => (
+                                <motion.div 
+                                    key={product._id}
+                                    className="group"
+                                    whileHover={{ y: -5 }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    <Link to={`/product/${product._id}`} className="block">
+                                        <div className="relative overflow-hidden rounded-lg bg-gray-100" style={{ aspectRatio: '1/1' }}>
+                                            <img 
+                                                src={getImageUrl(product.image)} 
+                                                alt={product.name} 
+                                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                onError={(e) => {
+                                                    e.target.src = "https://via.placeholder.com/400x400?text=Product+Image";
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="mt-3">
+                                            <h3 className="text-sm font-medium text-gray-900 truncate">{product.name}</h3>
+                                            <p className="mt-1 text-sm text-primary">
+                                                {currencySymbol}{formatPrice(product.price)}
+                                                {product.oldPrice && (
+                                                    <span className="ml-2 line-through text-gray-500">
+                                                        {currencySymbol}{formatPrice(product.oldPrice)}
+                                                    </span>
+                                                )}
+                                            </p>
+                                        </div>
+                                    </Link>
+                                </motion.div>
+                            ))}
+                        </div>
+                    )}
                 </motion.section>
             )}
             
