@@ -261,8 +261,15 @@ const SingleProduct = () => {
         }
 
         if (singleProduct?.colors?.length > 0) {
-            console.log("Setting initial color:", singleProduct.colors[0].hexCode);
-            setSelectedColor(singleProduct.colors[0].hexCode);
+            // Get a proper color name for the initial color
+            const initialColor = singleProduct.colors[0];
+            const colorName = initialColor.name || getColorName(initialColor.hexCode) || 'Default Color';
+            
+            console.log("Setting initial color:", colorName, "from", initialColor);
+            setSelectedColor({
+                name: colorName,
+                hexCode: initialColor.hexCode || initialColor.name
+            });
         }
     }, [singleProduct?._id]); // Only run when product ID changes
 
@@ -324,6 +331,35 @@ const SingleProduct = () => {
         }
     };
 
+    // Helper function to convert hex code to color name
+    const getColorName = (hexCode) => {
+        if (!hexCode) return '';
+        
+        // If it's already a name (not starting with #), return it
+        if (!hexCode.startsWith('#')) return hexCode;
+        
+        // Find the color in our predefined colors array
+        const foundColor = PRODUCT_COLORS.find(c => 
+            c.value.toLowerCase() === hexCode.toLowerCase()
+        );
+        
+        // Return the standard color name or a simple default
+        if (foundColor) {
+            return foundColor.name;
+        } else {
+            // Simple matching for basic colors if exact match not found
+            if (hexCode.toLowerCase() === '#ff0000') return 'Red';
+            if (hexCode.toLowerCase() === '#00ff00') return 'Green';
+            if (hexCode.toLowerCase() === '#0000ff') return 'Blue';
+            if (hexCode.toLowerCase() === '#ffff00') return 'Yellow';
+            if (hexCode.toLowerCase() === '#000000') return 'Black';
+            if (hexCode.toLowerCase() === '#ffffff') return 'White';
+            
+            // Return a friendly generic name rather than the hex code
+            return 'Custom Color';
+        }
+    };
+
     // Handlers
     const handleAddToCart = (product) => {
         console.log("Adding to cart with size:", selectedSize);
@@ -340,13 +376,18 @@ const SingleProduct = () => {
             return;
         }
 
+        // Get the color value to store - prefer the name for display
+        const colorToStore = typeof selectedColor === 'object' 
+            ? selectedColor.name  // Store the name for better display in cart
+            : selectedColor;
+
         // Create the product object with the selected options
         const productToAdd = {
-                ...product,
+            ...product,
             selectedSize: selectedSize,
-            selectedColor: selectedColor,
-                quantity: 1
-            };
+            selectedColor: colorToStore,
+            quantity: 1
+        };
 
         console.log("Product being added to cart:", productToAdd);
         
@@ -356,9 +397,15 @@ const SingleProduct = () => {
     };
 
     const handlePreOrder = (product) => {
+        // Get the color value to store - prefer the name for display
+        const colorToStore = typeof selectedColor === 'object' 
+            ? selectedColor.name  // Store the name for better display in cart
+            : selectedColor;
+            
         const productWithSize = {
             ...product,
             selectedSize,
+            selectedColor: colorToStore,
             quantity: 1
         };
         dispatch(addToCart(productWithSize));
@@ -373,9 +420,15 @@ const SingleProduct = () => {
 
     const handleIncrement = (product) => {
         if (!hasReachedStockLimit) {
+            // Get the color value to store - prefer the name for display
+            const colorToStore = typeof selectedColor === 'object' 
+                ? selectedColor.name  // Store the name for better display in cart
+                : selectedColor;
+                
             const productWithSize = {
                 ...product,
-                selectedSize
+                selectedSize,
+                selectedColor: colorToStore
             };
             dispatch(addToCart(productWithSize));
         }
@@ -407,15 +460,19 @@ const SingleProduct = () => {
         console.log("Selected size after update:", size);
     };
 
-    const handleColorSelect = (color) => {
-        console.log("Selected color:", color);
+    const handleColorSelect = (color, hexCode) => {
+        console.log("Selected color:", color, "Hex:", hexCode);
         
         // Find the color object - prioritize color name match
         const colorObject = singleProduct.colors?.find(c => c.name === color) || 
-                            singleProduct.colors?.find(c => c.hexCode === color);
-                            
-        // Store the color name, not the hex code if possible
-        setSelectedColor(colorObject?.name || color);
+                          singleProduct.colors?.find(c => c.hexCode === hexCode);
+        
+        // Always store the color name for display, but keep hex code for internal use
+        const colorName = colorObject?.name || getColorName(hexCode) || color;
+        setSelectedColor({
+            name: colorName,
+            hexCode: colorObject?.hexCode || hexCode
+        });
         
         // Update the selected image if there's a color-specific image
         if (colorObject?.imageUrl) {
@@ -423,7 +480,7 @@ const SingleProduct = () => {
         }
         
         // Show confirmation toast with the color name
-        toast.success(`Color ${colorObject?.name || color} selected`, {
+        toast.success(`Color ${colorName} selected`, {
             id: 'color-selection-toast',
             duration: 2000
         });
@@ -752,46 +809,53 @@ const SingleProduct = () => {
                             )}
                             
                             {/* Color Selection */}
-                            {singleProduct.colors?.length > 0 && (
+                            {Array.isArray(singleProduct.colors) && singleProduct.colors.length > 0 && (
                                 <div>
                                     <h3 className="text-lg font-bold mb-4 text-gray-800">Select Color</h3>
                                     <div className="flex flex-col space-y-4">
                                         <div className="flex flex-wrap gap-3">
-                                            {singleProduct.colors.map((colorObj, index) => {
-                                                // Check if selected by name first, then by hex code if needed
-                                                const isSelected = selectedColor === colorObj.name || selectedColor === colorObj.hexCode;
-                                                
-                                                // Find the standard color name from our constants if not already named
-                                                const standardColorName = colorObj.name || (() => {
-                                                    const foundColor = PRODUCT_COLORS.find(c => 
-                                                        c.value.toLowerCase() === colorObj.hexCode?.toLowerCase()
+                                            {singleProduct.colors
+                                                .filter(c => c !== null && c !== undefined)
+                                                .map((colorObj, index) => {
+                                                    if (!colorObj) return null; // Extra safety check
+                                                    
+                                                    // First determine a proper display name for the color - never show hex codes
+                                                    const displayName = colorObj.name && typeof colorObj.name === 'string' && !colorObj.name.startsWith('#') 
+                                                        ? colorObj.name 
+                                                        : getColorName(colorObj.hexCode) || `Color ${index + 1}`;
+                                                    
+                                                    // Check if this color is selected
+                                                    const isSelected = 
+                                                        (typeof selectedColor === 'object' && selectedColor && (
+                                                            (selectedColor.name && displayName && selectedColor.name === displayName) ||
+                                                            (selectedColor.hexCode && colorObj.hexCode && selectedColor.hexCode === colorObj.hexCode)
+                                                        )) || 
+                                                        (selectedColor && displayName && selectedColor === displayName) ||
+                                                        (selectedColor && colorObj.hexCode && selectedColor === colorObj.hexCode);
+                                                    
+                                                    return (
+                                                        <button
+                                                            key={`color-${index}-${colorObj.hexCode || index}`}
+                                                            type="button"
+                                                            onClick={() => handleColorSelect(displayName, colorObj.hexCode)}
+                                                            className={`
+                                                                flex items-center gap-2 px-3 py-2 rounded-md border
+                                                                ${isSelected ? 
+                                                                    'border-primary bg-primary/5 font-medium' : 
+                                                                    'border-gray-300 hover:border-gray-400'
+                                                                }
+                                                                transition-all
+                                                            `}
+                                                            title={displayName}
+                                                        >
+                                                            <div
+                                                                className={`w-6 h-6 rounded-full ${isSelected ? 'ring-2 ring-primary' : ''}`}
+                                                                style={{ backgroundColor: colorObj.hexCode || '#CCCCCC' }}
+                                                            />
+                                                            <span className="text-sm">{displayName}</span>
+                                                        </button>
                                                     );
-                                                    return foundColor ? foundColor.name : `Color ${index + 1}`;
-                                                })();
-                                                
-                                                return (
-                                                    <button
-                                                        key={`color-${index}-${colorObj.hexCode}`}
-                                                        type="button"
-                                                        onClick={() => handleColorSelect(colorObj.name || standardColorName)}
-                                                        className={`
-                                                            flex items-center gap-2 px-3 py-2 rounded-md border
-                                                            ${isSelected ? 
-                                                                'border-primary bg-primary/5 font-medium' : 
-                                                                'border-gray-300 hover:border-gray-400'
-                                                            }
-                                                            transition-all
-                                                        `}
-                                                        title={standardColorName}
-                                                    >
-                                                        <div
-                                                            className={`w-6 h-6 rounded-full ${isSelected ? 'ring-2 ring-primary' : ''}`}
-                                                            style={{ backgroundColor: colorObj.hexCode }}
-                                                        />
-                                                        <span className="text-sm">{standardColorName}</span>
-                                                    </button>
-                                                );
-                                            })}
+                                                })}
                                         </div>
                                         
                                         {selectedColor && (
@@ -799,26 +863,64 @@ const SingleProduct = () => {
                                                 <span className="text-sm font-medium mr-2">Selected color:</span>
                                                 <div className="flex items-center gap-2">
                                                     {(() => {
-                                                        const colorObj = singleProduct.colors.find(c => 
-                                                            c.name === selectedColor || c.hexCode === selectedColor
-                                                        );
-                                                        return colorObj ? (
-                                                            <>
-                                                                <div
-                                                                    className="w-5 h-5 rounded-full border border-gray-300"
-                                                                    style={{ backgroundColor: colorObj.hexCode }}
-                                                                />
-                                                                <span className="text-sm font-medium">
-                                                                    {colorObj.name || (() => {
-                                                                        // Try to find standard name
-                                                                        const foundColor = PRODUCT_COLORS.find(c => 
-                                                                            c.value.toLowerCase() === colorObj.hexCode?.toLowerCase()
-                                                                        );
-                                                                        return foundColor?.name || "Selected Color";
-                                                                    })()}
-                                                                </span>
-                                                            </>
-                                                        ) : null;
+                                                        try {
+                                                            // Find the color object with null safety
+                                                            const colorObj = singleProduct.colors?.find(c => 
+                                                                c && (
+                                                                    (typeof selectedColor === 'object' && (
+                                                                        c.name === selectedColor.name || 
+                                                                        c.hexCode === selectedColor.hexCode
+                                                                    )) ||
+                                                                    c.name === selectedColor || 
+                                                                    c.hexCode === selectedColor
+                                                                )
+                                                            );
+                                                            
+                                                            // Get the hex code for the color preview with fallback
+                                                            const hexCode = colorObj?.hexCode || 
+                                                                        (typeof selectedColor === 'object' ? selectedColor.hexCode : selectedColor) || 
+                                                                        '#CCCCCC'; // Gray fallback
+                                                            
+                                                            // Get the display name - NEVER use hex codes for display
+                                                            let displayName;
+                                                            if (typeof selectedColor === 'object' && selectedColor.name) {
+                                                                displayName = selectedColor.name;
+                                                            } else if (colorObj?.name && !colorObj.name.startsWith('#')) {
+                                                                displayName = colorObj.name;
+                                                            } else {
+                                                                displayName = getColorName(hexCode) || "Selected Color";
+                                                            }
+                                                            
+                                                            // Ensure we never display a hex code to the user
+                                                            if (displayName && displayName.startsWith && displayName.startsWith('#')) {
+                                                                displayName = getColorName(displayName) || "Selected Color";
+                                                            }
+                                                            
+                                                            return (
+                                                                <>
+                                                                    <div
+                                                                        className="w-5 h-5 rounded-full border border-gray-300"
+                                                                        style={{ backgroundColor: hexCode }}
+                                                                    />
+                                                                    <span className="text-sm font-medium">
+                                                                        {displayName || "Selected Color"}
+                                                                    </span>
+                                                                </>
+                                                            );
+                                                        } catch (err) {
+                                                            console.error("Error displaying selected color:", err);
+                                                            return (
+                                                                <>
+                                                                    <div
+                                                                        className="w-5 h-5 rounded-full border border-gray-300"
+                                                                        style={{ backgroundColor: '#CCCCCC' }}
+                                                                    />
+                                                                    <span className="text-sm font-medium">
+                                                                        Selected Color
+                                                                    </span>
+                                                                </>
+                                                            );
+                                                        }
                                                     })()}
                                                 </div>
                                             </div>
@@ -826,7 +928,7 @@ const SingleProduct = () => {
                                     </div>
                                 </div>
                             )}
-                            </motion.div>
+                        </motion.div>
                         
                         {/* Add to cart / Pre-order section */}
                         <motion.div 
@@ -911,222 +1013,11 @@ const SingleProduct = () => {
                                 </div>
                             )}
                         </motion.div>
-                        
-                        {/* Product specs and details */}
-                        <motion.div 
-                            className="mt-8 text-sm text-gray-600 grid grid-cols-2 gap-4"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.7 }}
-                        >
-                            <div className="flex items-center">
-                                <span className="font-medium text-gray-800 mr-2">SKU:</span>
-                                <span>{singleProduct._id?.substring(0, 8)}</span>
-                            </div>
-                            <div className="flex items-center">
-                                <span className="font-medium text-gray-800 mr-2">Category:</span>
-                                <span className="capitalize">{singleProduct?.category}</span>
-                            </div>
-                            {singleProduct?.subcategory && (
-                                <div className="flex items-center">
-                                    <span className="font-medium text-gray-800 mr-2">Subcategory:</span>
-                                    <span className="capitalize">{singleProduct?.subcategory.replace(/-/g, ' ')}</span>
-                                </div>
-                            )}
-                            {selectedSize && (
-                                <div className="flex items-center">
-                                    <span className="font-medium text-gray-800 mr-2">Selected Size:</span>
-                                    <span>{selectedSize}</span>
-                                </div>
-                            )}
-                            {singleProduct?.tags?.length > 0 && (
-                                <div className="col-span-2 flex items-center flex-wrap">
-                                    <span className="font-medium text-gray-800 mr-2">Tags:</span>
-                                    <div className="flex flex-wrap gap-1">
-                                        {singleProduct.tags.map((tag, index) => (
-                                            <span key={index} className="px-2 py-1 bg-gray-100 rounded-full text-xs">
-                                                {tag}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </motion.div>
                     </motion.div>
                 </div>
-                
-                {/* Product reviews section with animation */}
-                <motion.div 
-                    className="mt-20"
-                    initial={{ opacity: 0, y: 40 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.8, duration: 0.6 }}
-                >
-                    <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">Customer Reviews</h2>
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Review Form */}
-                        <div className="lg:col-span-1">
-                            {user ? (
-                                <ReviewForm
-                                    productId={id}
-                                    onReviewSubmitted={handleReviewSubmitted}
-                                />
-                            ) : (
-                                <div className="bg-white p-6 rounded-lg shadow-sm">
-                                    <h3 className="text-lg font-medium mb-4">Write a Review</h3>
-                                    <p className="text-gray-600 mb-4">
-                                        Please <Link to="/login" className="text-gold hover:underline">login</Link> to submit a review.
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Reviews List */}
-                        <div className="lg:col-span-2">
-                            <ReviewsCard
-                                productReviews={reviewsData || []}
-                                onReviewLike={handleReviewLike}
-                                isLoading={isLoadingReviews}
-                            />
-                        </div>
-                    </div>
-                </motion.div>
             </motion.section>
-            
-            {/* Product Recommendations */}
-            {!isLoading && !error && similarProducts.length > 0 && (
-                <motion.section
-                    className="py-12 mt-12 border-t border-gray-200"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.7 }}
-                >
-                    <h2 className="text-2xl md:text-3xl font-bold mb-8">You May Also Like</h2>
-                    
-                    <div className="relative">
-                        {/* Left Navigation Button */}
-                        <button 
-                            onClick={() => scrollRecommendations(-1)}
-                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full shadow-lg p-2 hover:bg-gray-50 transition-colors"
-                            aria-label="Scroll left"
-                        >
-                            <FaChevronLeft className="w-5 h-5" />
-                        </button>
-                        
-                        {/* Scrollable Products Container */}
-                        <div 
-                            ref={recommendationSliderRef}
-                            className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide scroll-smooth"
-                            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                        >
-                            {similarProducts.map((product) => (
-                                <div 
-                                    key={product._id}
-                                    className="flex-shrink-0 w-60 group"
-                                >
-                                    <Link to={`/product/${product._id}`} className="block">
-                                        <div className="relative overflow-hidden rounded-lg bg-gray-100" style={{ aspectRatio: '1/1' }}>
-                                            <img 
-                                                src={product.image} 
-                                                alt={product.name} 
-                                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                            />
-                                        </div>
-                                        <div className="mt-3">
-                                            <h3 className="text-sm font-medium text-gray-900">{product.name}</h3>
-                                            <p className="mt-1 text-sm text-primary">
-                                                {currencySymbol}{formatPrice(product.price)}
-                                                {product.oldPrice && (
-                                                    <span className="ml-2 line-through text-gray-500">
-                                                        {currencySymbol}{formatPrice(product.oldPrice)}
-                                                    </span>
-                                                )}
-                                            </p>
-                                        </div>
-                                    </Link>
-                                </div>
-                            ))}
-                        </div>
-                        
-                        {/* Right Navigation Button */}
-                        <button 
-                            onClick={() => scrollRecommendations(1)}
-                            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full shadow-lg p-2 hover:bg-gray-50 transition-colors"
-                            aria-label="Scroll right"
-                        >
-                            <FaChevronRight className="w-5 h-5" />
-                        </button>
-                    </div>
-                </motion.section>
-            )}
-            
-            {/* Recommendations Section - Based on browsing history */}
-            {!isLoading && !error && recommendations.length > 0 && (
-                <motion.section
-                    className="py-12 mt-8 border-t border-gray-200"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.8 }}
-                >
-                    <h2 className="text-2xl md:text-3xl font-bold mb-2">Recommended For You</h2>
-                    <p className="text-gray-600 mb-8">Based on your browsing history</p>
-                    
-                    {isLoadingRecommendations ? (
-                        <div className="flex justify-center py-10">
-                            <motion.div 
-                                className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full"
-                                animate={{ rotate: 360 }}
-                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                            />
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {recommendations.slice(0, 4).map((product) => (
-                                <motion.div 
-                                    key={product._id}
-                                    className="group"
-                                    whileHover={{ y: -5 }}
-                                    transition={{ duration: 0.2 }}
-                                >
-                                    <Link to={`/product/${product._id}`} className="block">
-                                        <div className="relative overflow-hidden rounded-lg bg-gray-100" style={{ aspectRatio: '1/1' }}>
-                                            <img 
-                                                src={getImageUrl(product.image)} 
-                                                alt={product.name} 
-                                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                                onError={(e) => {
-                                                    e.target.src = "https://via.placeholder.com/400x400?text=Product+Image";
-                                                }}
-                                            />
-                                        </div>
-                                        <div className="mt-3">
-                                            <h3 className="text-sm font-medium text-gray-900 truncate">{product.name}</h3>
-                                            <p className="mt-1 text-sm text-primary">
-                                                {currencySymbol}{formatPrice(product.price)}
-                                                {product.oldPrice && (
-                                                    <span className="ml-2 line-through text-gray-500">
-                                                        {currencySymbol}{formatPrice(product.oldPrice)}
-                                                    </span>
-                                                )}
-                                            </p>
-                                        </div>
-                                    </Link>
-                                </motion.div>
-                            ))}
-                        </div>
-                    )}
-                </motion.section>
-            )}
-            
-            {/* Image Preview Modal */}
-            <ImagePreviewModal 
-                isOpen={previewOpen}
-                imageUrl={selectedImage}
-                productName={singleProduct.name}
-                onClose={() => setPreviewOpen(false)}
-            />
         </motion.div>
-    )
-}
+    );
+};
 
-export default SingleProduct
+export default SingleProduct;
