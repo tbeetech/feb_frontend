@@ -9,12 +9,12 @@ import ReviewsCard from '../reviews/ReviewsCard';
 import { motion } from 'framer-motion';
 import ImagePreviewModal from '../../../components/ImagePreviewModal';
 import SizeSelectionWheel from '../../../components/SizeSelectionWheel';
-import ColorPalette from '../../../components/ColorPalette';
 import { toast } from 'react-hot-toast';
 import ReviewForm from '../reviews/ReviewForm';
 import { useCurrency } from '../../../components/CurrencySwitcher';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { getImageUrl } from '../../../utils/imageUrl';
+import { PRODUCT_COLORS } from '../../../constants/colorConstants';
 
 /**
  * Custom hook for product recommendations
@@ -46,8 +46,8 @@ const useRecommendationEngine = (currentProductId, productCategory) => {
                     return stored ? JSON.parse(stored) : [];
                 } catch (e) {
                     console.error('Error reading browsing history:', e);
-                    return [];
-                }
+                return [];
+            }
             })();
             
             // Update browsing history
@@ -56,7 +56,7 @@ const useRecommendationEngine = (currentProductId, productCategory) => {
                 ...history.filter(id => id !== currentProductId)
             ].slice(0, 20);
             
-            localStorage.setItem('browsingHistory', JSON.stringify(updatedHistory));
+                    localStorage.setItem('browsingHistory', JSON.stringify(updatedHistory));
             
             // Filter and score products
             const availableProducts = allProductsData.products.filter(
@@ -342,11 +342,11 @@ const SingleProduct = () => {
 
         // Create the product object with the selected options
         const productToAdd = {
-            ...product,
+                ...product,
             selectedSize: selectedSize,
             selectedColor: selectedColor,
-            quantity: 1
-        };
+                quantity: 1
+            };
 
         console.log("Product being added to cart:", productToAdd);
         
@@ -408,12 +408,25 @@ const SingleProduct = () => {
     };
 
     const handleColorSelect = (color) => {
-        setSelectedColor(color);
+        console.log("Selected color:", color);
+        
+        // Find the color object - prioritize color name match
+        const colorObject = singleProduct.colors?.find(c => c.name === color) || 
+                            singleProduct.colors?.find(c => c.hexCode === color);
+                            
+        // Store the color name, not the hex code if possible
+        setSelectedColor(colorObject?.name || color);
+        
         // Update the selected image if there's a color-specific image
-        const colorVariant = singleProduct.colors?.find(c => c.hexCode === color);
-        if (colorVariant?.imageUrl) {
-            setSelectedImage(colorVariant.imageUrl);
+        if (colorObject?.imageUrl) {
+            setSelectedImage(colorObject.imageUrl);
         }
+        
+        // Show confirmation toast with the color name
+        toast.success(`Color ${colorObject?.name || color} selected`, {
+            id: 'color-selection-toast',
+            duration: 2000
+        });
     };
 
     const handleReviewSubmitted = async (updatedReviews) => {
@@ -485,7 +498,7 @@ const SingleProduct = () => {
     console.log('Main product image:', singleProduct?.image);
     console.log('Combined images for display:', allImages);
     console.log('Currently selected image:', selectedImage);
-
+    
     // Get delivery information
     const deliveryInfo = getDeliveryInfo();
 
@@ -544,11 +557,11 @@ const SingleProduct = () => {
                         <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-50">
                             {selectedImage && (
                                 <>
-                                    <img
+                            <img
                                         src={getImageUrl(selectedImage)}
-                                        alt={singleProduct.name}
+                                alt={singleProduct.name}
                                         className="w-full h-full object-contain transition-opacity duration-300"
-                                        onClick={() => setPreviewOpen(true)}
+                                onClick={() => setPreviewOpen(true)}
                                         onError={(e) => {
                                             console.error("Image failed to load:", selectedImage);
                                             e.target.src = "https://via.placeholder.com/600x600?text=Image+Not+Available";
@@ -599,7 +612,7 @@ const SingleProduct = () => {
                                         aria-label={`Go to image ${index + 1}`}
                                     />
                                 ))}
-                            </div>
+                                    </div>
                         )}
                     </motion.div>
                     
@@ -720,11 +733,11 @@ const SingleProduct = () => {
                             {singleProduct?.sizeType !== 'none' && singleProduct?.sizes?.length > 0 && (
                                 <div className="mb-8">
                                     <h3 className="text-lg font-bold mb-4 text-gray-800">Select Size</h3>
-                                    <SizeSelectionWheel 
-                                        sizes={singleProduct.sizes} 
-                                        sizeType={singleProduct.sizeType}
-                                        onSizeSelect={handleSizeSelect}
-                                        outOfStock={outOfStockSizes}
+                                <SizeSelectionWheel 
+                                    sizes={singleProduct.sizes} 
+                                    sizeType={singleProduct.sizeType}
+                                    onSizeSelect={handleSizeSelect}
+                                    outOfStock={outOfStockSizes}
                                         selectedSizeFromParent={selectedSize}
                                         key={`size-wheel-${singleProduct._id}`}
                                     />
@@ -743,18 +756,71 @@ const SingleProduct = () => {
                                 <div>
                                     <h3 className="text-lg font-bold mb-4 text-gray-800">Select Color</h3>
                                     <div className="flex flex-col space-y-4">
-                                        <ColorPalette
-                                            colors={singleProduct.colors.map(c => c.hexCode)}
-                                            onColorSelect={handleColorSelect}
-                                            selectedColor={selectedColor}
-                                        />
+                                        <div className="flex flex-wrap gap-3">
+                                            {singleProduct.colors.map((colorObj, index) => {
+                                                // Check if selected by name first, then by hex code if needed
+                                                const isSelected = selectedColor === colorObj.name || selectedColor === colorObj.hexCode;
+                                                
+                                                // Find the standard color name from our constants if not already named
+                                                const standardColorName = colorObj.name || (() => {
+                                                    const foundColor = PRODUCT_COLORS.find(c => 
+                                                        c.value.toLowerCase() === colorObj.hexCode?.toLowerCase()
+                                                    );
+                                                    return foundColor ? foundColor.name : `Color ${index + 1}`;
+                                                })();
+                                                
+                                                return (
+                                                    <button
+                                                        key={`color-${index}-${colorObj.hexCode}`}
+                                                        type="button"
+                                                        onClick={() => handleColorSelect(colorObj.name || standardColorName)}
+                                                        className={`
+                                                            flex items-center gap-2 px-3 py-2 rounded-md border
+                                                            ${isSelected ? 
+                                                                'border-primary bg-primary/5 font-medium' : 
+                                                                'border-gray-300 hover:border-gray-400'
+                                                            }
+                                                            transition-all
+                                                        `}
+                                                        title={standardColorName}
+                                                    >
+                                                        <div
+                                                            className={`w-6 h-6 rounded-full ${isSelected ? 'ring-2 ring-primary' : ''}`}
+                                                            style={{ backgroundColor: colorObj.hexCode }}
+                                                        />
+                                                        <span className="text-sm">{standardColorName}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                        
                                         {selectedColor && (
                                             <div className="mt-2 flex items-center">
-                                                <span className="text-sm font-medium mr-2">Selected:</span>
-                                                <div
-                                                    className="w-6 h-6 rounded-md border border-gray-300"
-                                                    style={{ backgroundColor: selectedColor }}
-                                                />
+                                                <span className="text-sm font-medium mr-2">Selected color:</span>
+                                                <div className="flex items-center gap-2">
+                                                    {(() => {
+                                                        const colorObj = singleProduct.colors.find(c => 
+                                                            c.name === selectedColor || c.hexCode === selectedColor
+                                                        );
+                                                        return colorObj ? (
+                                                            <>
+                                                                <div
+                                                                    className="w-5 h-5 rounded-full border border-gray-300"
+                                                                    style={{ backgroundColor: colorObj.hexCode }}
+                                                                />
+                                                                <span className="text-sm font-medium">
+                                                                    {colorObj.name || (() => {
+                                                                        // Try to find standard name
+                                                                        const foundColor = PRODUCT_COLORS.find(c => 
+                                                                            c.value.toLowerCase() === colorObj.hexCode?.toLowerCase()
+                                                                        );
+                                                                        return foundColor?.name || "Selected Color";
+                                                                    })()}
+                                                                </span>
+                                                            </>
+                                                        ) : null;
+                                                    })()}
+                                                </div>
                                             </div>
                                         )}
                                     </div>

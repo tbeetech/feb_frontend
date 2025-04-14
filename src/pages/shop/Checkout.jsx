@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { FaWhatsapp, FaEye, FaEyeSlash, FaDownload, FaExternalLinkAlt, FaArrowLeft } from 'react-icons/fa';
+import { FaWhatsapp, FaEye, FaEyeSlash, FaDownload, FaExternalLinkAlt, FaArrowLeft, FaEnvelope } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
@@ -7,6 +7,7 @@ import 'jspdf-autotable';
 import { saveAs } from 'file-saver';
 import { formatReceiptNumber } from '../../utils/formatters';
 import { toast } from 'react-hot-toast';
+import axios from 'axios';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -198,10 +199,23 @@ const Checkout = () => {
       // Ensure cartItems exists and is an array
       if (validatedCartItems.length > 0) {
         validatedCartItems.forEach(item => {
+          // Get color name instead of just the hex code
+          let colorDisplay = 'N/A';
+          if (item.selectedColor) {
+            // Check if it's a color name or a hex code
+            if (item.selectedColor.startsWith('#')) {
+              // It's a hex code, try to find the color name from the product
+              colorDisplay = 'Custom'; // Default if we can't find the name
+            } else {
+              // It's already a name
+              colorDisplay = item.selectedColor;
+            }
+          }
+          
           const itemData = [
             (item.name || 'Unnamed Product').substring(0, 30), // Limit name length to avoid overflow
             item.selectedSize || 'N/A',
-            item.selectedColor ? 'Custom' : 'N/A', // Since we can't display colors in PDF text directly
+            colorDisplay, // Use the color name instead of just "Custom"
             item.quantity || 1,
             (item.price || 0).toLocaleString(),
             ((item.price || 0) * (item.quantity || 1)).toLocaleString()
@@ -331,7 +345,7 @@ const Checkout = () => {
           setShowSuccessMessage(false);
         }, 5000);
         
-        return true;
+        return { doc, pdfBlob };
       } catch (downloadError) {
         console.warn('Primary download methods failed:', downloadError);
         
@@ -346,7 +360,7 @@ const Checkout = () => {
           setErrorDetails('Direct download failed. Please use the "Direct Download" button below.');
           setShowErrorMessage(true);
           
-          return false;
+          return { doc, pdfBlob };
         } catch (fallbackError) {
           throw new Error('All download methods failed. Please try again later.');
         }
@@ -377,7 +391,7 @@ const Checkout = () => {
         console.error('Even fallback PDF creation failed:', fallbackError);
       }
       
-      return false;
+      return { doc, pdfBlob };
     }
   };
   
@@ -385,6 +399,235 @@ const Checkout = () => {
     // We're using a wrapper function so we can add more error handling if needed
     if (isGenerating) return; // Prevent multiple clicks
     generateAndDownloadPDF();
+  };
+
+  // Add a new function to send email receipts
+  const sendEmailReceipt = async (pdfBlob, billingDetails, receiptNumber) => {
+    try {
+      // Create a FormData object to send the PDF attachment
+      const formData = new FormData();
+      
+      // Ensure pdfBlob is a proper Blob object with correct mime type
+      let fileBlob;
+      if (pdfBlob instanceof Blob) {
+        // If it's already a Blob, just ensure it has the correct type
+        fileBlob = new Blob([pdfBlob], { type: 'application/pdf' });
+      } else if (typeof pdfBlob === 'string') {
+        // If it's a base64 string or similar, convert to Blob
+        const byteCharacters = atob(pdfBlob.split(',')[1] || pdfBlob);
+        const byteArrays = [];
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteArrays.push(byteCharacters.charCodeAt(i));
+        }
+        fileBlob = new Blob([new Uint8Array(byteArrays)], { type: 'application/pdf' });
+      } else {
+        // If it's something else, try to convert it
+        console.log("Received non-Blob PDF data, attempting conversion:", typeof pdfBlob);
+        
+        // Get the PDF as an ArrayBuffer if using jsPDF
+        const pdfData = doc.output('arraybuffer');
+        fileBlob = new Blob([pdfData], { type: 'application/pdf' });
+      }
+      
+      // Now append the properly-formatted Blob to the form
+      formData.append('receipt', fileBlob, `receipt-${receiptNumber}.pdf`);
+      
+      // Add order information to the form data
+      formData.append('receiptNumber', receiptNumber);
+      formData.append('customerName', `${billingDetails.firstName} ${billingDetails.lastName}`);
+      formData.append('customerEmail', billingDetails.email);
+      formData.append('orderDate', orderDate);
+      formData.append('deliveryDate', deliveryDate);
+      formData.append('totalAmount', cartTotal.toFixed(2));
+      
+      // Add admin emails to notify
+      formData.append('adminEmails', JSON.stringify(['tobirammar@gmail.com', 'febluxurycloset@gmail.com']));
+
+      // Set a timeout to prevent hanging on slow requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      
+      try {
+        // Send the email request with timeout
+        const response = await axios.post('/api/send-receipt-email', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId); // Clear the timeout if successful
+        
+        console.log('Email receipt sent:', response.data);
+        toast.success('Order confirmation has been sent to your email');
+        return true;
+      } catch (apiError) {
+        clearTimeout(timeoutId); // Clear the timeout
+        
+        console.error('API email attempt failed:', apiError);
+        
+        // Get a more detailed error message
+        let errorMessage = 'Could not send email receipt';
+        
+        if (apiError.response && apiError.response.data && apiError.response.data.message) {
+          // Use server error message if available
+          errorMessage = `Email error: ${apiError.response.data.message}`;
+        } else if (apiError.message) {
+          errorMessage = `Email error: ${apiError.message}`;
+        }
+        
+        // Show toast error to user
+        toast.error(errorMessage);
+        
+        // Attempted server-side email failed, implement a client-side fallback
+        console.log('Attempting fallback email service...');
+        
+        // Create a download link for the PDF
+        if (pdfUrl) {
+          // Create a temporary download link element
+          const downloadLink = document.createElement('a');
+          downloadLink.href = pdfUrl;
+          downloadLink.download = `FEB_Luxury_Receipt_${receiptNumber}.pdf`;
+          downloadLink.style.display = 'none';
+          document.body.appendChild(downloadLink);
+          
+          // Show a more informative message to the user
+          toast.success('Order complete! Please download your receipt using the button below.');
+          
+          // Create a client-side email template that includes order details
+          if (billingDetails && billingDetails.email) {
+            // Create an email template with order details
+            const emailSubject = `Your FEB Luxury Order #${receiptNumber}`;
+            const emailBody = `
+Dear ${billingDetails.firstName} ${billingDetails.lastName},
+
+Thank you for your order with FEB Luxury!
+
+Order Details:
+- Receipt Number: ${receiptNumber}
+- Order Date: ${orderDate}
+- Expected Delivery: ${deliveryDate}
+- Total Amount: ₦${cartTotal.toLocaleString()}
+
+Please save your receipt for your records.
+
+If you have any questions, please contact us at:
+WhatsApp: +2348033825144
+Email: febluxurycloset@gmail.com
+
+Thank you for shopping with us!
+
+FEB Luxury Team
+            `;
+            
+            // Create a mailto link as a fallback
+            const subject = encodeURIComponent(emailSubject);
+            const body = encodeURIComponent(emailBody);
+            
+            // Create a mailto link that can be used to manually send an email
+            const fallbackMailLink = document.createElement('a');
+            fallbackMailLink.href = `mailto:${billingDetails.email}?subject=${subject}&body=${body}`;
+            fallbackMailLink.textContent = 'Send Receipt Details via Email';
+            fallbackMailLink.style.display = 'none';
+            
+            document.body.appendChild(fallbackMailLink);
+            console.log('Email fallback link created');
+            
+            // Alert user about alternate options
+            toast.success('You can also contact us on WhatsApp for order confirmation', {
+              duration: 6000
+            });
+            
+            return false;
+          }
+        }
+        return false;
+      }
+    } catch (error) {
+      console.error('All email methods failed:', error);
+      
+      // Final fallback: just create a direct download link for the PDF
+      toast.error('Email delivery failed, but your order is confirmed. Please download your receipt.');
+      
+      if (pdfUrl) {
+        // Create a temporary download link element that's bigger and more visible
+        const downloadSection = document.createElement('div');
+        downloadSection.style.margin = '20px auto';
+        downloadSection.style.textAlign = 'center';
+        
+        const downloadText = document.createElement('p');
+        downloadText.textContent = 'Please download your receipt:';
+        downloadText.style.marginBottom = '10px';
+        
+        const downloadLink = document.createElement('a');
+        downloadLink.href = pdfUrl;
+        downloadLink.download = `FEB_Luxury_Receipt_${receiptNumber}.pdf`;
+        downloadLink.textContent = 'Download Receipt';
+        downloadLink.className = 'bg-black text-white py-2 px-4 rounded hover:bg-gray-800';
+        
+        downloadSection.appendChild(downloadText);
+        downloadSection.appendChild(downloadLink);
+        
+        // Append to the receipt preview section if it exists
+        if (receiptRef.current) {
+          receiptRef.current.appendChild(downloadSection);
+        }
+      }
+      
+      return false;
+    }
+  };
+
+  // Update the checkout flow to send the receipt via email
+  const handleCheckoutComplete = async () => {
+    setIsGenerating(true);
+    
+    try {
+      // First create a new PDF document instance
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      // Generate the PDF content using the existing function (but don't download yet)
+      // We're calling this to fill the 'doc' object with content
+      await generateAndDownloadPDF();
+      
+      // Get a proper Blob from the document for the email attachment
+      // This ensures we have a valid Blob object with the correct MIME type
+      const pdfArrayBuffer = doc.output('arraybuffer');
+      const properPdfBlob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
+      
+      console.log("Created PDF Blob:", properPdfBlob instanceof Blob, properPdfBlob.size, properPdfBlob.type);
+      
+      // Attempt to send the email receipt
+      if (billingDetails && billingDetails.email) {
+        const emailSent = await sendEmailReceipt(properPdfBlob, billingDetails, receiptNumber);
+        if (emailSent) {
+          console.log('Email receipt sent successfully');
+          
+          // Show success messages
+          toast.success('Order confirmed! Receipt has been emailed to you.');
+          setShowSuccessMessage(true);
+        } else {
+          console.warn('Email delivery failed, but continuing checkout');
+          toast.error('Order confirmed, but email delivery failed. You can still download the receipt.');
+        }
+      } else {
+        console.warn('No billing email available, skipping email receipt');
+        toast.error('Please provide an email address to receive your receipt.');
+      }
+      
+      setIsGenerating(false);
+      return { doc, pdfBlob: properPdfBlob };
+    } catch (error) {
+      console.error('Error in checkout process:', error);
+      setIsGenerating(false);
+      showErrorMessageWithTimeout(error.message || 'Failed to complete checkout');
+      toast.error('There was a problem processing your order. Please try again.');
+      return null;
+    }
   };
 
   return (
@@ -540,12 +783,21 @@ const Checkout = () => {
             
             <div className="mt-6 flex flex-col sm:flex-row gap-4">
               <button 
-                onClick={downloadReceiptPDF} 
+                onClick={handleCheckoutComplete}
                 disabled={isGenerating}
-                className="flex items-center justify-center w-full sm:w-auto px-6 py-3 bg-black text-white rounded-md hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="w-full py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors flex items-center justify-center space-x-2"
               >
-                <FaDownload className="mr-2" />
-                {isGenerating ? 'Generating PDF...' : 'Download Receipt'}
+                {isGenerating ? (
+                  <>
+                    <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2"></span>
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <FaEnvelope className="mr-2" />
+                    <span>Complete Order & Send Receipt</span>
+                  </>
+                )}
               </button>
             
             {pdfUrl && (

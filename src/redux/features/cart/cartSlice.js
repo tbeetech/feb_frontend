@@ -64,13 +64,44 @@ const cartSlice = createSlice({
             }
         },
         removeFromCart: (state, action) => {
-            state.products = state.products.filter(
-                (product) => 
-                    !(product._id === action.payload._id && 
-                      product.selectedSize === action.payload.selectedSize &&
-                      product.selectedColor === action.payload.selectedColor)
+            // Log the item being removed and the current state
+            console.log('Cart State Before Removal:', {
+                productsCount: state.products.length,
+                firstProduct: state.products[0],
+                actionPayload: action.payload
+            });
+            
+            // Add more robust checks for the item to remove
+            const itemToRemove = action.payload;
+            if (!itemToRemove || !itemToRemove._id) {
+                console.error('Invalid item to remove from cart:', itemToRemove);
+                return;
+            }
+            
+            // Check if the item actually exists in the cart before attempting removal
+            const existingItemIndex = state.products.findIndex(product => 
+                product._id === itemToRemove._id && 
+                product.selectedSize === itemToRemove.selectedSize &&
+                product.selectedColor === itemToRemove.selectedColor
             );
             
+            if (existingItemIndex === -1) {
+                console.warn('Item not found in cart, cannot remove:', itemToRemove);
+                return;
+            }
+            
+            // Create a new array without the item to ensure state updates properly
+            state.products = state.products.filter(
+                (product, index) => index !== existingItemIndex
+            );
+            
+            // Log the updated state
+            console.log('Cart State After Removal:', {
+                productsCount: state.products.length,
+                removedItem: itemToRemove
+            });
+            
+            // Recalculate total
             state.total = state.products.reduce(
                 (total, item) => total + item.price * item.quantity,
                 0

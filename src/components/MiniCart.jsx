@@ -8,6 +8,7 @@ import { useCurrency } from './CurrencySwitcher';
 import { toast } from 'react-hot-toast';
 import { addToCart } from '../redux/features/cart/cartSlice';
 import LazyImage from './Image';
+import { PRODUCT_COLORS } from '../constants/colorConstants';
 
 const MiniCart = () => {
   const [showMiniCart, setShowMiniCart] = useState(false);
@@ -30,10 +31,86 @@ const MiniCart = () => {
   // Count total items
   const itemCount = products.reduce((total, item) => total + item.quantity, 0);
 
+  // Helper function to convert hex color to color name
+  const getColorName = (colorInput) => {
+    if (!colorInput) return '';
+    
+    // If it's already a name (not starting with #), return it
+    if (!colorInput.startsWith('#')) return colorInput;
+    
+    // Find the color in the PRODUCT_COLORS constant
+    const foundColor = PRODUCT_COLORS.find(c => c.value.toLowerCase() === colorInput.toLowerCase());
+    
+    // Return the standard color name or a simple default
+    if (foundColor) {
+      return foundColor.name;
+    } else {
+      // Simple logic to match basic colors when exact match not found
+      if (colorInput.toLowerCase() === '#ff0000') return 'Red';
+      if (colorInput.toLowerCase() === '#00ff00') return 'Green';
+      if (colorInput.toLowerCase() === '#0000ff') return 'Blue';
+      if (colorInput.toLowerCase() === '#ffff00') return 'Yellow';
+      if (colorInput.toLowerCase() === '#000000') return 'Black';
+      if (colorInput.toLowerCase() === '#ffffff') return 'White';
+      
+      // Default to a generic name
+      return 'Custom Color';
+    }
+  };
+
   // Handle cart item operations
   const handleRemoveItem = (product) => {
-    dispatch(removeFromCart(product));
-    toast.success('Product removed from cart');
+    // Debug the product being removed
+    console.log('Attempting to remove item from cart:', {
+      id: product._id,
+      name: product.name,
+      size: product.selectedSize,
+      color: product.selectedColor,
+      fullProduct: product
+    });
+    
+    // Verify all required fields are present
+    if (!product || !product._id) {
+      console.error("Cannot remove product - invalid product data:", product);
+      toast.error('Could not remove item from cart - invalid product data');
+      return;
+    }
+    
+    // Log the current cart state before removal
+    console.log('Current cart before removal:', products);
+    
+    try {
+      // Dispatch the action to remove this specific product
+      dispatch(removeFromCart(product));
+      
+      // Verify removal by checking the updated products from useSelector in the next cycle
+      setTimeout(() => {
+        // Get current products from Redux
+        const currentProducts = products;
+        const stillExists = currentProducts.some(
+          item => item._id === product._id && 
+                 item.selectedSize === product.selectedSize && 
+                 item.selectedColor === product.selectedColor
+        );
+        
+        if (stillExists) {
+          console.warn('Product may not have been removed from cart:', product);
+          // Try removing again with a direct dispatch that includes exact matching parameters
+          dispatch(removeFromCart({
+            _id: product._id,
+            selectedSize: product.selectedSize,
+            selectedColor: product.selectedColor
+          }));
+        } else {
+          console.log('Product successfully removed from cart');
+        }
+      }, 100);
+      
+      toast.success('Item removed from cart');
+    } catch (error) {
+      console.error("Error removing product from cart:", error);
+      toast.error('Failed to remove item from cart');
+    }
   };
 
   const handleIncrementItem = (product) => {
@@ -228,10 +305,15 @@ const MiniCart = () => {
                         {product.selectedColor && (
                           <div className="flex items-center mt-1">
                             <span className="text-xs text-gray-500 mr-1">Color:</span>
-                            <div 
-                              className="w-3 h-3 rounded-full border border-gray-300" 
-                              style={{ backgroundColor: product.selectedColor }}
-                            ></div>
+                            <div className="flex items-center">
+                              <div 
+                                className="w-3 h-3 rounded-full border border-gray-300 mr-1" 
+                                style={{ backgroundColor: product.selectedColor }}
+                              ></div>
+                              <span className="text-xs text-gray-500">
+                                {getColorName(product.selectedColor)}
+                              </span>
+                            </div>
                           </div>
                         )}
                       </div>

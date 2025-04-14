@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import CurrencySwitcher from './CurrencySwitcher';
-import { FaChevronDown, FaFacebookF, FaTwitter, FaInstagram, FaPinterestP, FaYoutube } from 'react-icons/fa';
+import { FaChevronDown, FaInstagram, FaWhatsapp, FaTelegram } from 'react-icons/fa';
 
 const RegionSwitcher = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -136,26 +136,33 @@ const Footer = () => {
           <div>
             <h4 className="text-sm font-medium uppercase mb-4">Connect with us</h4>
             <div className="flex space-x-4 mt-4">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" 
-                className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-black transition-colors retro-shadow">
-                <FaFacebookF size={18} />
-              </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" 
-                className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-black transition-colors retro-shadow">
-                <FaTwitter size={18} />
-              </a>
-              <a href="https://instagram.com/f.e.b_luxurycloset" target="_blank" rel="noopener noreferrer" 
-                className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-black transition-colors retro-shadow">
-                <FaInstagram size={18} />
-              </a>
-              <a href="https://pinterest.com" target="_blank" rel="noopener noreferrer" 
-                className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-black transition-colors retro-shadow">
-                <FaPinterestP size={18} />
-              </a>
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" 
-                className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-black transition-colors retro-shadow">
-                <FaYoutube size={18} />
-              </a>
+                <a 
+                    href="https://www.instagram.com/f.e.b_luxuryclosetbackup1" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-black transition-colors retro-shadow"
+                    aria-label="Instagram"
+                >
+                    <FaInstagram size={18} />
+                </a>
+                <a 
+                    href="https://wa.me/message/NP6XO5SXNXG5G1" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-black transition-colors retro-shadow"
+                    aria-label="WhatsApp"
+                >
+                    <FaWhatsapp size={18} />
+                </a>
+                <a 
+                    href="https://t.me/febluxury" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-black transition-colors retro-shadow"
+                    aria-label="Telegram"
+                >
+                    <FaTelegram size={18} />
+                </a>
             </div>
           </div>
         </div>
