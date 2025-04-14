@@ -12,7 +12,7 @@ import { PRODUCT_COLORS } from '../constants/colorConstants';
 
 const MiniCart = () => {
   const [showMiniCart, setShowMiniCart] = useState(false);
-  const { products, deliveryFee } = useSelector((state) => state.cart);
+  const { products, deliveryFee, grandTotal, total } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { formatPrice, currencySymbol } = useCurrency();
@@ -22,14 +22,14 @@ const MiniCart = () => {
   const [lastAddedProduct, setLastAddedProduct] = useState(null);
   const [prevProductsLength, setPrevProductsLength] = useState(0);
 
-  // Calculate total price
-  const subtotal = products.reduce(
+  // Calculate total price - we'll use this for subtotal only
+  const subtotal = total || products.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
   
-  // Calculate total with delivery fee
-  const totalPrice = subtotal + deliveryFee;
+  // Use grandTotal from Redux state instead of calculating it locally
+  const totalPrice = grandTotal;
 
   // Count total items
   const itemCount = products.reduce((total, item) => total + item.quantity, 0);
