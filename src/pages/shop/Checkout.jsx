@@ -22,17 +22,15 @@ const Checkout = () => {
   
   // Get cart state from Redux store
   const cartState = useSelector((state) => state.cart);
+  const { deliveryFee } = cartState;
   
   // Calculate cart total price if not provided in location state
   const calculateCartTotal = (items) => {
     return items.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
   };
   
-  // Fixed delivery fee
-  const deliveryFee = 8800;
-  
   // Get cart items from location state or Redux store (with priority to location state)
-  const cartItems = location.state?.cartItems || useSelector((state) => state.cart.products);
+  const cartItems = location.state?.cartItems || cartState.products;
   
   // Calculate the total from the cart items in real-time
   const cartItemsTotal = useMemo(() => {
@@ -134,6 +132,10 @@ const Checkout = () => {
   const generateAndDownloadPDF = async () => {
     setIsGenerating(true);
     
+    // Initialize these variables in the parent scope so they're accessible in all code paths
+    let doc;
+    let pdfBlob;
+    
     try {
       // Check if jsPDF is available
       if (typeof jsPDF !== 'function') {
@@ -151,7 +153,7 @@ const Checkout = () => {
       ) : [];
       
       // Create a new jsPDF instance
-      const doc = new jsPDF({
+      doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
@@ -203,7 +205,7 @@ const Checkout = () => {
       // Calculate row totals and grand total
       let subtotalValue = 0;
 
-      validatedCartItems.forEach(item => {
+        validatedCartItems.forEach(item => {
         const quantity = item.quantity || 1;
         const price = typeof item.price === 'number' ? item.price : parseFloat(item.price || 0);
         const totalPrice = price * quantity;
@@ -229,12 +231,12 @@ const Checkout = () => {
         '-',
         '-',
         '1',
-        '8,800',
-        '8,800'
+        deliveryFee.toLocaleString(),
+        deliveryFee.toLocaleString()
       ]);
       
       // Grand total
-      const grandTotal = subtotalValue + 8800;
+      const grandTotal = subtotalValue + deliveryFee;
       
       doc.autoTable({
         head: [tableColumn],
@@ -249,7 +251,7 @@ const Checkout = () => {
           4: { halign: 'right' },
           5: { halign: 'right' }
         },
-        didDrawPage: (data) => {
+        didDrawPage: () => {
           // Add page numbers
           const pageCount = doc.internal.getNumberOfPages();
           for (let i = 1; i <= pageCount; i++) {
@@ -270,7 +272,7 @@ const Checkout = () => {
       
       // Display delivery fee
       doc.text('Delivery Fee:', 140, tableEndY + 8);
-      doc.text('₦8,800', 195, tableEndY + 8, { align: 'right' });
+      doc.text(`₦${deliveryFee.toLocaleString()}`, 195, tableEndY + 8, { align: 'right' });
       
       // Display Grand Total (bold)
       doc.setFontStyle('bold');
@@ -293,7 +295,6 @@ const Checkout = () => {
       doc.text('Visit us at: www.febluxury.com', 105, tableEndY + 60, { align: 'center' });
       
       // Generate a blob for the PDF
-      let pdfBlob;
       try {
         pdfBlob = doc.output('blob');
       } catch (blobError) {
@@ -340,6 +341,7 @@ const Checkout = () => {
           
           return { doc, pdfBlob };
         } catch (fallbackError) {
+          console.warn('Fallback download also failed:', fallbackError.message);
           throw new Error('All download methods failed. Please try again later.');
         }
       }
@@ -350,26 +352,30 @@ const Checkout = () => {
       
       // Still try to create the blob URL as a fallback
       try {
-        const doc = new jsPDF({
+        const fallbackDoc = new jsPDF({
           orientation: 'portrait',
           unit: 'mm',
           format: 'a4'
         });
-        doc.text('F.E.B LUXURY RECEIPT', 105, 20, { align: 'center' });
-        doc.text(`Total Amount: ₦${cartTotal.toLocaleString()}`, 105, 40, { align: 'center' });
-        doc.text(`Receipt No: ${receiptNumber}`, 105, 50, { align: 'center' });
-        doc.text(`Date: ${currentDate}`, 105, 60, { align: 'center' });
-        doc.text('Visit us at: www.febluxury.com', 105, 70, { align: 'center' });
+        fallbackDoc.text('F.E.B LUXURY RECEIPT', 105, 20, { align: 'center' });
+        fallbackDoc.text(`Total Amount: ₦${cartTotal.toLocaleString()}`, 105, 40, { align: 'center' });
+        fallbackDoc.text(`Receipt No: ${receiptNumber}`, 105, 50, { align: 'center' });
+        fallbackDoc.text(`Date: ${currentDate}`, 105, 60, { align: 'center' });
+        fallbackDoc.text('Visit us at: www.febluxury.com', 105, 70, { align: 'center' });
         
-        const simplePdfBlob = doc.output('blob');
+        const simplePdfBlob = fallbackDoc.output('blob');
         const objectUrl = URL.createObjectURL(simplePdfBlob);
         setPdfUrl(objectUrl);
         console.log('Created fallback PDF URL after error');
+        
+        // Return the fallback document and blob
+        return { doc: fallbackDoc, pdfBlob: simplePdfBlob };
       } catch (fallbackError) {
         console.error('Even fallback PDF creation failed:', fallbackError);
       }
       
-      return { doc, pdfBlob };
+      // Return null or an empty object if everything fails
+      return { doc: null, pdfBlob: null };
     }
   };
   
@@ -399,12 +405,8 @@ const Checkout = () => {
         }
         fileBlob = new Blob([new Uint8Array(byteArrays)], { type: 'application/pdf' });
       } else {
-        // If it's something else, try to convert it
-        console.log("Received non-Blob PDF data, attempting conversion:", typeof pdfBlob);
-        
-        // Get the PDF as an ArrayBuffer if using jsPDF
-        const pdfData = doc.output('arraybuffer');
-        fileBlob = new Blob([pdfData], { type: 'application/pdf' });
+        // If we don't have a valid blob, throw an error
+        throw new Error("Invalid PDF data provided for email attachment");
       }
       
       // Now append the properly-formatted Blob to the form
@@ -499,62 +501,10 @@ const Checkout = () => {
         
         // Create a download link for the PDF
         if (pdfUrl) {
-          // Create a temporary download link element
-          const downloadLink = document.createElement('a');
-          downloadLink.href = pdfUrl;
-          downloadLink.download = `FEB_Luxury_Receipt_${receiptNumber}.pdf`;
-          downloadLink.style.display = 'none';
-          document.body.appendChild(downloadLink);
-          
           // Show a more informative message to the user
           toast.success('Order complete! Please download your receipt using the button below.');
-          
-          // Create a client-side email template that includes order details
-          if (billingDetails && billingDetails.email) {
-            // Create an email template with order details
-            const emailSubject = `Your FEB Luxury Order #${receiptNumber}`;
-            const emailBody = `
-Dear ${billingDetails.firstName} ${billingDetails.lastName},
-
-Thank you for your order with FEB Luxury!
-
-Order Details:
-- Receipt Number: ${receiptNumber}
-- Order Date: ${orderDate}
-- Expected Delivery: ${deliveryDate}
-- Total Amount: ₦${cartTotal.toLocaleString()}
-
-Please save your receipt for your records.
-
-To complete your order, please make payment using the details on your receipt
-and contact us via WhatsApp at +2348033825144 to confirm your payment.
-
-Thank you for shopping with us!
-
-FEB Luxury Team
-            `;
-            
-            // Create a mailto link as a fallback
-            const subject = encodeURIComponent(emailSubject);
-            const body = encodeURIComponent(emailBody);
-            
-            // Create a mailto link that can be used to manually send an email
-            const fallbackMailLink = document.createElement('a');
-            fallbackMailLink.href = `mailto:${billingDetails.email}?subject=${subject}&body=${body}`;
-            fallbackMailLink.textContent = 'Send Receipt Details via Email';
-            fallbackMailLink.style.display = 'none';
-            
-            document.body.appendChild(fallbackMailLink);
-            console.log('Email fallback link created');
-            
-            // Alert user about alternate options
-            toast.success('You can also contact us on WhatsApp for order confirmation', {
-              duration: 6000
-            });
-            
-            return false;
-          }
         }
+        
         return false;
       }
     } catch (error) {
@@ -562,31 +512,6 @@ FEB Luxury Team
       
       // Final fallback: just create a direct download link for the PDF
       toast.error('Email delivery failed, but your order is confirmed. Please download your receipt.');
-      
-      if (pdfUrl) {
-        // Create a temporary download link element that's bigger and more visible
-        const downloadSection = document.createElement('div');
-        downloadSection.style.margin = '20px auto';
-        downloadSection.style.textAlign = 'center';
-        
-        const downloadText = document.createElement('p');
-        downloadText.textContent = 'Please download your receipt:';
-        downloadText.style.marginBottom = '10px';
-        
-        const downloadLink = document.createElement('a');
-        downloadLink.href = pdfUrl;
-        downloadLink.download = `FEB_Luxury_Receipt_${receiptNumber}.pdf`;
-        downloadLink.textContent = 'Download Receipt';
-        downloadLink.className = 'bg-black text-white py-2 px-4 rounded hover:bg-gray-800';
-        
-        downloadSection.appendChild(downloadText);
-        downloadSection.appendChild(downloadLink);
-        
-        // Append to the receipt preview section if it exists
-        if (receiptRef.current) {
-          receiptRef.current.appendChild(downloadSection);
-        }
-      }
       
       return false;
     }
@@ -598,7 +523,8 @@ FEB Luxury Team
     
     try {
       // First properly generate the PDF content
-      const { doc, pdfBlob } = await generateAndDownloadPDF();
+      const result = await generateAndDownloadPDF();
+      const { doc, pdfBlob } = result || {};
       
       if (!doc || !pdfBlob) {
         throw new Error('Failed to generate receipt PDF');
@@ -608,10 +534,15 @@ FEB Luxury Team
       
       // Get a fresh proper Blob from the document for the email attachment
       // This ensures we have a valid Blob object with the correct MIME type and content
-      const pdfArrayBuffer = doc.output('arraybuffer');
-      const properPdfBlob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
-      
-      console.log("Created PDF Blob for email:", properPdfBlob instanceof Blob, properPdfBlob.size, properPdfBlob.type);
+      let properPdfBlob;
+      try {
+        const pdfArrayBuffer = doc.output('arraybuffer');
+        properPdfBlob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
+        console.log("Created PDF Blob for email:", properPdfBlob instanceof Blob, properPdfBlob.size, properPdfBlob.type);
+      } catch (blobError) {
+        console.warn("Could not create a fresh blob, using the original:", blobError);
+        properPdfBlob = pdfBlob;
+      }
       
       // Attempt to send the email receipt
       if (billingDetails && billingDetails.email) {
@@ -744,7 +675,7 @@ FEB Luxury Team
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-gray-600">Shipping</span>
-                <span className="font-medium">₦0.00</span>
+                <span className="font-medium">₦{deliveryFee.toLocaleString()}</span>
               </div>
               <div className="flex justify-between py-3 border-t mt-2 text-lg font-bold">
                 <span>Total</span>

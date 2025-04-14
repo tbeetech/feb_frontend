@@ -7,10 +7,11 @@ const BillingDetails = ({ isPreOrder = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useSelector((state) => state.auth);
+  const { products, total, deliveryFee, grandTotal } = useSelector((state) => state.cart);
   
   // Get cart items and total from location state or Redux store
   const cartItems = location.state?.cartItems || useSelector((state) => state.cart.products) || [];
-  const total = location.state?.total || useSelector((state) => 
+  const totalFromRedux = location.state?.total || useSelector((state) => 
     state.cart.products.reduce((sum, item) => sum + (item.price * item.quantity), 0)
   ) || 0;
 
@@ -18,8 +19,9 @@ const BillingDetails = ({ isPreOrder = false }) => {
   useEffect(() => {
     console.log("BillingDetails - Location state:", location.state);
     console.log("BillingDetails - Cart items:", cartItems);
-    console.log("BillingDetails - Total:", total);
-  }, [location.state, cartItems, total]);
+    console.log("BillingDetails - Total:", totalFromRedux);
+    console.log('Cart state in BillingDetails:', { products, total, deliveryFee, grandTotal });
+  }, [location.state, cartItems, totalFromRedux, products, total, deliveryFee, grandTotal]);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -179,7 +181,7 @@ const BillingDetails = ({ isPreOrder = false }) => {
           state: { 
             billingDetails: formData,
             cartItems: cartItems,
-            total: total,
+            total: totalFromRedux,
             isPreOrder,
             orderDate: formatDate(orderDate),
             deliveryDate: formatDate(deliveryDate)
@@ -521,15 +523,15 @@ const BillingDetails = ({ isPreOrder = false }) => {
             <div className="space-y-2 mb-4">
               <div className="flex justify-between">
                 <span className="text-gray-600">Items ({cartItems.length}):</span>
-                <span className="font-medium">₦{total.toLocaleString()}</span>
+                <span className="font-medium">₦{totalFromRedux.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Shipping:</span>
-                <span className="font-medium">₦0.00</span>
+                <span className="font-medium">₦{deliveryFee.toLocaleString()}</span>
               </div>
               <div className="border-t border-gray-200 my-2 pt-2 flex justify-between">
                 <span className="font-medium">Total:</span>
-                <span className="font-bold text-lg text-gold">₦{total.toLocaleString()}</span>
+                <span className="font-bold text-lg text-gold">₦{grandTotal.toLocaleString()}</span>
               </div>
             </div>
             <div className="text-xs text-gray-500">

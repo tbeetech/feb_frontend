@@ -1017,16 +1017,16 @@ const SingleProduct = () => {
                                             <div className="flex justify-between text-sm">
                                                 <span className="text-gray-600">Product Price:</span>
                                                 <span className="font-medium">₦{singleProduct?.price?.toLocaleString() || 0}</span>
-                                            </div>
+                            </div>
                                             <div className="flex justify-between text-sm">
                                                 <span className="text-gray-600">Delivery Fee:</span>
                                                 <span className="font-medium">₦8,800</span>
-                                            </div>
+                            </div>
                                             <div className="flex justify-between font-bold pt-2 border-t border-gray-100">
                                                 <span>Total:</span>
                                                 <span>₦{((singleProduct?.price || 0) + 8800).toLocaleString()}</span>
-                                            </div>
-                                        </div>
+                                </div>
+                                </div>
                                     </div>
                                 </div>
                             )}

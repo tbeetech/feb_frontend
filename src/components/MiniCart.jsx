@@ -12,7 +12,7 @@ import { PRODUCT_COLORS } from '../constants/colorConstants';
 
 const MiniCart = () => {
   const [showMiniCart, setShowMiniCart] = useState(false);
-  const { products } = useSelector((state) => state.cart);
+  const { products, deliveryFee } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { formatPrice, currencySymbol } = useCurrency();
@@ -27,9 +27,6 @@ const MiniCart = () => {
     (total, item) => total + item.price * item.quantity,
     0
   );
-  
-  // Fixed delivery fee
-  const deliveryFee = 8800;
   
   // Calculate total with delivery fee
   const totalPrice = subtotal + deliveryFee;
@@ -336,7 +333,7 @@ const MiniCart = () => {
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-medium">Delivery Fee:</span>
                     <span className="font-semibold text-primary">
-                      ₦8,800
+                      {currencySymbol}{formatPrice(deliveryFee)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center mb-4">
