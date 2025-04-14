@@ -23,10 +23,16 @@ const MiniCart = () => {
   const [prevProductsLength, setPrevProductsLength] = useState(0);
 
   // Calculate total price
-  const totalPrice = products.reduce(
+  const subtotal = products.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
+  
+  // Fixed delivery fee
+  const deliveryFee = 8800;
+  
+  // Calculate total with delivery fee
+  const totalPrice = subtotal + deliveryFee;
 
   // Count total items
   const itemCount = products.reduce((total, item) => total + item.quantity, 0);
@@ -321,8 +327,20 @@ const MiniCart = () => {
                   ))}
                 </div>
                 <div className="border-t p-4">
-                  <div className="flex justify-between items-center mb-4">
+                  <div className="flex justify-between items-center mb-2">
                     <span className="font-medium">Subtotal:</span>
+                    <span className="font-semibold text-primary">
+                      {currencySymbol}{formatPrice(subtotal)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-medium">Delivery Fee:</span>
+                    <span className="font-semibold text-primary">
+                      ₦8,800
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="font-medium">Total:</span>
                     <span className="font-semibold text-primary">
                       {currencySymbol}{formatPrice(totalPrice)}
                     </span>

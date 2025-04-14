@@ -28,6 +28,9 @@ const Checkout = () => {
     return items.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
   };
   
+  // Fixed delivery fee
+  const deliveryFee = 8800;
+  
   // Get cart items from location state or Redux store (with priority to location state)
   const cartItems = location.state?.cartItems || useSelector((state) => state.cart.products);
   
@@ -36,8 +39,9 @@ const Checkout = () => {
     return calculateCartTotal(cartItems);
   }, [cartItems]);
   
-  // Use the total from location state or calculated total (with priority to location state)
-  const cartTotal = location.state?.total || cartItemsTotal;
+  // Calculate the subtotal and grand total
+  const subtotal = location.state?.subtotal || cartItemsTotal;
+  const cartTotal = location.state?.total || (subtotal + deliveryFee);
   
   const isPreOrder = location.state?.isPreOrder || false;
   const billingDetails = location.state?.billingDetails || null;
@@ -196,123 +200,97 @@ const Checkout = () => {
       const tableColumn = ["Item", "Size", "Color", "Qty", "Unit Price (₦)", "Total (₦)"];
       const tableRows = [];
       
-      // Ensure cartItems exists and is an array
-      if (validatedCartItems.length > 0) {
-        validatedCartItems.forEach(item => {
-          // Get color name instead of just the hex code
-          let colorDisplay = 'N/A';
-          if (item.selectedColor) {
-            // Check if it's a color name or a hex code
-            if (item.selectedColor.startsWith('#')) {
-              // It's a hex code, try to find the color name from the product
-              colorDisplay = 'Custom'; // Default if we can't find the name
-            } else {
-              // It's already a name
-              colorDisplay = item.selectedColor;
-            }
+      // Calculate row totals and grand total
+      let subtotalValue = 0;
+
+      validatedCartItems.forEach(item => {
+        const quantity = item.quantity || 1;
+        const price = typeof item.price === 'number' ? item.price : parseFloat(item.price || 0);
+        const totalPrice = price * quantity;
+        subtotalValue += totalPrice;
+        
+        tableRows.push([
+          item.name || 'Unknown Product',
+          item.selectedSize || '-',
+          (item.selectedColor && typeof item.selectedColor === 'string') 
+            ? item.selectedColor.startsWith('#') 
+              ? item.selectedColor 
+              : '-'
+            : '-',
+          quantity.toString(),
+          price.toLocaleString(),
+          totalPrice.toLocaleString()
+        ]);
+      });
+
+      // Add delivery fee row
+      tableRows.push([
+        'Delivery Fee',
+        '-',
+        '-',
+        '1',
+        '8,800',
+        '8,800'
+      ]);
+      
+      // Grand total
+      const grandTotal = subtotalValue + 8800;
+      
+      doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 105,
+        theme: 'grid',
+        styles: { fontSize: 9, cellPadding: 3 },
+        headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+        columnStyles: {
+          0: { cellWidth: 50 },
+          3: { halign: 'center' },
+          4: { halign: 'right' },
+          5: { halign: 'right' }
+        },
+        didDrawPage: (data) => {
+          // Add page numbers
+          const pageCount = doc.internal.getNumberOfPages();
+          for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.text(`Page ${i} of ${pageCount}`, 195, 285, { align: 'right' });
           }
-          
-          const itemData = [
-            (item.name || 'Unnamed Product').substring(0, 30), // Limit name length to avoid overflow
-            item.selectedSize || 'N/A',
-            colorDisplay, // Use the color name instead of just "Custom"
-            item.quantity || 1,
-            (item.price || 0).toLocaleString(),
-            ((item.price || 0) * (item.quantity || 1)).toLocaleString()
-          ];
-          tableRows.push(itemData);
-        });
-      } else {
-        // Add a fallback row if cart is empty
-        tableRows.push(['No items in cart', 'N/A', 'N/A', '0', '0', '0']);
-      }
-      
-      // Create a manual table instead of using autoTable to avoid compatibility issues
-      // Set up table styles
-      const startY = 100;
-      const cellPadding = 5;
-      const tableWidth = 180;
-      // Adjust column widths to provide more space for the price columns
-      const colWidths = [50, 20, 20, 15, 35, 40]; // Column widths that sum to tableWidth
-      
-      // Draw table header with background
-      doc.setFillColor(0, 0, 0);
-      doc.setTextColor(255, 255, 255);
-      doc.rect(15, startY, tableWidth, 10, 'F');
-      
-      // Draw header text
-      doc.setFontSize(9);
-      let currentX = 15;
-      tableColumn.forEach((col, index) => {
-        // Align price columns to the right
-        if (index >= 3) {
-          doc.text(col, currentX + colWidths[index] - cellPadding, startY + 7, { align: 'right' });
-        } else {
-          doc.text(col, currentX + cellPadding, startY + 7);
         }
-        currentX += colWidths[index];
       });
       
-      // Draw table rows
-      doc.setTextColor(0, 0, 0);
-      let currentY = startY + 10;
-      let isGray = false;
+      // Calculate totals 
+      const tableEndY = doc.lastAutoTable.finalY + 10;
+      doc.setFontSize(10);
       
-      tableRows.forEach(row => {
-        // Alternate row colors
-        if (isGray) {
-          doc.setFillColor(245, 245, 245);
-          doc.rect(15, currentY, tableWidth, 10, 'F');
-        }
-        isGray = !isGray;
-        
-        // Draw cell text
-        currentX = 15;
-        row.forEach((cell, index) => {
-          // Right align price columns
-          if (index >= 3) {
-            doc.text(String(cell), currentX + colWidths[index] - cellPadding, currentY + 7, { align: 'right' });
-          } else {
-            doc.text(String(cell), currentX + cellPadding, currentY + 7);
-          }
-          currentX += colWidths[index];
-        });
-        
-        currentY += 10;
-      });
+      // Display subtotal
+      doc.text('Subtotal:', 140, tableEndY);
+      doc.text(`₦${subtotalValue.toLocaleString()}`, 195, tableEndY, { align: 'right' });
       
-      // Draw table border
-      doc.setLineWidth(0.1);
-      doc.rect(15, startY, tableWidth, currentY - startY, 'S');
+      // Display delivery fee
+      doc.text('Delivery Fee:', 140, tableEndY + 8);
+      doc.text('₦8,800', 195, tableEndY + 8, { align: 'right' });
       
-      // Draw column dividers
-      currentX = 15;
-      for (let i = 0; i < colWidths.length - 1; i++) {
-        currentX += colWidths[i];
-        doc.line(currentX, startY, currentX, currentY);
-      }
-      
-      // Calculate the Y position after the table
-      let finalY = currentY + 10;
-      
-      // Add total
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`Total Amount: ₦${cartTotal.toLocaleString()}`, 180, finalY, { align: 'right' });
+      // Display Grand Total (bold)
+      doc.setFontStyle('bold');
+      doc.text('GRAND TOTAL:', 140, tableEndY + 16);
+      doc.text(`₦${grandTotal.toLocaleString()}`, 195, tableEndY + 16, { align: 'right' });
+      doc.setFontStyle('normal');
       
       // Payment details
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      doc.text('Payment Details:', 15, finalY + 15);
-      doc.text(`Bank: Stanbic IBTC Bank`, 15, finalY + 22);
-      doc.text(`Account Name: Jumoke Obembe`, 15, finalY + 29);
-      doc.text(`Account Number: ${accountNumber}`, 15, finalY + 36);
+      doc.text('Payment Details:', 15, tableEndY + 25);
+      doc.text(`Bank: Stanbic IBTC Bank`, 15, tableEndY + 32);
+      doc.text(`Account Name: Jumoke Obembe`, 15, tableEndY + 39);
+      doc.text(`Account Number: ${accountNumber}`, 15, tableEndY + 46);
       
       // Footer
       doc.setFontSize(8);
-      doc.text('Thank you for shopping with F.E.B Luxury!', 105, finalY + 50, { align: 'center' });
-      doc.text('For inquiries, please contact us at +2348033825144', 105, finalY + 55, { align: 'center' });
-      doc.text('Visit us at: www.febluxury.com', 105, finalY + 60, { align: 'center' });
+      doc.text('Thank you for shopping with F.E.B Luxury!', 105, tableEndY + 50, { align: 'center' });
+      doc.text('For inquiries, please contact us at +2348033825144', 105, tableEndY + 55, { align: 'center' });
+      doc.text('Visit us at: www.febluxury.com', 105, tableEndY + 60, { align: 'center' });
       
       // Generate a blob for the PDF
       let pdfBlob;
@@ -762,7 +740,7 @@ FEB Luxury Team
             <div className="border-t pt-4">
               <div className="flex justify-between py-2">
                 <span className="text-gray-600">Subtotal</span>
-                <span className="font-medium">₦{cartTotal.toLocaleString()}</span>
+                <span className="font-medium">₦{subtotal.toLocaleString()}</span>
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-gray-600">Shipping</span>

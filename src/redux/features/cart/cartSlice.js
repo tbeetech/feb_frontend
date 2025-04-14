@@ -4,6 +4,8 @@ import toast from 'react-hot-toast'
 const initialState = {
     products: [],
     total: 0,
+    deliveryFee: 8800, // Fixed delivery fee
+    grandTotal: 0, // Total including delivery fee
 }
 
 const cartSlice = createSlice({
@@ -31,10 +33,14 @@ const cartSlice = createSlice({
                 toast.success('Added to cart');
             }
             
+            // Calculate subtotal
             state.total = state.products.reduce(
                 (total, item) => total + item.price * item.quantity,
                 0
             );
+            
+            // Calculate grand total including fixed delivery fee
+            state.grandTotal = state.total + state.deliveryFee;
         },
         decrementQuantity: (state, action) => {
             // Find product with same ID, size, and color
@@ -61,6 +67,9 @@ const cartSlice = createSlice({
                     (total, item) => total + item.price * item.quantity,
                     0
                 );
+                
+                // Recalculate grand total
+                state.grandTotal = state.total + state.deliveryFee;
             }
         },
         removeFromCart: (state, action) => {
@@ -106,10 +115,14 @@ const cartSlice = createSlice({
                 (total, item) => total + item.price * item.quantity,
                 0
             );
+            
+            // Recalculate grand total
+            state.grandTotal = state.total + state.deliveryFee;
         },
         clearCart: (state) => {
             state.products = [];
             state.total = 0;
+            state.grandTotal = state.deliveryFee; // Only delivery fee remains when cart is empty
         }
     }
 });

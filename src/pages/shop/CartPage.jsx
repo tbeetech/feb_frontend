@@ -31,8 +31,8 @@ const CartPage = () => {
 
     const subtotal = products.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const itemCount = products.reduce((sum, item) => sum + item.quantity, 0);
-    // Shipping cost (can be adjusted based on currency)
-    const shippingCost = 24;
+    // Fixed shipping cost of ₦8800
+    const shippingCost = 8800;
     const total = subtotal + shippingCost;
 
     return (
@@ -166,7 +166,7 @@ const CartPage = () => {
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">Shipping</span>
-                                    <span>{currencySymbol}{formatPrice(shippingCost)}</span>
+                                    <span>₦8,800</span>
                                 </div>
                                 <div className="border-t pt-3 mt-3">
                                     <div className="flex justify-between font-bold">
