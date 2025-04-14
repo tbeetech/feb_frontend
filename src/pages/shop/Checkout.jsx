@@ -441,11 +441,11 @@ const Checkout = () => {
       formData.append('totalAmount', cartTotal.toFixed(2));
       
       // Add admin emails to notify
-      formData.append('adminEmails', JSON.stringify(['tobirammar@gmail.com', 'febluxurycloset@gmail.com']));
+      formData.append('adminEmails', JSON.stringify(['tobirammar@gmail.com']));
 
       // Set a timeout to prevent hanging on slow requests
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
       
       try {
         // Send the email request with timeout
@@ -466,21 +466,52 @@ const Checkout = () => {
         
         console.error('API email attempt failed:', apiError);
         
-        // Get a more detailed error message
+        // Get a more detailed error message from the improved error response
         let errorMessage = 'Could not send email receipt';
+        let troubleshooting = null;
+        let alternativeContact = null;
         
-        if (apiError.response && apiError.response.data && apiError.response.data.message) {
-          // Use server error message if available
-          errorMessage = `Email error: ${apiError.response.data.message}`;
+        // Extract detailed error information if available
+        if (apiError.response && apiError.response.data) {
+          const errorData = apiError.response.data;
+          
+          // Use server-provided error message if available
+          if (errorData.message) {
+            errorMessage = `Email error: ${errorData.message}`;
+          }
+          
+          // Get troubleshooting tips if available
+          if (errorData.troubleshooting) {
+            troubleshooting = errorData.troubleshooting;
+          }
+          
+          // Get alternative contact information if available
+          if (errorData.alternativeContact) {
+            alternativeContact = errorData.alternativeContact;
+          }
         } else if (apiError.message) {
+          // Use generic error message if server didn't provide structured error data
           errorMessage = `Email error: ${apiError.message}`;
+          
+          // Special case for timeout errors
+          if (apiError.message.includes('aborted')) {
+            errorMessage = 'Email request timed out. The server might be busy.';
+            troubleshooting = 'Please try again later or use the download option instead.';
+          }
         }
         
         // Show toast error to user
         toast.error(errorMessage);
         
-        // Attempted server-side email failed, implement a client-side fallback
-        console.log('Attempting fallback email service...');
+        // Show troubleshooting information if available
+        if (troubleshooting) {
+          toast.error(troubleshooting, { duration: 5000 });
+        }
+        
+        // Show alternative contact information if available
+        if (alternativeContact) {
+          toast.success(alternativeContact, { duration: 6000 });
+        }
         
         // Create a download link for the PDF
         if (pdfUrl) {
@@ -513,7 +544,7 @@ Please save your receipt for your records.
 
 If you have any questions, please contact us at:
 WhatsApp: +2348033825144
-Email: febluxurycloset@gmail.com
+Email: tobirammar@gmail.com
 
 Thank you for shopping with us!
 
