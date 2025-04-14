@@ -15,6 +15,8 @@ import CartPage from "../pages/shop/CartPage";
 import BillingDetails from "../components/BillingDetails";
 import Contact from "../pages/contact/Contact";
 import About from "../pages/about/About";
+import Terms from "../pages/legal/Terms";
+import Privacy from "../pages/legal/Privacy";
 import ErrorBoundary from '../components/ErrorBoundary';
 import Dashboard from "../pages/Dashboard";
 import Profile from "../pages/Profile";
@@ -49,6 +51,8 @@ children: [
     {path: "/billing-details", element:<BillingDetails/>},
     {path: "/contact", element: <Contact/>},
     {path: "/about", element: <About/>},
+    {path: "/terms", element: <Terms/>},
+    {path: "/privacy", element: <Privacy/>},
     {path: "/admin/upload-product", element: <AdminRoute><ProductUpload /></AdminRoute>},
     {path: "/admin/manage-products", element: <AdminRoute><ProductManagement /></AdminRoute>},
     {path: "/admin/edit-product", element: <AdminRoute><EditProduct /></AdminRoute>},

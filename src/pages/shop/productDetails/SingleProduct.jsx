@@ -121,6 +121,9 @@ const SingleProduct = () => {
     const navigate = useNavigate();
     const { formatPrice, currencySymbol } = useCurrency();
     
+    // Get delivery fee from Redux store for consistent calculations
+    const { deliveryFee } = useSelector(state => state.cart);
+    
     // Fetch product data
     const { data, error, isLoading } = useFetchProductByIdQuery(id);
     const singleProduct = data?.product || {};
@@ -397,10 +400,24 @@ const SingleProduct = () => {
     };
 
     const handlePreOrder = (product) => {
+        // Verify we have a size selected if product has sizes
+        if (product.sizes?.length > 0 && !selectedSize) {
+            toast.error('Please select a size');
+            return;
+        }
+
+        // Verify we have a color selected if product has colors
+        if (product.colors?.length > 0 && !selectedColor) {
+            toast.error('Please select a color');
+            return;
+        }
+
         // Get the color value to store - prefer the name for display
-        const colorToStore = typeof selectedColor === 'object' 
-            ? selectedColor.name  // Store the name for better display in cart
-            : selectedColor;
+        const colorToStore = selectedColor ? (
+            typeof selectedColor === 'object' 
+                ? selectedColor.name  // Store the name for better display in cart
+                : selectedColor
+        ) : null;
             
         const productWithSize = {
             ...product,
@@ -1020,11 +1037,11 @@ const SingleProduct = () => {
                             </div>
                                             <div className="flex justify-between text-sm">
                                                 <span className="text-gray-600">Delivery Fee:</span>
-                                                <span className="font-medium">₦8,800</span>
+                                                <span className="font-medium">₦{deliveryFee.toLocaleString()}</span>
                             </div>
                                             <div className="flex justify-between font-bold pt-2 border-t border-gray-100">
                                                 <span>Total:</span>
-                                                <span>₦{((singleProduct?.price || 0) + 8800).toLocaleString()}</span>
+                                                <span>₦{((singleProduct?.price || 0) + deliveryFee).toLocaleString()}</span>
                                 </div>
                                 </div>
                                     </div>

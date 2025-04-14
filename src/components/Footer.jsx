@@ -128,8 +128,8 @@ const Footer = () => {
           <div>
             <h4 className="text-sm font-medium uppercase mb-4">Legal</h4>
             <ul className="space-y-3 text-sm">
-              <li><span className="text-gray-400 cursor-not-allowed">Terms & Conditions</span></li>
-              <li><span className="text-gray-400 cursor-not-allowed">Privacy Policy</span></li>
+              <li><Link to="/terms" className="text-gray-500 hover:text-black transition-colors">Terms & Conditions</Link></li>
+              <li><Link to="/privacy" className="text-gray-500 hover:text-black transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
           

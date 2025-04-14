@@ -10,7 +10,7 @@ import { useCurrency } from "../../components/CurrencySwitcher";
 
 const CartPage = () => {
     const dispatch = useDispatch();
-    const products = useSelector((state) => state.cart.products);
+    const { products, deliveryFee, grandTotal } = useSelector((state) => state.cart);
     const { formatPrice, currencySymbol, currencyCode } = useCurrency();
 
     const handleIncrement = (product) => {
@@ -31,9 +31,8 @@ const CartPage = () => {
 
     const subtotal = products.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const itemCount = products.reduce((sum, item) => sum + item.quantity, 0);
-    // Fixed shipping cost of ₦8800
-    const shippingCost = 8800;
-    const total = subtotal + shippingCost;
+    // Use delivery fee from Redux state for consistency
+    const total = grandTotal;
 
     return (
         <div className="container mx-auto py-8 px-4">
@@ -166,7 +165,7 @@ const CartPage = () => {
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">Shipping</span>
-                                    <span>₦8,800</span>
+                                    <span>{currencySymbol}{formatPrice(deliveryFee)}</span>
                                 </div>
                                 <div className="border-t pt-3 mt-3">
                                     <div className="flex justify-between font-bold">
@@ -183,7 +182,7 @@ const CartPage = () => {
                                 to="/billing-details"
                                 state={{ 
                                     cartItems: products,
-                                    total: total
+                                    total: grandTotal
                                 }}
                                 className="w-full block text-center py-3 px-4 bg-black text-white font-medium hover:bg-gray-800 rounded-md"
                             >
