@@ -29,7 +29,7 @@ const ProductUpload = () => {
     orderType: 'regular',
     sizeType: 'none',
     sizes: [],
-    stockStatus: 'In Stock',
+    stockStatus: 'Pre Order',
     stockQuantity: 0,
     colors: [],
     deliveryTimeFrame: {
@@ -456,9 +456,9 @@ const ProductUpload = () => {
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               >
+                <option value="Pre Order">Pre Order</option>
                 <option value="In Stock">In Stock</option>
                 <option value="Out of Stock">Out of Stock</option>
-                <option value="Pre Order">Pre Order</option>
               </select>
             </div>
             

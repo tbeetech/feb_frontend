@@ -439,9 +439,15 @@ const Checkout = () => {
       formData.append('orderDate', orderDate);
       formData.append('deliveryDate', deliveryDate);
       formData.append('totalAmount', cartTotal.toFixed(2));
-      
+
+      // Add product images to the email
+      const productImages = cartItems
+        .filter(item => item.image)
+        .map(item => item.image);
+      formData.append('productImages', JSON.stringify(productImages));
+
       // Add admin emails to notify
-      formData.append('adminEmails', JSON.stringify(['tobirammar@gmail.com']));
+      formData.append('adminEmails', JSON.stringify(['tobirammar@gmail.com', 'febluxurycloset@gmail.com']));
 
       // Set a timeout to prevent hanging on slow requests
       const controller = new AbortController();
@@ -542,9 +548,8 @@ Order Details:
 
 Please save your receipt for your records.
 
-If you have any questions, please contact us at:
-WhatsApp: +2348033825144
-Email: tobirammar@gmail.com
+To complete your order, please make payment using the details on your receipt
+and contact us via WhatsApp at +2348033825144 to confirm your payment.
 
 Thank you for shopping with us!
 
@@ -614,23 +619,21 @@ FEB Luxury Team
     setIsGenerating(true);
     
     try {
-      // First create a new PDF document instance
-      const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
+      // First properly generate the PDF content
+      const { doc, pdfBlob } = await generateAndDownloadPDF();
       
-      // Generate the PDF content using the existing function (but don't download yet)
-      // We're calling this to fill the 'doc' object with content
-      await generateAndDownloadPDF();
+      if (!doc || !pdfBlob) {
+        throw new Error('Failed to generate receipt PDF');
+      }
       
-      // Get a proper Blob from the document for the email attachment
-      // This ensures we have a valid Blob object with the correct MIME type
+      console.log("PDF generated successfully, size:", pdfBlob.size);
+      
+      // Get a fresh proper Blob from the document for the email attachment
+      // This ensures we have a valid Blob object with the correct MIME type and content
       const pdfArrayBuffer = doc.output('arraybuffer');
       const properPdfBlob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
       
-      console.log("Created PDF Blob:", properPdfBlob instanceof Blob, properPdfBlob.size, properPdfBlob.type);
+      console.log("Created PDF Blob for email:", properPdfBlob instanceof Blob, properPdfBlob.size, properPdfBlob.type);
       
       // Attempt to send the email receipt
       if (billingDetails && billingDetails.email) {
@@ -639,11 +642,11 @@ FEB Luxury Team
           console.log('Email receipt sent successfully');
           
           // Show success messages
-          toast.success('Order confirmed! Receipt has been emailed to you.');
+          toast.success('Order placed! Receipt has been emailed to you.');
           setShowSuccessMessage(true);
         } else {
           console.warn('Email delivery failed, but continuing checkout');
-          toast.error('Order confirmed, but email delivery failed. You can still download the receipt.');
+          toast.error('Order placed, but email delivery failed. You can still download the receipt.');
         }
       } else {
         console.warn('No billing email available, skipping email receipt');
@@ -778,7 +781,7 @@ FEB Luxury Team
             
             <div className="text-center mb-6">
               <h3 className="text-lg font-semibold">F.E.B LUXURY</h3>
-              <p className="text-gray-600">Receipt / Invoice</p>
+              <p className="text-gray-600">Order Details / Quote</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm">
@@ -826,7 +829,7 @@ FEB Luxury Team
                 ) : (
                   <>
                     <FaEnvelope className="mr-2" />
-                    <span>Complete Order & Send Receipt</span>
+                    <span>Place Order & Send Receipt</span>
                   </>
                 )}
               </button>

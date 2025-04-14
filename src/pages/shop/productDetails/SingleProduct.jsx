@@ -383,11 +383,11 @@ const SingleProduct = () => {
 
         // Create the product object with the selected options
         const productToAdd = {
-            ...product,
+                ...product,
             selectedSize: selectedSize,
             selectedColor: colorToStore,
-            quantity: 1
-        };
+                quantity: 1
+            };
 
         console.log("Product being added to cart:", productToAdd);
         
@@ -928,7 +928,7 @@ const SingleProduct = () => {
                                     </div>
                                 </div>
                             )}
-                        </motion.div>
+                            </motion.div>
                         
                         {/* Add to cart / Pre-order section */}
                         <motion.div 

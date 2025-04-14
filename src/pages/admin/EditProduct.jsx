@@ -228,7 +228,11 @@ const EditProduct = () => {
         },
         icon: '✅'
       });
-      navigate('/admin/products');
+      
+      // Add slight delay to ensure toast is visible before navigation
+      setTimeout(() => {
+        navigate('/admin/manage-products');
+      }, 1000);
     } catch (error) {
       console.error('Failed to update product:', error);
       toast.error('Failed to update product');
