@@ -1,15 +1,17 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { FaExternalLinkAlt, FaArrowLeft, FaEnvelope } from 'react-icons/fa';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
 import { saveAs } from 'file-saver';
 import { formatReceiptNumber } from '../../utils/formatters';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
+import { clearCart } from '../../redux/features/cart/cartSlice';
 
 const Checkout = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorDetails, setErrorDetails] = useState('');
@@ -178,7 +180,10 @@ const Checkout = () => {
       }
       
       // Expected Delivery date
-      doc.text(`Expected Delivery: ${new Date(today.getTime() + 3*24*60*60*1000).toLocaleDateString()}`, margin, 50);
+      const isPreOrder = location.state?.isPreOrder;
+      const deliveryDays = isPreOrder ? 14 : 3;
+      const expectedDeliveryDate = new Date(today.getTime() + deliveryDays * 24 * 60 * 60 * 1000);
+      doc.text(`Expected Delivery: ${expectedDeliveryDate.toLocaleDateString()} (${isPreOrder ? '14 working days' : '3 business days'})`, margin, 50);
       
       // Add line
       doc.line(margin, 70, pageWidth - margin, 70);
@@ -487,8 +492,7 @@ const Checkout = () => {
       
       if (!result) {
         console.warn("PDF generation failed, but continuing with order completion");
-        // Show successful checkout message even if PDF fails
-        toast.success('Order placed successfully!');
+        toast.success('Order placed successfully! Please check your email for payment instructions.');
         setShowSuccessMessage(true);
         setIsGenerating(false);
         return null;
@@ -497,25 +501,20 @@ const Checkout = () => {
       const { doc, pdfBlob } = result;
       console.log("PDF generated successfully, proceeding to email");
       
-      // Attempt to send the email receipt if we have valid data
+      // Attempt to send the email receipt
       if (billingDetails && billingDetails.email && pdfBlob) {
         try {
           await sendEmailReceipt(billingDetails.email, cartTotal, pdfBlob, receiptNumber);
-          // Show success message
+          // Show notice screen
           setShowSuccessMessage(true);
+          // Clear cart after successful order
+          dispatch(clearCart());
+          // Hide download button
+          setPdfUrl(null);
         } catch (emailError) {
           console.warn('Email sending failed but order is complete:', emailError);
-          toast.success('Order placed! Download your receipt below.');
+          toast.success('Order placed! Please check your email for payment instructions.');
         }
-      } else {
-        console.warn('Missing email address or PDF data');
-        if (!billingDetails || !billingDetails.email) {
-          console.warn('Missing billing email');
-        }
-        if (!pdfBlob) {
-          console.warn('Missing PDF blob');
-        }
-        toast.success('Order placed! Your receipt is ready for download.');
       }
       
       setIsGenerating(false);
@@ -538,8 +537,28 @@ const Checkout = () => {
     <div className="container mx-auto px-4 py-6 max-w-6xl">
       {/* Alert messages */}
       {showSuccessMessage && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-md shadow-lg z-50 animate-fade-in-out">
-          <p>Receipt downloaded successfully!</p>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full">
+            <div className="text-center">
+              <span className="material-icons text-5xl text-green-500 mb-4">check_circle</span>
+              <h2 className="text-2xl font-bold mb-4 text-gray-900">Order Successfully Placed!</h2>
+              <p className="text-gray-800 mb-6">
+                Please check your email for payment instructions and order details. Follow the steps in the email to complete your order.
+              </p>
+              <p className="text-sm text-gray-600 mb-6">
+                Your items will be delivered within 3 business days after payment confirmation.
+              </p>
+              <button
+                onClick={() => {
+                  setShowSuccessMessage(false);
+                  navigate('/shop');
+                }}
+                className="w-full py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors"
+              >
+                Continue Shopping
+              </button>
+            </div>
+          </div>
         </div>
       )}
       
@@ -555,7 +574,7 @@ const Checkout = () => {
           <FaArrowLeft className="mr-2" />
           Back to Billing Details
         </Link>
-            </div>
+      </div>
       
       <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">Complete Your Order</h1>
       
@@ -573,11 +592,11 @@ const Checkout = () => {
                       <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
                       <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
                       <th className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-              </tr>
-            </thead>
+                    </tr>
+                  </thead>
                   <tbody className="divide-y divide-gray-200">
-              {cartItems && cartItems.length > 0 ? (
-                cartItems.map((item, index) => (
+                    {cartItems && cartItems.length > 0 ? (
+                      cartItems.map((item, index) => (
                         <tr key={`${item._id || index}-${index}`} className="hover:bg-gray-50">
                           <td className="py-4 px-4">
                             <div className="flex items-center">
@@ -606,25 +625,25 @@ const Checkout = () => {
                                   <span className="mr-1">Color:</span>
                                   <div 
                                     className="w-4 h-4 rounded-full border border-gray-300" 
-                            style={{ backgroundColor: item.selectedColor }}
-                          />
-                        </div>
+                                    style={{ backgroundColor: item.selectedColor }}
+                                  />
+                                </div>
                               )}
                             </div>
                           </td>
                           <td className="py-4 px-4 text-sm text-right font-medium">
                             ₦{(item.price * item.quantity).toLocaleString()}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
                         <td colSpan="3" className="py-4 px-4 text-center text-gray-500">
                           No items in cart
                         </td>
-                </tr>
-              )}
-            </tbody>
+                      </tr>
+                    )}
+                  </tbody>
                 </table>
               </div>
             </div>
@@ -640,7 +659,7 @@ const Checkout = () => {
               </div>
               <div className="flex justify-between py-3 border-t mt-2 text-lg font-bold">
                 <span>Total</span>
-            <span>₦{cartTotal.toLocaleString()}</span>
+                <span>₦{cartTotal.toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -678,7 +697,7 @@ const Checkout = () => {
                 )}
               </button>
             
-            {pdfUrl && (
+              {pdfUrl && (
                 <a 
                   href={pdfUrl} 
                   download={`FEB_Luxury_Receipt_${receiptNumber}.pdf`} 
@@ -690,7 +709,7 @@ const Checkout = () => {
                   Download Receipt
                 </a>
               )}
-        </div>
+            </div>
           </div>
         </div>
       </div>

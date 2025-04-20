@@ -1,9 +1,10 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
+import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
-const ShopHeader = ({ products = [] }) => {
+const ShopHeader = ({ products }) => {
     const navigate = useNavigate();
     const sliderRef = useRef(null);
 
@@ -43,13 +44,21 @@ const ShopHeader = ({ products = [] }) => {
                         Discover Our Collection
                     </motion.h1>
                     <motion.p 
-                        className="text-xl text-gray-600 max-w-2xl mx-auto"
+                        className="text-xl text-gray-600 max-w-2xl mx-auto mb-4"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4 }}
                     >
                         Elevate your style with our curated selection of luxury fashion and accessories
                     </motion.p>
+                    <motion.div
+                        className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.6 }}
+                    >
+                  
+                    </motion.div>
                 </motion.div>
 
                 {/* Products Slider - Simplified to show only full-sized images */}
@@ -99,6 +108,21 @@ const ShopHeader = ({ products = [] }) => {
             </div>
         </section>
     );
+};
+
+ShopHeader.propTypes = {
+    products: PropTypes.arrayOf(
+        PropTypes.shape({
+            _id: PropTypes.string.isRequired,
+            name: PropTypes.string.isRequired,
+            image: PropTypes.string,
+            images: PropTypes.arrayOf(PropTypes.string)
+        })
+    )
+};
+
+ShopHeader.defaultProps = {
+    products: []
 };
 
 export default ShopHeader;
