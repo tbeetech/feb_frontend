@@ -478,7 +478,31 @@ const SingleProduct = () => {
     };
 
     const handleDecrement = (product) => {
-        dispatch(decrementQuantity(product));
+        if (!product) {
+            console.error("Cannot decrement null product");
+            return;
+        }
+
+        // If quantity is 1, this will remove the item
+        if (quantity <= 1) {
+            const productToRemove = {
+                ...product,
+                selectedSize: selectedSize || null,
+                selectedColor: selectedColor ? (typeof selectedColor === 'object' ? selectedColor.name : selectedColor) : null
+            };
+            console.log("Removing product from cart:", productToRemove);
+            dispatch(decrementQuantity(productToRemove));
+            toast.success('Item removed from cart');
+            return;
+        }
+
+        // Otherwise just decrement the quantity
+        const productToDecrement = {
+            ...product,
+            selectedSize: selectedSize || null,
+            selectedColor: selectedColor ? (typeof selectedColor === 'object' ? selectedColor.name : selectedColor) : null
+        };
+        dispatch(decrementQuantity(productToDecrement));
     };
 
     // Handler for size selection - simplified

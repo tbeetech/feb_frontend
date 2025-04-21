@@ -324,17 +324,13 @@ const Checkout = () => {
     try {
       console.log('Preparing to send email receipt...');
       
-      // Create a FormData object to send the PDF attachment
       const formData = new FormData();
       
-      // Ensure pdfBlob is a proper Blob object with correct mime type
       let fileBlob;
       if (pdfBlob instanceof Blob) {
-        // If it's already a Blob, just ensure it has the correct type
         console.log("Using existing PDF blob");
         fileBlob = new Blob([pdfBlob], { type: 'application/pdf' });
       } else if (typeof pdfBlob === 'string') {
-        // If it's a base64 string or similar, convert to Blob
         console.log("Converting string PDF data to blob");
         const byteString = atob(pdfBlob.split(',')[1] || pdfBlob);
         const byteArrays = [];
@@ -346,12 +342,10 @@ const Checkout = () => {
         fileBlob = new Blob([new Uint8Array(byteArrays)], { type: 'application/pdf' });
       } else {
         console.warn('Invalid PDF data, creating a simple text file instead');
-        // Create a simple text file as fallback
         fileBlob = new Blob([`Receipt Number: FEB-${receiptNumber}\nAmount: ₦${totalAmount.toLocaleString()}`], 
                             { type: 'text/plain' });
       }
       
-      // Validate the created blob
       if (!fileBlob || fileBlob.size === 0) {
         throw new Error("Generated PDF is empty or invalid");
       }
@@ -361,13 +355,9 @@ const Checkout = () => {
         size: fileBlob.size + " bytes"
       });
       
-      // Now append the properly-formatted Blob to the form
       formData.append('receipt', fileBlob, `receipt-${receiptNumber}.pdf`);
-      
-      // Add order information to the form data
       formData.append('receiptNumber', receiptNumber);
       
-      // Make sure billingDetails exists before accessing it
       const customerName = billingDetails ? 
         `${billingDetails.firstName || ''} ${billingDetails.lastName || ''}`.trim() : 
         'Customer';
@@ -378,97 +368,75 @@ const Checkout = () => {
       formData.append('deliveryDate', deliveryDate || '');
       formData.append('totalAmount', totalAmount.toString());
 
-      // Add product images to the email - only valid URLs
       const productImages = cartItems
         .filter(item => item.image && typeof item.image === 'string' && item.image.startsWith('http'))
         .map(item => item.image);
       
       formData.append('productImages', JSON.stringify(productImages));
-
-      // Add admin emails to notify
       formData.append('adminEmails', JSON.stringify(['tobirammar@gmail.com', 'febluxurycloset@gmail.com']));
 
-      // Set a timeout to prevent hanging on slow requests
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
       
       try {
-        // Send the email request with timeout
         console.log("Sending email API request...");
-        const response = await axios.post('/api/send-receipt-email', formData, {
+        const apiUrl = process.env.NODE_ENV === 'production' 
+          ? 'https://www.febluxury.com/api/send-receipt-email'
+          : '/api/send-receipt-email';
+
+        const response = await axios.post(apiUrl, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
+            'Accept': 'application/json'
           },
-          signal: controller.signal
+          signal: controller.signal,
+          withCredentials: true
         });
         
-        clearTimeout(timeoutId); // Clear the timeout if successful
+        clearTimeout(timeoutId);
         
         console.log('Email receipt sent successfully:', response.data);
         toast.success('Order confirmation has been sent to your email');
         return true;
       } catch (apiError) {
-        clearTimeout(timeoutId); // Clear the timeout
-        
+        clearTimeout(timeoutId);
         console.error('API email attempt failed:', apiError);
         
-        // Get a more detailed error message from the improved error response
         let errorMessage = 'Could not send email receipt';
         let troubleshooting = null;
         let alternativeContact = null;
         
-        // Extract detailed error information if available
         if (apiError.response && apiError.response.data) {
           const errorData = apiError.response.data;
-          
-          // Use server-provided error message if available
           if (errorData.message) {
             errorMessage = `Email error: ${errorData.message}`;
           }
-          
-          // Get troubleshooting tips if available
           if (errorData.troubleshooting) {
             troubleshooting = errorData.troubleshooting;
           }
-          
-          // Get alternative contact information if available
           if (errorData.alternativeContact) {
             alternativeContact = errorData.alternativeContact;
           }
         } else if (apiError.message) {
-          // Use generic error message if server didn't provide structured error data
           errorMessage = `Email error: ${apiError.message}`;
-          
-          // Special case for timeout errors
           if (apiError.message.includes('aborted')) {
             errorMessage = 'Email request timed out. The server might be busy.';
             troubleshooting = 'Please try again later or use the download option instead.';
           }
         }
         
-        // Show toast error to user
         toast.error(errorMessage);
-        
-        // Show troubleshooting information if available
         if (troubleshooting) {
           toast.error(troubleshooting, { duration: 5000 });
         }
-        
-        // Show alternative contact information if available
         if (alternativeContact) {
           toast.success(alternativeContact, { duration: 6000 });
         }
-        
-        // Return true to continue the checkout process despite email failure
         return true;
       }
     } catch (error) {
       console.error('All email methods failed:', error);
-      
-      // Final fallback: just create a direct download link for the PDF
       toast.error('Email delivery failed, but your order is confirmed. Please download your receipt.');
-      
-      // Return true to continue the checkout process despite email failure
       return true;
     }
   };
@@ -551,12 +519,12 @@ const Checkout = () => {
 
       {/* Success Message Overlay */}
       {showSuccessMessage && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 px-4">
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 px-4">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
-            className="bg-white rounded-lg p-8 max-w-md w-full shadow-2xl relative"
+            className="bg-white rounded-lg p-8 max-w-md w-full shadow-2xl"
           >
             <div className="text-center">
               <motion.div 
@@ -565,24 +533,24 @@ const Checkout = () => {
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 className="mb-6"
               >
-                <span className="material-icons text-6xl text-green-600">check_circle</span>
+                <span className="material-icons text-6xl text-green-500">check_circle</span>
               </motion.div>
-              <h2 className="text-2xl font-bold mb-4 text-gray-900">Thank You for Your Order!</h2>
+              <h2 className="text-3xl font-bold mb-4 text-black">Thank You for Your Order!</h2>
               <div className="space-y-4 mb-6">
-                <p className="text-gray-900 text-base">
-                  Your order <span className="font-semibold text-gray-900">#{receiptNumber}</span> has been successfully placed.
+                <p className="text-gray-800 text-lg">
+                  Your order <span className="font-semibold text-black">#{receiptNumber}</span> has been successfully placed.
                 </p>
-                <div className="bg-yellow-50/80 border border-yellow-200 rounded-lg p-4">
-                  <h3 className="font-semibold text-gray-900 mb-2">Next Steps:</h3>
-                  <ol className="text-left text-gray-800 space-y-2 list-decimal list-inside">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-black mb-2">Next Steps:</h3>
+                  <ol className="text-left text-gray-700 space-y-2 list-decimal list-inside">
                     <li>Check your email for payment instructions and invoice</li>
                     <li>Complete the bank transfer using the provided details</li>
                     <li>Forward your proof of payment as instructed</li>
                     <li>Await order confirmation (usually within 24 hours)</li>
                   </ol>
                 </div>
-                <p className="text-gray-800">
-                  Expected delivery: <span className="font-medium text-gray-900">3-5 business days after payment confirmation</span>
+                <p className="text-gray-700">
+                  Expected delivery: <span className="font-medium text-black">3-5 business days after payment confirmation</span>
                 </p>
               </div>
               <div className="space-y-3">
@@ -591,12 +559,12 @@ const Checkout = () => {
                     setShowSuccessMessage(false);
                     navigate('/shop');
                   }}
-                  className="w-full py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors rounded-sm"
+                  className="w-full py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors rounded-md"
                 >
                   Continue Shopping
                 </button>
-                <p className="text-gray-800">
-                  Questions? Contact us at <a href="mailto:febluxurycloset@gmail.com" className="text-gold hover:text-gold/80 hover:underline font-medium">febluxurycloset@gmail.com</a>
+                <p className="text-gray-700">
+                  Questions? Contact us at <a href="mailto:febluxurycloset@gmail.com" className="text-gold hover:underline font-medium">febluxurycloset@gmail.com</a>
                 </p>
               </div>
             </div>

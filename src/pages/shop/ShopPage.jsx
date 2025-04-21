@@ -189,41 +189,39 @@ const ShopPage = () => {
       <div className="mb-6 relative">
         <button 
           onClick={() => scrollCategories(-1)}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-gray-50/80 hover:bg-black/5 border border-gray-200 p-2 transition-all duration-200"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full shadow-md p-1"
           aria-label="Scroll categories left"
         >
-          <FaChevronLeft className="w-4 h-4 text-gray-700" />
+          <FaChevronLeft className="w-4 h-4" />
         </button>
         
         <div 
           ref={categorySliderRef}
-          className="flex space-x-3 overflow-x-auto py-2 px-8 scrollbar-hide scroll-smooth"
+          className="flex space-x-2 overflow-x-auto py-2 px-8 scrollbar-hide scroll-smooth"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {allCategoryOptions.map((cat) => (
             <button
               key={cat.value}
               onClick={() => handleCategoryClick(cat.value)}
-              className={`flex items-center space-x-2 whitespace-nowrap px-6 py-2 transition-all duration-200 ${
+              className={`flex items-center space-x-2 whitespace-nowrap px-4 py-2 rounded-full transition-colors ${
                 filtersState.category === cat.value 
-                  ? 'bg-black/90 text-white border border-black' 
-                  : 'bg-gray-50/80 hover:bg-black/5 text-gray-800 border border-gray-200'
+                  ? 'bg-black text-white' 
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
               }`}
             >
-              <span className={`flex items-center justify-center transition-colors duration-200 ${
-                filtersState.category === cat.value ? 'text-white' : 'text-gray-700'
-              }`}>{cat.icon}</span>
-              <span className="font-medium text-sm">{cat.label}</span>
+              <span className="flex items-center justify-center">{cat.icon}</span>
+              <span>{cat.label}</span>
             </button>
           ))}
         </div>
         
         <button 
           onClick={() => scrollCategories(1)}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-gray-50/80 hover:bg-black/5 border border-gray-200 p-2 transition-all duration-200"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full shadow-md p-1"
           aria-label="Scroll categories right"
         >
-          <FaChevronRight className="w-4 h-4 text-gray-700" />
+          <FaChevronRight className="w-4 h-4" />
         </button>
       </div>
 
