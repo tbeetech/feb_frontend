@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import PropTypes from 'prop-types';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
@@ -9,8 +10,11 @@ const BillingDetails = ({ isPreOrder = false }) => {
   const { user } = useSelector((state) => state.auth);
   const { products, total, deliveryFee, grandTotal } = useSelector((state) => state.cart);
   
-  // Get cart items and total from location state or Redux store
-  const cartItems = location.state?.cartItems || products || [];
+  // Get cart items and total from location state or Redux store using useMemo
+  const cartItems = useMemo(() => 
+    location.state?.cartItems || products || [], 
+    [location.state?.cartItems, products]
+  );
   
   // Use grandTotal from Redux for consistency across all components
   const cartTotal = isPreOrder ? location.state?.total || total : grandTotal;
@@ -32,7 +36,6 @@ const BillingDetails = ({ isPreOrder = false }) => {
     address: '',
     city: '',
     state: '',
-    zipCode: '',
     country: 'Nigeria',
     paymentMethod: 'transfer',
     saveInfo: true,
@@ -56,7 +59,6 @@ const BillingDetails = ({ isPreOrder = false }) => {
         address: user.address?.street || '',
         city: user.address?.city || '',
         state: user.address?.state || '',
-        zipCode: user.address?.zipCode || '',
       }));
     }
   }, [user]);
@@ -114,9 +116,6 @@ const BillingDetails = ({ isPreOrder = false }) => {
       case 'state':
         if (!value.trim()) error = 'State is required';
         break;
-      case 'zipCode':
-        if (!value.trim()) error = 'Zip code is required';
-        break;
       default:
         break;
     }
@@ -127,7 +126,7 @@ const BillingDetails = ({ isPreOrder = false }) => {
   
   // Validate all fields
   const validateForm = () => {
-    const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'address', 'city', 'state', 'zipCode'];
+    const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'address', 'city', 'state'];
     let isValid = true;
     let newErrors = {};
     let newTouched = {};
@@ -379,7 +378,7 @@ const BillingDetails = ({ isPreOrder = false }) => {
                     <p className="error-message text-red-500 text-xs mt-1">{errors.city}</p>
                   )}
                 </div>
-                
+
                 <div className="form-group">
                   <label htmlFor="state" className="form-label">State</label>
                   <input
@@ -397,42 +396,23 @@ const BillingDetails = ({ isPreOrder = false }) => {
                   )}
                 </div>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="form-group">
-                  <label htmlFor="zipCode" className="form-label">Zip/Postal Code</label>
-                  <input
-                    type="text"
-                    id="zipCode"
-                    name="zipCode"
-                    value={formData.zipCode}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`form-input ${touched.zipCode && errors.zipCode ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                    placeholder="100001"
-                  />
-                  {touched.zipCode && errors.zipCode && (
-                    <p className="error-message text-red-500 text-xs mt-1">{errors.zipCode}</p>
-                  )}
-                </div>
-                
-                <div className="form-group">
-                  <label htmlFor="country" className="form-label">Country</label>
-                  <select
-                    id="country"
-                    name="country"
-                    value={formData.country}
-                    onChange={handleChange}
-                    className="form-input"
-                  >
-                    <option value="Nigeria">Nigeria</option>
-                    <option value="Ghana">Ghana</option>
-                    <option value="Kenya">Kenya</option>
-                    <option value="South Africa">South Africa</option>
-                    <option value="United Kingdom">United Kingdom</option>
-                    <option value="United States">United States</option>
-                  </select>
-                </div>
+
+              <div className="form-group">
+                <label htmlFor="country" className="form-label">Country</label>
+                <select
+                  id="country"
+                  name="country"
+                  value={formData.country}
+                  onChange={handleChange}
+                  className="form-input"
+                >
+                  <option value="Nigeria">Nigeria</option>
+                  <option value="Ghana">Ghana</option>
+                  <option value="Kenya">Kenya</option>
+                  <option value="South Africa">South Africa</option>
+                  <option value="United Kingdom">United Kingdom</option>
+                  <option value="United States">United States</option>
+                </select>
               </div>
             </div>
           </motion.div>
@@ -576,4 +556,8 @@ const BillingDetails = ({ isPreOrder = false }) => {
   );
 };
 
-export default BillingDetails; 
+BillingDetails.propTypes = {
+  isPreOrder: PropTypes.bool
+};
+
+export default BillingDetails;

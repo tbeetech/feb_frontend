@@ -3,12 +3,16 @@ import { FaExternalLinkAlt, FaArrowLeft, FaEnvelope } from 'react-icons/fa';
 import { useSelector, useDispatch } from 'react-redux';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
-import { saveAs } from 'file-saver';
 import { formatReceiptNumber } from '../../utils/formatters';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { clearCart } from '../../redux/features/cart/cartSlice';
 import { motion } from 'framer-motion';
+
+// API URL based on environment
+const BASE_API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:5000/api'
+  : 'https://febluxury.com/api';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -43,7 +47,6 @@ const Checkout = () => {
   const cartTotal = location.state?.total || grandTotal || (subtotal + deliveryFee);
   
   const billingDetails = location.state?.billingDetails || null;
-  const orderDate = location.state?.orderDate || new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
   const deliveryDate = location.state?.deliveryDate || '';
   const receiptRef = useRef(null);
   
@@ -73,50 +76,6 @@ const Checkout = () => {
     setTimeout(() => {
       setShowErrorMessage(false);
     }, 5000);
-  };
-  
-  const downloadWithFallbacks = (doc, pdfBlob, filename) => {
-    // Try multiple methods in sequence to maximize compatibility
-    return new Promise((resolve, reject) => {
-      // Method 1: FileSaver (most compatible)
-      try {
-        saveAs(pdfBlob, filename);
-        console.log('PDF downloaded using FileSaver');
-        resolve('FileSaver');
-        return;
-      } catch (saveError) {
-        console.warn('FileSaver method failed, trying alternative methods:', saveError);
-      }
-      
-      // Method 2: Native jsPDF save
-      try {
-        doc.save(filename);
-        console.log('PDF downloaded using native jsPDF save');
-        resolve('jsPDFSave');
-        return;
-      } catch (jspdfError) {
-        console.warn('jsPDF save method failed, trying alternative methods:', jspdfError);
-      }
-      
-      // Method 3: Create object URL and trigger download programmatically
-      try {
-        const url = URL.createObjectURL(pdfBlob);
-        setPdfUrl(url);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        console.log('PDF downloaded using object URL and programmatic click');
-        resolve('objectURL');
-        return;
-      } catch (urlError) {
-        console.warn('Object URL method failed:', urlError);
-        reject(new Error('All download methods failed'));
-      }
-    });
   };
   
   const generateAndDownloadPDF = async (event, details, totalAmount, receiptNumber) => {
@@ -319,14 +278,8 @@ const Checkout = () => {
     }
   };
 
-  // Update the API URL construction to handle multiple domains
-  const apiUrl = (() => {
-    if (process.env.NODE_ENV === 'production') {
-      // Try the base domain first, fallback to www if needed
-      return ['https://febluxury.com/api/send-receipt-email', 'https://www.febluxury.com/api/send-receipt-email'];
-    }
-    return ['/api/send-receipt-email'];
-  })();
+  // Update the API URL construction to use BASE_API_URL
+  const apiUrl = [`${BASE_API_URL}/send-receipt-email`];
 
   // Update the email sending logic
   const sendEmailReceipt = async (email, totalAmount, pdfBlob, receiptNumber) => {
@@ -334,90 +287,33 @@ const Checkout = () => {
       console.log('Preparing to send email receipt...');
       
       const formData = new FormData();
-      
-      let fileBlob;
-      if (pdfBlob instanceof Blob) {
-        console.log("Using existing PDF blob");
-        fileBlob = new Blob([pdfBlob], { type: 'application/pdf' });
-      } else if (typeof pdfBlob === 'string') {
-        console.log("Converting string PDF data to blob");
-        const byteString = atob(pdfBlob.split(',')[1] || pdfBlob);
-        const byteArrays = [];
-        
-        for (let i = 0; i < byteString.length; i++) {
-          byteArrays.push(byteString.charCodeAt(i));
-        }
-        
-        fileBlob = new Blob([new Uint8Array(byteArrays)], { type: 'application/pdf' });
-      } else {
-        console.warn('Invalid PDF data, creating a simple text file instead');
-        fileBlob = new Blob([`Receipt Number: FEB-${receiptNumber}\nAmount: ₦${totalAmount.toLocaleString()}`], 
-                            { type: 'text/plain' });
-      }
-      
-      if (!fileBlob || fileBlob.size === 0) {
-        throw new Error("Generated PDF is empty or invalid");
-      }
-      
-      console.log("PDF attachment prepared", {
-        type: fileBlob.type,
-        size: fileBlob.size + " bytes"
-      });
-      
+      const fileBlob = new Blob([pdfBlob], { type: 'application/pdf' });
       formData.append('receipt', fileBlob, `receipt-${receiptNumber}.pdf`);
       formData.append('receiptNumber', receiptNumber);
-      
-      const customerName = billingDetails ? 
-        `${billingDetails.firstName || ''} ${billingDetails.lastName || ''}`.trim() : 
-        'Customer';
-      
-      formData.append('customerName', customerName);
+      formData.append('customerName', billingDetails ? `${billingDetails.firstName} ${billingDetails.lastName}`.trim() : 'Customer');
       formData.append('customerEmail', email);
-      formData.append('orderDate', orderDate || new Date().toLocaleDateString());
-      formData.append('deliveryDate', deliveryDate || '');
+      formData.append('orderDate', new Date().toLocaleDateString());
       formData.append('totalAmount', totalAmount.toString());
 
       const productImages = cartItems
-        .filter(item => item.image && typeof item.image === 'string' && item.image.startsWith('http'))
+        .filter(item => item.image && typeof item.image === 'string')
         .map(item => item.image);
       
       formData.append('productImages', JSON.stringify(productImages));
-      formData.append('adminEmails', JSON.stringify(['tobirammar@gmail.com', 'febluxurycloset@gmail.com']));
+      formData.append('adminEmails', JSON.stringify(['febluxurycloset@gmail.com']));
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const response = await axios.post(apiUrl[0], formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        withCredentials: true
+      });
 
-      // Try each API URL in sequence
-      let lastError = null;
-      for (const url of apiUrl) {
-        try {
-          console.log(`Attempting to send email using endpoint: ${url}`);
-          const response = await axios.post(url, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              'Accept': 'application/json',
-              'Origin': window.location.origin
-            },
-            signal: controller.signal,
-            withCredentials: true
-          });
-          
-          clearTimeout(timeoutId);
-          console.log('Email receipt sent successfully:', response.data);
-          toast.success('Order confirmation has been sent to your email');
-          return true;
-        } catch (error) {
-          console.warn(`Failed to send email using ${url}:`, error);
-          lastError = error;
-          // Continue to next URL if available
-        }
-      }
-
-      // If we get here, all URLs failed
-      throw lastError || new Error('All API endpoints failed');
-
+      console.log('Email receipt sent successfully:', response.data);
+      toast.success('Order confirmation has been sent to your email');
+      return true;
     } catch (error) {
-      console.error('All email methods failed:', error);
+      console.error('Email sending failed:', error);
       toast.error('Email delivery failed, but your order is confirmed. Please download your receipt.');
       return true;
     }
@@ -502,35 +398,118 @@ const Checkout = () => {
       {/* Success Message Overlay */}
       {showSuccessMessage && (
         <motion.div 
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
-            <div className="mb-4">
-              <svg
-                className="mx-auto h-12 w-12 text-green-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
+          <motion.div 
+            className="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-xl"
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            transition={{ type: "spring", duration: 0.5 }}
+          >
+            {/* Success Icon */}
+            <motion.div
+              className="mx-auto h-16 w-16 bg-green-100 rounded-full flex items-center justify-center mb-6"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", duration: 0.5, delay: 0.2 }}
+            >
+              <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <motion.path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
+                  strokeWidth={2.5}
                   d="M5 13l4 4L19 7"
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 0.5, delay: 0.5 }}
                 />
               </svg>
-            </div>
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">Order Confirmed!</h2>
-            <p className="text-gray-600 mb-6">
-              Thank you for your order! We've sent a confirmation email with payment instructions to your inbox.
-            </p>
-            <p className="text-sm text-gray-500 mb-6">
-              Questions? Contact us at <a href="mailto:febluxurycloset@gmail.com" className="text-gold hover:underline font-medium">febluxurycloset@gmail.com</a>
-            </p>
-          </div>
+            </motion.div>
+
+            {/* Order Success Content */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+              className="text-center"
+            >
+              <h2 className="text-2xl font-bold mb-2 text-gray-800">Order Successfully Placed!</h2>
+              <p className="text-gray-600 mb-6">Thank you for shopping with FEB Luxury</p>
+
+              {/* Order Details */}
+              <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Order Number:</span>
+                    <span className="text-sm font-medium">FEB-{receiptNumber}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Expected Delivery:</span>
+                    <span className="text-sm font-medium">{deliveryDate}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Total Amount:</span>
+                    <span className="text-sm font-medium">₦{cartTotal.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Next Steps */}
+              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 text-left">
+                <h3 className="font-medium text-yellow-800 mb-2">Next Steps:</h3>
+                <ol className="list-decimal list-inside text-sm text-gray-700 space-y-2 ml-1">
+                  <li>Check your email for payment instructions</li>
+                  <li>Complete the bank transfer using the provided details</li>
+                  <li>Forward your payment proof via WhatsApp</li>
+                  <li>Wait for order processing confirmation</li>
+                </ol>
+              </div>
+
+              {/* Contact Information */}
+              <div className="text-sm text-gray-600 mb-6">
+                Questions? Contact us:
+                <div className="flex items-center justify-center gap-4 mt-2">
+                  <a href="mailto:febluxurycloset@gmail.com" 
+                     className="text-gold hover:underline flex items-center">
+                    <FaEnvelope className="mr-1" /> 
+                    Email
+                  </a>
+                  <a href="https://wa.me/2348033825144" 
+                     target="_blank" 
+                     rel="noopener noreferrer"
+                     className="text-green-600 hover:underline flex items-center">
+                    <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                    </svg>
+                    WhatsApp
+                  </a>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link
+                  to="/shop"
+                  className="w-full sm:w-auto px-6 py-3 bg-black text-white rounded-md hover:bg-gray-800 transition-colors flex items-center justify-center font-medium"
+                >
+                  Continue Shopping
+                </Link>
+                {pdfUrl && (
+                  <a
+                    href={pdfUrl}
+                    download={`FEB_Luxury_Receipt_${receiptNumber}.pdf`}
+                    className="w-full sm:w-auto px-6 py-3 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors flex items-center justify-center"
+                  >
+                    <FaExternalLinkAlt className="mr-2" />
+                    Download Receipt
+                  </a>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
         </motion.div>
       )}
       
