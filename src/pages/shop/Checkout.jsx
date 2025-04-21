@@ -8,6 +8,7 @@ import { formatReceiptNumber } from '../../utils/formatters';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { clearCart } from '../../redux/features/cart/cartSlice';
+import { motion } from 'framer-motion';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -284,7 +285,6 @@ const Checkout = () => {
       let pdfBlob = null;
       try {
         console.log("Converting PDF to blob...");
-        // Use the output method with 'blob' option explicitly setting the type
         pdfBlob = doc.output('blob');
         console.log("PDF blob created successfully", {
           type: pdfBlob.type, 
@@ -294,7 +294,6 @@ const Checkout = () => {
         console.error("Error creating PDF blob:", blobError);
         
         try {
-          // Fallback: try creating blob manually from array buffer
           console.log("Trying alternative blob creation method...");
           const pdfData = doc.output('arraybuffer');
           pdfBlob = new Blob([pdfData], { type: 'application/pdf' });
@@ -304,17 +303,11 @@ const Checkout = () => {
           throw new Error("Failed to create PDF data. " + fallbackError.message);
         }
       }
+
+      // Store the PDF URL for optional download later
+      const url = URL.createObjectURL(pdfBlob);
+      setPdfUrl(url);
       
-      // Attempt to download the PDF
-      try {
-        console.log("Attempting to download PDF...");
-        await downloadWithFallbacks(doc, pdfBlob, `FEB_Luxury_Receipt_${receiptNumber}.pdf`);
-        console.log("PDF download initiated successfully");
-      } catch (downloadError) {
-        console.warn('Download failed but continuing:', downloadError);
-      }
-      
-      setIsGenerating(false);
       return { doc, pdfBlob };
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -535,30 +528,79 @@ const Checkout = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl">
-      {/* Alert messages */}
-      {showSuccessMessage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-lg p-8 max-w-md w-full">
-            <div className="text-center">
-              <span className="material-icons text-5xl text-green-500 mb-4">check_circle</span>
-              <h2 className="text-2xl font-bold mb-4 text-gray-900">Order Successfully Placed!</h2>
-              <p className="text-gray-800 mb-6">
-                Please check your email for payment instructions and order details. Follow the steps in the email to complete your order.
-              </p>
-              <p className="text-sm text-gray-600 mb-6">
-                Your items will be delivered within 3 business days after payment confirmation.
-              </p>
-              <button
-                onClick={() => {
-                  setShowSuccessMessage(false);
-                  navigate('/shop');
-                }}
-                className="w-full py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors"
-              >
-                Continue Shopping
-              </button>
+      {/* Processing Overlay */}
+      {isGenerating && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[9999] animate-fadeIn" style={{ opacity: 1, pointerEvents: 'auto' }}>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white rounded-lg p-8 max-w-sm w-full text-center shadow-xl relative"
+          >
+            <div className="inline-block mb-4">
+              <div className="relative w-16 h-16 mx-auto">
+                <div className="absolute inset-0 rounded-full border-4 border-gold/30"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-gold border-t-transparent animate-spin"></div>
+              </div>
             </div>
-          </div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">Processing Order</h3>
+            <p className="text-gray-600">Please wait while we generate your invoice...</p>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Success Message Overlay */}
+      {showSuccessMessage && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 px-4">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white rounded-lg p-8 max-w-md w-full shadow-2xl relative"
+          >
+            <div className="text-center">
+              <motion.div 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="mb-6"
+              >
+                <span className="material-icons text-6xl text-green-600">check_circle</span>
+              </motion.div>
+              <h2 className="text-2xl font-bold mb-4 text-gray-900">Thank You for Your Order!</h2>
+              <div className="space-y-4 mb-6">
+                <p className="text-gray-900 text-base">
+                  Your order <span className="font-semibold text-gray-900">#{receiptNumber}</span> has been successfully placed.
+                </p>
+                <div className="bg-yellow-50/80 border border-yellow-200 rounded-lg p-4">
+                  <h3 className="font-semibold text-gray-900 mb-2">Next Steps:</h3>
+                  <ol className="text-left text-gray-800 space-y-2 list-decimal list-inside">
+                    <li>Check your email for payment instructions and invoice</li>
+                    <li>Complete the bank transfer using the provided details</li>
+                    <li>Forward your proof of payment as instructed</li>
+                    <li>Await order confirmation (usually within 24 hours)</li>
+                  </ol>
+                </div>
+                <p className="text-gray-800">
+                  Expected delivery: <span className="font-medium text-gray-900">3-5 business days after payment confirmation</span>
+                </p>
+              </div>
+              <div className="space-y-3">
+                <button
+                  onClick={() => {
+                    setShowSuccessMessage(false);
+                    navigate('/shop');
+                  }}
+                  className="w-full py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors rounded-sm"
+                >
+                  Continue Shopping
+                </button>
+                <p className="text-gray-800">
+                  Questions? Contact us at <a href="mailto:febluxurycloset@gmail.com" className="text-gold hover:text-gold/80 hover:underline font-medium">febluxurycloset@gmail.com</a>
+                </p>
+              </div>
+            </div>
+          </motion.div>
         </div>
       )}
       
@@ -682,12 +724,12 @@ const Checkout = () => {
               <button 
                 onClick={handleCheckoutComplete}
                 disabled={isGenerating}
-                className="w-full py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors flex items-center justify-center space-x-2"
+                className={`w-full py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors flex items-center justify-center space-x-2 ${isGenerating ? 'opacity-75 cursor-not-allowed' : ''}`}
               >
                 {isGenerating ? (
                   <>
-                    <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2"></span>
-                    <span>Processing...</span>
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
+                    <span>Processing order...</span>
                   </>
                 ) : (
                   <>

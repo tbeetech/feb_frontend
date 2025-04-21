@@ -113,8 +113,8 @@ const Footer = () => {
           <div>
             <h4 className="text-sm font-medium uppercase mb-4">Customer Service</h4>
             <ul className="space-y-3 text-sm">
-              <li><span className="text-gray-400 cursor-not-allowed">Help & Contact</span></li>
-              <li><span className="text-gray-400 cursor-not-allowed">Shipping & Delivery</span></li>
+              <li><Link to="/contact" className="text-gray-400">Help & Contact</Link></li>
+              <li><span className="text-gray-400">Shipping & Delivery</span></li>
             </ul>
           </div>
           
