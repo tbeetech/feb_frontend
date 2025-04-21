@@ -1083,6 +1083,77 @@ const SingleProduct = () => {
                     </motion.div>
                 </div>
             </motion.section>
+
+        {/* Recommended Products Section */}
+        <motion.section className="mt-16 mb-8">
+            <div className="container mx-auto px-4">
+                <h2 className="text-2xl font-bold mb-6">Recommended Products</h2>
+                
+                <div className="relative">
+                    <button 
+                        onClick={() => scrollRecommendations(-1)}
+                        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 rounded-full p-2 shadow-md hover:bg-white transition-colors"
+                        aria-label="Previous recommendation"
+                    >
+                        <FaChevronLeft className="w-5 h-5" />
+                    </button>
+
+                    <div 
+                        ref={recommendationSliderRef}
+                        className="flex space-x-6 overflow-x-auto scrollbar-hide pb-6"
+                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    >
+                        {similarProducts.map((product) => (
+                            <motion.div
+                                key={product._id}
+                                className="flex-shrink-0 w-64 group"
+                                whileHover={{ y: -5 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <Link to={`/product/${product._id}`} className="block">
+                                    <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 mb-4">
+                                        <img 
+                                            src={getImageUrl(product.image)}
+                                            alt={product.name}
+                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                        />
+                                        {product.oldPrice > 0 && (
+                                            <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                                                {Math.round((product.oldPrice - product.price) / product.oldPrice * 100)}% OFF
+                                            </div>
+                                        )}
+                                    </div>
+                                    <h3 className="font-medium text-gray-900 mb-2 truncate">{product.name}</h3>
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex flex-col">
+                                            <span className="text-lg font-bold text-gray-900">
+                                                {currencySymbol}{formatPrice(product.price)}
+                                            </span>
+                                            {product.oldPrice > 0 && (
+                                                <span className="text-sm text-gray-500 line-through">
+                                                    {currencySymbol}{formatPrice(product.oldPrice)}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center">
+                                            <RatingStars rating={product.rating || 0} size="small" />
+                                        </div>
+                                    </div>
+                                </Link>
+                            </motion.div>
+                        ))}
+                    </div>
+
+                    <button 
+                        onClick={() => scrollRecommendations(1)}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 rounded-full p-2 shadow-md hover:bg-white transition-colors"
+                        aria-label="Next recommendation"
+                    >
+                        <FaChevronRight className="w-5 h-5" />
+                    </button>
+                </div>
+            </div>
+        </motion.section>
         </motion.div>
     );
 };
