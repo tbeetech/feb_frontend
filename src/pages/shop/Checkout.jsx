@@ -381,7 +381,7 @@ const Checkout = () => {
       try {
         console.log("Sending email API request...");
         const apiUrl = process.env.NODE_ENV === 'production' 
-          ? 'https://www.febluxury.com/api/send-receipt-email'
+          ? 'https://febluxury.com/api/send-receipt-email' // Remove www.
           : '/api/send-receipt-email';
 
         const response = await axios.post(apiUrl, formData, {
@@ -519,57 +519,37 @@ const Checkout = () => {
 
       {/* Success Message Overlay */}
       {showSuccessMessage && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 px-4">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className="bg-white rounded-lg p-8 max-w-md w-full shadow-2xl"
-          >
-            <div className="text-center">
-              <motion.div 
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className="mb-6"
+        <motion.div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
+            <div className="mb-4">
+              <svg
+                className="mx-auto h-12 w-12 text-green-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                <span className="material-icons text-6xl text-green-500">check_circle</span>
-              </motion.div>
-              <h2 className="text-3xl font-bold mb-4 text-black">Thank You for Your Order!</h2>
-              <div className="space-y-4 mb-6">
-                <p className="text-gray-800 text-lg">
-                  Your order <span className="font-semibold text-black">#{receiptNumber}</span> has been successfully placed.
-                </p>
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <h3 className="font-semibold text-black mb-2">Next Steps:</h3>
-                  <ol className="text-left text-gray-700 space-y-2 list-decimal list-inside">
-                    <li>Check your email for payment instructions and invoice</li>
-                    <li>Complete the bank transfer using the provided details</li>
-                    <li>Forward your proof of payment as instructed</li>
-                    <li>Await order confirmation (usually within 24 hours)</li>
-                  </ol>
-                </div>
-                <p className="text-gray-700">
-                  Expected delivery: <span className="font-medium text-black">3-5 business days after payment confirmation</span>
-                </p>
-              </div>
-              <div className="space-y-3">
-                <button
-                  onClick={() => {
-                    setShowSuccessMessage(false);
-                    navigate('/shop');
-                  }}
-                  className="w-full py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors rounded-md"
-                >
-                  Continue Shopping
-                </button>
-                <p className="text-gray-700">
-                  Questions? Contact us at <a href="mailto:febluxurycloset@gmail.com" className="text-gold hover:underline font-medium">febluxurycloset@gmail.com</a>
-                </p>
-              </div>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
             </div>
-          </motion.div>
-        </div>
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">Order Confirmed!</h2>
+            <p className="text-gray-600 mb-6">
+              Thank you for your order! We've sent a confirmation email with payment instructions to your inbox.
+            </p>
+            <p className="text-sm text-gray-500 mb-6">
+              Questions? Contact us at <a href="mailto:febluxurycloset@gmail.com" className="text-gold hover:underline font-medium">febluxurycloset@gmail.com</a>
+            </p>
+          </div>
+        </motion.div>
       )}
       
       {showErrorMessage && (
@@ -692,17 +672,17 @@ const Checkout = () => {
               <button 
                 onClick={handleCheckoutComplete}
                 disabled={isGenerating}
-                className={`w-full py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors flex items-center justify-center space-x-2 ${isGenerating ? 'opacity-75 cursor-not-allowed' : ''}`}
+                className="flex items-center justify-center w-full sm:w-auto px-6 py-3 bg-black text-white border border-black rounded-md hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isGenerating ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
-                    <span>Processing order...</span>
+                    <span className="text-white">Processing order...</span>
                   </>
                 ) : (
                   <>
-                    <FaEnvelope className="mr-2" />
-                    <span>Generate Payment Invoice & Place Order</span>
+                    <FaEnvelope className="mr-2 text-white" />
+                    <span className="text-white">Generate Payment Invoice & Place Order</span>
                   </>
                 )}
               </button>
