@@ -319,7 +319,16 @@ const Checkout = () => {
     }
   };
 
-  // Add a new function to send email receipts
+  // Update the API URL construction to handle multiple domains
+  const apiUrl = (() => {
+    if (process.env.NODE_ENV === 'production') {
+      // Try the base domain first, fallback to www if needed
+      return ['https://febluxury.com/api/send-receipt-email', 'https://www.febluxury.com/api/send-receipt-email'];
+    }
+    return ['/api/send-receipt-email'];
+  })();
+
+  // Update the email sending logic
   const sendEmailReceipt = async (email, totalAmount, pdfBlob, receiptNumber) => {
     try {
       console.log('Preparing to send email receipt...');
@@ -377,63 +386,36 @@ const Checkout = () => {
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
-      
-      try {
-        console.log("Sending email API request...");
-        const apiUrl = process.env.NODE_ENV === 'production' 
-          ? 'https://febluxury.com/api/send-receipt-email' // Remove www.
-          : '/api/send-receipt-email';
 
-        const response = await axios.post(apiUrl, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            'Accept': 'application/json'
-          },
-          signal: controller.signal,
-          withCredentials: true
-        });
-        
-        clearTimeout(timeoutId);
-        
-        console.log('Email receipt sent successfully:', response.data);
-        toast.success('Order confirmation has been sent to your email');
-        return true;
-      } catch (apiError) {
-        clearTimeout(timeoutId);
-        console.error('API email attempt failed:', apiError);
-        
-        let errorMessage = 'Could not send email receipt';
-        let troubleshooting = null;
-        let alternativeContact = null;
-        
-        if (apiError.response && apiError.response.data) {
-          const errorData = apiError.response.data;
-          if (errorData.message) {
-            errorMessage = `Email error: ${errorData.message}`;
-          }
-          if (errorData.troubleshooting) {
-            troubleshooting = errorData.troubleshooting;
-          }
-          if (errorData.alternativeContact) {
-            alternativeContact = errorData.alternativeContact;
-          }
-        } else if (apiError.message) {
-          errorMessage = `Email error: ${apiError.message}`;
-          if (apiError.message.includes('aborted')) {
-            errorMessage = 'Email request timed out. The server might be busy.';
-            troubleshooting = 'Please try again later or use the download option instead.';
-          }
+      // Try each API URL in sequence
+      let lastError = null;
+      for (const url of apiUrl) {
+        try {
+          console.log(`Attempting to send email using endpoint: ${url}`);
+          const response = await axios.post(url, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              'Accept': 'application/json',
+              'Origin': window.location.origin
+            },
+            signal: controller.signal,
+            withCredentials: true
+          });
+          
+          clearTimeout(timeoutId);
+          console.log('Email receipt sent successfully:', response.data);
+          toast.success('Order confirmation has been sent to your email');
+          return true;
+        } catch (error) {
+          console.warn(`Failed to send email using ${url}:`, error);
+          lastError = error;
+          // Continue to next URL if available
         }
-        
-        toast.error(errorMessage);
-        if (troubleshooting) {
-          toast.error(troubleshooting, { duration: 5000 });
-        }
-        if (alternativeContact) {
-          toast.success(alternativeContact, { duration: 6000 });
-        }
-        return true;
       }
+
+      // If we get here, all URLs failed
+      throw lastError || new Error('All API endpoints failed');
+
     } catch (error) {
       console.error('All email methods failed:', error);
       toast.error('Email delivery failed, but your order is confirmed. Please download your receipt.');
