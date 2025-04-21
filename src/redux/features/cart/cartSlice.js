@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit'
-import toast from 'react-hot-toast'
 
 const initialState = {
     products: [],
@@ -9,46 +8,55 @@ const initialState = {
 }
 
 const cartSlice = createSlice({
-    name: "cart",
+    name: 'cart',
     initialState,
     reducers: {
         addToCart: (state, action) => {
-            // Check if product with same ID, size, and color exists
+            const itemToAdd = action.payload;
+            
+            // Validate payload
+            if (!itemToAdd || !itemToAdd._id) {
+                console.error('Invalid item to add to cart:', itemToAdd);
+                return;
+            }
+            
+            // Find existing product with same ID, size, and color
             const existingProductIndex = state.products.findIndex(
                 (product) => 
-                    product._id === action.payload._id && 
-                    product.selectedSize === action.payload.selectedSize &&
-                    product.selectedColor === action.payload.selectedColor
+                    product._id === itemToAdd._id && 
+                    product.selectedSize === itemToAdd.selectedSize &&
+                    product.selectedColor === itemToAdd.selectedColor
             );
             
             if (existingProductIndex >= 0) {
-                // If product exists, increment quantity
+                // Check stock limit if it exists
+                if (itemToAdd.stockQuantity && 
+                    state.products[existingProductIndex].quantity >= itemToAdd.stockQuantity) {
+                    return;
+                }
+                // Increment quantity if exists
                 state.products[existingProductIndex].quantity += 1;
-                // Show a toast
-                toast.success('Product quantity increased');
             } else {
-                // Otherwise add new product
-                state.products.push({ ...action.payload, quantity: 1 });
-                // Show a toast
-                toast.success('Added to cart');
+                // Add new item with quantity 1
+                state.products.unshift({ ...itemToAdd, quantity: 1 });
             }
             
-            // Calculate subtotal
+            // Recalculate totals
             state.total = state.products.reduce(
                 (total, item) => total + item.price * item.quantity,
                 0
             );
-            
-            // Calculate grand total including fixed delivery fee
             state.grandTotal = state.total + state.deliveryFee;
         },
         decrementQuantity: (state, action) => {
+            const itemToDecrement = action.payload;
+            
             // Find product with same ID, size, and color
             const existingProductIndex = state.products.findIndex(
                 (product) => 
-                    product._id === action.payload._id && 
-                    product.selectedSize === action.payload.selectedSize &&
-                    product.selectedColor === action.payload.selectedColor
+                    product._id === itemToDecrement._id && 
+                    product.selectedSize === itemToDecrement.selectedSize &&
+                    product.selectedColor === itemToDecrement.selectedColor
             );
             
             if (existingProductIndex >= 0) {
@@ -62,67 +70,40 @@ const cartSlice = createSlice({
                     state.products[existingProductIndex].quantity -= 1;
                 }
                 
-                // Recalculate total
+                // Recalculate totals
                 state.total = state.products.reduce(
                     (total, item) => total + item.price * item.quantity,
                     0
                 );
-                
-                // Recalculate grand total
                 state.grandTotal = state.total + state.deliveryFee;
             }
         },
         removeFromCart: (state, action) => {
-            // Log the item being removed and the current state
-            console.log('Cart State Before Removal:', {
-                productsCount: state.products.length,
-                firstProduct: state.products[0],
-                actionPayload: action.payload
-            });
-            
-            // Add more robust checks for the item to remove
             const itemToRemove = action.payload;
             if (!itemToRemove || !itemToRemove._id) {
                 console.error('Invalid item to remove from cart:', itemToRemove);
                 return;
             }
             
-            // Check if the item actually exists in the cart before attempting removal
-            const existingItemIndex = state.products.findIndex(product => 
-                product._id === itemToRemove._id && 
-                product.selectedSize === itemToRemove.selectedSize &&
-                product.selectedColor === itemToRemove.selectedColor
-            );
-            
-            if (existingItemIndex === -1) {
-                console.warn('Item not found in cart, cannot remove:', itemToRemove);
-                return;
-            }
-            
-            // Create a new array without the item to ensure state updates properly
+            // Remove product matching ID, size, and color
             state.products = state.products.filter(
-                (product, index) => index !== existingItemIndex
+                product => 
+                    !(product._id === itemToRemove._id && 
+                    product.selectedSize === itemToRemove.selectedSize &&
+                    product.selectedColor === itemToRemove.selectedColor)
             );
             
-            // Log the updated state
-            console.log('Cart State After Removal:', {
-                productsCount: state.products.length,
-                removedItem: itemToRemove
-            });
-            
-            // Recalculate total
+            // Recalculate totals
             state.total = state.products.reduce(
                 (total, item) => total + item.price * item.quantity,
                 0
             );
-            
-            // Recalculate grand total
             state.grandTotal = state.total + state.deliveryFee;
         },
         clearCart: (state) => {
             state.products = [];
             state.total = 0;
-            state.grandTotal = state.deliveryFee; // Only delivery fee remains when cart is empty
+            state.grandTotal = state.deliveryFee;
         }
     }
 });

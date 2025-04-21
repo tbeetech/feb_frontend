@@ -1,16 +1,18 @@
-import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, decrementQuantity, removeFromCart, clearCart } from "../../redux/features/cart/cartSlice";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { CiTrash, CiCirclePlus, CiCircleMinus } from "react-icons/ci";
 import { getImageUrl } from "../../utils/imageUrl";
 import { useCurrency } from "../../components/CurrencySwitcher";
+import PropTypes from 'prop-types';
 
 const CartModal = ({ onClose }) => {
     const dispatch = useDispatch();
-    const products = useSelector((state) => state.cart.products);
+    const { products, deliveryFee, grandTotal, total } = useSelector((state) => state.cart);
     const { formatPrice, currencySymbol, currencyCode } = useCurrency();
+    
+    const itemCount = products.reduce((sum, item) => sum + item.quantity, 0);
 
     const handleIncrement = (product) => {
         dispatch(addToCart(product));
@@ -21,17 +23,16 @@ const CartModal = ({ onClose }) => {
     };
 
     const handleRemove = (product) => {
-        dispatch(removeFromCart({ _id: product._id }));
+        dispatch(removeFromCart({ 
+            _id: product._id,
+            selectedSize: product.selectedSize,
+            selectedColor: product.selectedColor
+        }));
     };
 
     const handleClearCart = () => {
         dispatch(clearCart());
     };
-
-    const total = products.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const itemCount = products.reduce((sum, item) => sum + item.quantity, 0);
-    // Shipping cost (can be adjusted based on currency)
-    const shippingCost = 24;
 
     return (
         <motion.div
@@ -158,11 +159,11 @@ const CartModal = ({ onClose }) => {
                                 </div>
                                 <div className="flex justify-between py-2">
                                     <span className="text-sm text-gray-600">Delivery</span>
-                                    <span className="text-sm font-medium">{currencySymbol}{formatPrice(shippingCost)}</span>
+                                    <span className="text-sm font-medium">{currencySymbol}{formatPrice(deliveryFee)}</span>
                                 </div>
                                 <div className="flex justify-between py-2 border-t border-gray-200 mt-2">
                                     <span className="text-base font-medium">Total</span>
-                                    <span className="text-base font-medium">{currencyCode} {currencySymbol}{formatPrice(total + shippingCost)}</span>
+                                    <span className="text-base font-medium">{currencyCode} {currencySymbol}{formatPrice(grandTotal)}</span>
                                 </div>
                             </div>
                             
@@ -174,7 +175,7 @@ const CartModal = ({ onClose }) => {
                                     }}
                                     state={{ 
                                         cartItems: products,
-                                        total: total + shippingCost
+                                        total: grandTotal
                                     }}
                                     className="w-full block text-center py-3 px-4 bg-black text-white font-medium hover:bg-gray-900"
                                 >
@@ -199,6 +200,10 @@ const CartModal = ({ onClose }) => {
             </motion.div>
         </motion.div>
     );
+};
+
+CartModal.propTypes = {
+    onClose: PropTypes.func.isRequired
 };
 
 export default CartModal;

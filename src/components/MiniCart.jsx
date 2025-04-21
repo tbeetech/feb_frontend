@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -63,52 +63,12 @@ const MiniCart = () => {
 
   // Handle cart item operations
   const handleRemoveItem = (product) => {
-    // Debug the product being removed
-    console.log('Attempting to remove item from cart:', {
-      id: product._id,
-      name: product.name,
-      size: product.selectedSize,
-      color: product.selectedColor,
-      fullProduct: product
-    });
-    
-    // Verify all required fields are present
-    if (!product || !product._id) {
-      console.error("Cannot remove product - invalid product data:", product);
-      toast.error('Could not remove item from cart - invalid product data');
-      return;
-    }
-    
-    // Log the current cart state before removal
-    console.log('Current cart before removal:', products);
-    
     try {
-      // Dispatch the action to remove this specific product
-      dispatch(removeFromCart(product));
-      
-      // Verify removal by checking the updated products from useSelector in the next cycle
-      setTimeout(() => {
-        // Get current products from Redux
-        const currentProducts = products;
-        const stillExists = currentProducts.some(
-          item => item._id === product._id && 
-                 item.selectedSize === product.selectedSize && 
-                 item.selectedColor === product.selectedColor
-        );
-        
-        if (stillExists) {
-          console.warn('Product may not have been removed from cart:', product);
-          // Try removing again with a direct dispatch that includes exact matching parameters
-          dispatch(removeFromCart({
-            _id: product._id,
-            selectedSize: product.selectedSize,
-            selectedColor: product.selectedColor
-          }));
-        } else {
-          console.log('Product successfully removed from cart');
-        }
-      }, 100);
-      
+      dispatch(removeFromCart({ 
+        _id: product._id,
+        selectedSize: product.selectedSize,
+        selectedColor: product.selectedColor
+      }));
       toast.success('Item removed from cart');
     } catch (error) {
       console.error("Error removing product from cart:", error);
@@ -117,6 +77,10 @@ const MiniCart = () => {
   };
 
   const handleIncrementItem = (product) => {
+    if (product.stockQuantity && product.quantity >= product.stockQuantity) {
+      toast.error(`Sorry, only ${product.stockQuantity} items available`);
+      return;
+    }
     dispatch(addToCart(product));
     toast.success('Product quantity increased');
   };
@@ -254,7 +218,7 @@ const MiniCart = () => {
             ) : (
               <>
                 <div className="max-h-80 overflow-y-auto p-3">
-                  {products.map((product, index) => (
+                  {products.map((product) => (
                     <div 
                       key={`${product._id}-${product.selectedSize || ''}-${product.selectedColor || ''}`}
                       className="flex items-center gap-3 mb-3 p-2 hover:bg-gray-50 rounded-lg transition-colors"
@@ -416,4 +380,4 @@ const MiniCart = () => {
   );
 };
 
-export default MiniCart; 
+export default MiniCart;

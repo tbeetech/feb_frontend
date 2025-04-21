@@ -1,19 +1,22 @@
-import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, decrementQuantity, removeFromCart, clearCart } from "../../redux/features/cart/cartSlice";
 import { Link } from "react-router-dom";
-import { motion } from 'framer-motion';
 import { CiTrash, CiCirclePlus, CiCircleMinus } from "react-icons/ci";
 import { FaArrowLeft } from "react-icons/fa";
 import { getImageUrl } from "../../utils/imageUrl";
 import { useCurrency } from "../../components/CurrencySwitcher";
+import { toast } from 'react-hot-toast';
 
 const CartPage = () => {
     const dispatch = useDispatch();
     const { products, deliveryFee, grandTotal } = useSelector((state) => state.cart);
-    const { formatPrice, currencySymbol, currencyCode } = useCurrency();
+    const { formatPrice, currencySymbol } = useCurrency();
 
     const handleIncrement = (product) => {
+        if (product.stockQuantity && product.quantity >= product.stockQuantity) {
+            toast.error(`Sorry, only ${product.stockQuantity} items available`);
+            return;
+        }
         dispatch(addToCart(product));
     };
 
@@ -22,11 +25,19 @@ const CartPage = () => {
     };
 
     const handleRemove = (product) => {
-        dispatch(removeFromCart({ _id: product._id }));
+        dispatch(removeFromCart({ 
+            _id: product._id,
+            selectedSize: product.selectedSize,
+            selectedColor: product.selectedColor
+        }));
+        toast.success('Item removed from cart');
     };
 
     const handleClearCart = () => {
-        dispatch(clearCart());
+        if (window.confirm('Are you sure you want to clear your cart?')) {
+            dispatch(clearCart());
+            toast.success('Cart cleared successfully');
+        }
     };
 
     const subtotal = products.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -51,7 +62,7 @@ const CartPage = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>
                         <h2 className="text-xl font-semibold mb-4">Your cart is empty</h2>
-                        <p className="text-gray-600 mb-6">Looks like you haven't added any products to your cart yet.</p>
+                        <p className="text-gray-600 mb-6">Looks like you haven&apos;t added any products to your cart yet.</p>
                         <Link to="/shop" className="bg-black text-white px-6 py-3 rounded-md font-medium hover:bg-gray-800 inline-block">
                             <span className="text-white" style={{color: 'white !important'}}>Browse Products</span>
                         </Link>
@@ -196,4 +207,4 @@ const CartPage = () => {
     );
 };
 
-export default CartPage; 
+export default CartPage;

@@ -82,7 +82,7 @@ const TrendingProductSlider = () => {
             {/* Products Container - Minimalist Design */}
             <div 
                 ref={scrollContainerRef}
-                className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
+                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 relative"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
                 {products.map((product) => (
@@ -92,7 +92,7 @@ const TrendingProductSlider = () => {
                             scale: 1.03,
                             transition: { type: "spring", stiffness: 300 }
                         }}
-                        className="w-72 flex-shrink-0 overflow-hidden cursor-pointer relative group"
+                        className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col"
                     >
                         {/* Only show image for cleaner look */}
                         <div className="relative h-96 overflow-hidden">
