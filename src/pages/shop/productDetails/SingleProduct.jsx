@@ -364,93 +364,75 @@ const SingleProduct = () => {
     };
 
     // Handlers
-    const handleAddToCart = (product) => {
-        // Guard against null product
-        if (!product) {
+    const handleAddToCart = () => {
+        if (!singleProduct) {
             console.error("Cannot add null product to cart");
-            toast.error("Error adding product to cart");
+            toast.error("Error adding to cart");
+            return;
+        }
+        
+        // For pre-order products, show alert instead of redirecting
+        if (singleProduct.stockStatus === 'Pre Order') {
+            handlePreOrder(singleProduct);
             return;
         }
 
-        console.log("Adding to cart with size:", selectedSize);
-        
-        // Verify we have a size selected if product has sizes
-        if (product.sizes && product.sizes.length > 0 && !selectedSize) {
+        // Validate selections
+        if (singleProduct.sizes && singleProduct.sizes.length > 0 && !selectedSize) {
             toast.error('Please select a size');
             return;
         }
 
-        // Verify we have a color selected if product has colors
-        if (product.colors && product.colors.length > 0 && !selectedColor) {
+        if (singleProduct.colors && singleProduct.colors.length > 0 && !selectedColor) {
             toast.error('Please select a color');
             return;
         }
 
-        // Get the color value to store - prefer the name for display
-        // Only process color if selectedColor is not null
+        // Get the color value to store
         const colorToStore = selectedColor ? (
             typeof selectedColor === 'object' 
-                ? selectedColor.name  // Store the name for better display in cart
+                ? selectedColor.name
                 : selectedColor
         ) : null;
 
-        // Create the product object with the selected options
         const productToAdd = {
-            ...product,
+            ...singleProduct,
             selectedSize: selectedSize || null,
             selectedColor: colorToStore,
             quantity: 1
         };
 
-        console.log("Product being added to cart:", productToAdd);
-        
-        // Add to cart and show confirmation
         dispatch(addToCart(productToAdd));
-        toast.success('Added to cart successfully');
+        toast.success('Item added to cart successfully');
     };
 
     const handlePreOrder = (product) => {
-        // Guard against null product
-        if (!product) {
-            console.error("Cannot pre-order null product");
-            toast.error("Error processing pre-order");
-            return;
-        }
-        
-        // Verify we have a size selected if product has sizes
+        // Validate selections for pre-order
         if (product.sizes && product.sizes.length > 0 && !selectedSize) {
             toast.error('Please select a size');
             return;
         }
 
-        // Verify we have a color selected if product has colors
         if (product.colors && product.colors.length > 0 && !selectedColor) {
             toast.error('Please select a color');
             return;
         }
 
-        // Get the color value to store - prefer the name for display
         const colorToStore = selectedColor ? (
             typeof selectedColor === 'object' 
-                ? selectedColor.name  // Store the name for better display in cart
+                ? selectedColor.name
                 : selectedColor
         ) : null;
-            
-        const productWithSize = {
+
+        const productWithDetails = {
             ...product,
             selectedSize: selectedSize || null,
             selectedColor: colorToStore,
             quantity: 1
         };
         
-        dispatch(addToCart(productWithSize));
-        navigate('/billing-details', { 
-            state: { 
-                cartItems: [productWithSize],
-                total: product.price,
-                isPreOrder: true 
-            } 
-        });
+        dispatch(addToCart(productWithDetails));
+        toast.success('Pre-order item added to cart successfully');
     };
 
     const handleIncrement = (product) => {

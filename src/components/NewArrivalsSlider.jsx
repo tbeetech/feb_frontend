@@ -1,46 +1,79 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useRef } from 'react';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useFetchAllProductsQuery } from '../redux/features/products/productsApi';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import Slider from 'react-slick';
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 const NewArrivalsSlider = () => {
     const navigate = useNavigate();
-    const [currentIndex, setCurrentIndex] = useState(0);
+    const sliderRef = useRef(null);
+    const [isHovered, setIsHovered] = useState(false);
 
     const { data, isLoading, error, refetch } = useFetchAllProductsQuery({
-        limit: 7,
+        limit: 10,
         sort: '-createdAt'
     });
 
-    useEffect(() => {
-        // Log query status
-        console.log('Query Status:', { isLoading, error, data });
-    }, [isLoading, error, data]);
-
     const products = data?.products || [];
 
-    // Reset index when products change
-    useEffect(() => {
-        setCurrentIndex(0);
-    }, [products]);
+    // Slider settings
+    const settings = {
+        dots: true,
+        infinite: true,
+        speed: 500,
+        slidesToShow: 4,
+        slidesToScroll: 1,
+        autoplay: true,
+        autoplaySpeed: 3000,
+        pauseOnHover: true,
+        arrows: false,
+        responsive: [
+            {
+                breakpoint: 1536, // 2xl
+                settings: {
+                    slidesToShow: 4
+                }
+            },
+            {
+                breakpoint: 1280, // xl
+                settings: {
+                    slidesToShow: 3
+                }
+            },
+            {
+                breakpoint: 1024, // lg
+                settings: {
+                    slidesToShow: 2
+                }
+            },
+            {
+                breakpoint: 640, // sm
+                settings: {
+                    slidesToShow: 1,
+                    dots: false
+                }
+            }
+        ]
+    };
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center min-h-[400px] bg-gray-50">
+            <div className="flex justify-center items-center min-h-[400px]">
                 <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
             </div>
         );
     }
 
     if (error) {
-        console.error('NewArrivalsSlider Error:', error);
         return (
-            <div className="flex flex-col items-center justify-center min-h-[400px] bg-gray-50">
+            <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
                 <p className="text-red-500 mb-4">Error loading new arrivals</p>
                 <button 
                     onClick={() => refetch()}
-                    className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
+                    className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800"
                 >
                     Try Again
                 </button>
@@ -48,241 +81,109 @@ const NewArrivalsSlider = () => {
         );
     }
 
-    if (!products?.length) {
-        return (
-            <div className="flex justify-center items-center min-h-[400px] bg-gray-50">
-                <p className="text-gray-500">No new arrivals available</p>
-            </div>
-        );
-    }
-
-    // 3D card animation variants
-    const cardVariants = {
-        hidden: { 
-            rotateY: 180,
-            opacity: 0,
-            scale: 0.8,
-            z: -100
-        },
-        visible: {
-            rotateY: 0,
-            opacity: 1,
-            scale: 1,
-            z: 0,
-            transition: {
-                type: "spring",
-                stiffness: 100,
-                damping: 15
-            }
-        },
-        hover: {
-            scale: 1.05,
-            rotateY: 15,
-            z: 50,
-            transition: {
-                type: "spring",
-                stiffness: 400,
-                damping: 30
-            }
-        }
-    };
-
-    // Parallax effect for background
-    const backgroundVariants = {
-        initial: { opacity: 0 },
-        animate: { 
-            opacity: 1,
-            transition: {
-                duration: 1.5
-            }
-        }
-    };
-
-    // Slider animation variants
-    const sliderVariants = {
-        enter: (direction) => ({
-            x: direction > 0 ? 1000 : -1000,
-            opacity: 0
-        }),
-        center: {
-            zIndex: 1,
-            x: 0,
-            opacity: 1
-        },
-        exit: (direction) => ({
-            zIndex: 0,
-            x: direction < 0 ? 1000 : -1000,
-            opacity: 0
-        })
-    };
-
-    const swipeConfidenceThreshold = 10000;
-    const swipePower = (offset, velocity) => {
-        return Math.abs(offset) * velocity;
-    };
-
-    const paginate = (newDirection) => {
-        setCurrentIndex((prevIndex) => {
-            const nextIndex = prevIndex + newDirection;
-            if (nextIndex < 0) return products.length - 1;
-            if (nextIndex >= products.length) return 0;
-            return nextIndex;
-        });
-    };
-
     return (
-        <motion.div 
-            className="relative min-h-[600px] overflow-hidden"
-            initial="initial"
-            animate="animate"
-            variants={backgroundVariants}
-        >
-            {/* Parallax Background */}
-            <motion.div 
-                className="absolute inset-0 bg-gradient-to-r from-gray-100/30 to-white"
-                style={{
-                    backgroundSize: "200% 200%",
-                    backgroundPosition: "0% 0%"
+        <div className="relative py-8 max-w-[1536px] mx-auto px-4 xl:px-8"
+             onMouseEnter={() => setIsHovered(true)}
+             onMouseLeave={() => setIsHovered(false)}>
+            
+            {/* Navigation Arrows */}
+            <motion.button
+                onClick={() => sliderRef.current?.slickPrev()}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-gray-700 hover:bg-black hover:text-white transition-all duration-300 -ml-5 lg:-ml-6"
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ 
+                    opacity: isHovered ? 1 : 0,
+                    x: isHovered ? 0 : 10
                 }}
-            />
+                transition={{ duration: 0.3 }}
+                aria-label="Previous slide"
+            >
+                <FaChevronLeft className="w-4 h-4" />
+            </motion.button>
 
-            {/* Main Content */}
-            <div className="relative z-10 max-w-6xl mx-auto px-4 py-16">
-                {/* Previous/Next Arrows */}
-                {products.length > 1 && (
-                    <>
-                        <button 
-                            onClick={() => paginate(-1)}
-                            className="absolute left-4 top-1/2 z-20 transform -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-md hover:bg-white transition-colors"
-                            aria-label="Previous product"
-                        >
-                            <FaChevronLeft className="w-5 h-5 text-gray-800" />
-                        </button>
-                        <button 
-                            onClick={() => paginate(1)}
-                            className="absolute right-4 top-1/2 z-20 transform -translate-y-1/2 bg-white/80 rounded-full p-2 shadow-md hover:bg-white transition-colors"
-                            aria-label="Next product"
-                        >
-                            <FaChevronRight className="w-5 h-5 text-gray-800" />
-                        </button>
-                    </>
-                )}
+            <motion.button
+                onClick={() => sliderRef.current?.slickNext()}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-gray-700 hover:bg-black hover:text-white transition-all duration-300 -mr-5 lg:-mr-6"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ 
+                    opacity: isHovered ? 1 : 0,
+                    x: isHovered ? 0 : -10
+                }}
+                transition={{ duration: 0.3 }}
+                aria-label="Next slide"
+            >
+                <FaChevronRight className="w-4 h-4" />
+            </motion.button>
 
-                <AnimatePresence initial={false} custom={currentIndex}>
-                    <motion.div
-                        key={currentIndex}
-                        custom={currentIndex}
-                        variants={sliderVariants}
-                        initial="enter"
-                        animate="center"
-                        exit="exit"
-                        transition={{
-                            x: { type: "spring", stiffness: 300, damping: 30 },
-                            opacity: { duration: 0.2 }
-                        }}
-                        drag="x"
-                        dragConstraints={{ left: 0, right: 0 }}
-                        dragElastic={1}
-                        onDragEnd={(e, { offset, velocity }) => {
-                            const swipe = swipePower(offset.x, velocity.x);
-                            if (swipe < -swipeConfidenceThreshold) {
-                                paginate(1);
-                            } else if (swipe > swipeConfidenceThreshold) {
-                                paginate(-1);
-                            }
-                        }}
-                        className="absolute inset-0 z-10"
-                    >
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full items-center">
-                            {/* Product Image */}
-                            <motion.div
-                                variants={cardVariants}
-                                initial="hidden"
-                                animate="visible"
-                                whileHover="hover"
-                                className="relative perspective-1000"
-                            >
-                                <div className="relative group cursor-pointer" 
-                                     onClick={() => navigate(`/product/${products[currentIndex]._id}`)}>
-                                    <img
-                                        src={products[currentIndex].image}
-                                        alt={products[currentIndex].name}
-                                        className="w-full h-[400px] object-cover rounded-lg shadow-2xl transform-gpu"
-                                    />
-                                    <motion.div
-                                        className="absolute inset-0 bg-black bg-opacity-40 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                                        whileHover={{ opacity: 1 }}
+            {/* Products Slider */}
+            <Slider ref={sliderRef} {...settings} className="new-arrivals-slider -mx-2">
+                {products.map((product) => (
+                    <div key={product._id} className="px-2">
+                        <motion.div
+                            whileHover={{ y: -10 }}
+                            transition={{ duration: 0.3 }}
+                            className="group relative bg-white rounded-lg overflow-hidden shadow-lg"
+                        >
+                            <div className="relative aspect-square overflow-hidden">
+                                <img
+                                    src={product.image}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                    <button
+                                        onClick={() => navigate(`/product/${product._id}`)}
+                                        className="bg-white text-black px-6 py-2 rounded-full transform -translate-y-10 group-hover:translate-y-0 transition-transform duration-300"
                                     >
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <span className="text-white text-lg font-semibold">View Details</span>
-                                        </div>
-                                    </motion.div>
+                                        View Product
+                                    </button>
                                 </div>
-                            </motion.div>
+                                {product.isNew && (
+                                    <div className="absolute top-2 left-2 bg-black text-white text-xs px-2 py-1 rounded">
+                                        NEW
+                                    </div>
+                                )}
+                            </div>
+                            <div className="p-4">
+                                <h3 className="text-lg font-semibold mb-2 truncate">{product.name}</h3>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-primary font-bold">₦{product.price.toLocaleString()}</span>
+                                    {product.oldPrice > 0 && (
+                                        <span className="text-gray-500 line-through text-sm">
+                                            ₦{product.oldPrice.toLocaleString()}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                ))}
+            </Slider>
 
-                            {/* Product Info */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2 }}
-                                className="text-center md:text-left"
-                            >
-                                <motion.h3
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="text-3xl font-playfair font-bold text-gray-900 mb-4"
-                                >
-                                    {products[currentIndex].name}
-                                </motion.h3>
-                                <motion.div
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    className="text-2xl font-bold text-primary mb-4"
-                                >
-                                    ₦{products[currentIndex].price.toLocaleString()}
-                                </motion.div>
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    className="bg-black text-white px-8 py-3 rounded-full font-semibold shadow-lg hover:bg-gray-800 transition-colors"
-                                    onClick={() => navigate(`/product/${products[currentIndex]._id}`)}
-                                >
-                                    Shop Now
-                                </motion.button>
-                            </motion.div>
-                        </div>
-                    </motion.div>
-                </AnimatePresence>
-
-                {/* Navigation Dots */}
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                    {products.map((_, index) => (
-                        <motion.button
-                            key={index}
-                            className={`w-3 h-3 rounded-full ${
-                                index === currentIndex ? 'bg-primary' : 'bg-gray-300'
-                            }`}
-                            onClick={() => setCurrentIndex(index)}
-                            whileHover={{ scale: 1.2 }}
-                            whileTap={{ scale: 0.8 }}
-                        />
-                    ))}
-                </div>
-                
-                {/* Go to Shop button */}
-                <div className="flex justify-center mt-12 relative z-20">
-                    <Link 
-                        to="/shop" 
-                        className="bg-gold hover:bg-gold-dark text-white font-medium py-3 px-6 rounded-md transition-all duration-300 shadow-luxury flex items-center gap-2 transform hover:scale-105"
-                    >
-                        Go to Shop
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                    </Link>
-                </div>
-            </div>
-        </motion.div>
+            <style>{`
+                .new-arrivals-slider .slick-track {
+                    display: flex !important;
+                    gap: 1rem;
+                }
+                .new-arrivals-slider .slick-slide {
+                    height: inherit !important;
+                }
+                .new-arrivals-slider .slick-slide > div {
+                    height: 100%;
+                }
+                .new-arrivals-slider .slick-dots {
+                    bottom: -2.5rem;
+                }
+                .new-arrivals-slider .slick-dots li button:before {
+                    font-size: 8px;
+                }
+                @media (min-width: 1024px) {
+                    .new-arrivals-slider {
+                        margin: 0 -1rem;
+                    }
+                }
+            `}</style>
+        </div>
     );
 };
 
