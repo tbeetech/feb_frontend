@@ -7,8 +7,8 @@ const getApiUrl = () => {
     return process.env.REACT_APP_API_URL || 'http://localhost:5000';
   }
   
-  // Production environment - use the same domain as frontend but with https
-  return `https://${hostname}`;
+  // Production environment - use the Vercel deployment URL
+  return 'https://feb-backend.vercel.app';
 };
 
 const config = {
