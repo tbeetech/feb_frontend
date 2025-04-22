@@ -9,11 +9,6 @@ import axios from 'axios';
 import { clearCart } from '../../redux/features/cart/cartSlice';
 import { motion } from 'framer-motion';
 
-// API URL based on environment
-const BASE_API_URL = window.location.hostname === 'localhost' 
-  ? 'http://localhost:5000/api'
-  : `https://${window.location.hostname}/api`;
-
 const Checkout = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -278,9 +273,6 @@ const Checkout = () => {
     }
   };
 
-  // Update the API URL construction to use BASE_API_URL
-  const apiUrl = [`${BASE_API_URL}/send-receipt-email`];
-
   // Update the email sending logic
   const sendEmailReceipt = async (email, totalAmount, pdfBlob, receiptNumber) => {
     try {
@@ -302,16 +294,22 @@ const Checkout = () => {
       formData.append('productImages', JSON.stringify(productImages));
       formData.append('adminEmails', JSON.stringify(['febluxurycloset@gmail.com']));
 
-      const response = await axios.post(apiUrl[0], formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        withCredentials: true
-      });
+      try {
+        const response = await axios.post('https://feb-backend.vercel.app/api/send-receipt-email', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          },
+          withCredentials: true
+        });
 
-      console.log('Email receipt sent successfully:', response.data);
-      toast.success('Order confirmation has been sent to your email');
-      return true;
+        console.log('Email receipt sent successfully:', response.data);
+        toast.success('Order confirmation has been sent to your email');
+        return true;
+      } catch (error) {
+        console.error('Email sending failed:', error);
+        toast.error('Email delivery failed, but your order is confirmed. Please download your receipt.');
+        return true;
+      }
     } catch (error) {
       console.error('Email sending failed:', error);
       toast.error('Email delivery failed, but your order is confirmed. Please download your receipt.');
