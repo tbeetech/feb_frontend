@@ -3,11 +3,12 @@ const getBaseUrl = () => {
     const hostname = window.location.hostname;
     
     if (isDevelopment) {
-        return import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        return 'http://localhost:5000';
     }
     
-    // In production, use the same hostname as the frontend
-    return `https://${hostname}`;
+    // In production, use the current domain
+    const currentDomain = hostname.replace('www.', '');
+    return `https://${currentDomain}`;
 };
 
 export const baseURL = getBaseUrl();
