@@ -5,8 +5,8 @@ const getBaseUrl = () => {
         return 'http://localhost:5000';
     }
     
-    // In production, use the current window location origin
-    return window.location.origin;
+    // In production, use the Vercel deployment URL
+    return 'https://feb-backend.vercel.app';
 };
 
 export const baseURL = getBaseUrl();
