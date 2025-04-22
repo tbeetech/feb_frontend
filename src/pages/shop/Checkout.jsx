@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 // API URL based on environment
 const BASE_API_URL = window.location.hostname === 'localhost' 
   ? 'http://localhost:5000/api'
-  : 'https://febluxury.com/api';
+  : `https://${window.location.hostname}/api`;
 
 const Checkout = () => {
   const navigate = useNavigate();
