@@ -221,8 +221,14 @@ const Terms = () => {
             </p>
             <div className="bg-gray-50 p-4 rounded-lg my-4">
               <p className="mb-1"><strong>Email:</strong> <a href="mailto:febluxurycloset@gmail.com" className="text-primary hover:underline">febluxurycloset@gmail.com</a></p>
-              <p className="mb-1"><strong>WhatsApp:</strong> <a href="https://wa.me/message/NP6XO5SXNXG5G1" className="text-primary hover:underline">Click here to message us</a></p>
-              <p><strong>Instagram:</strong> <a href="https://www.instagram.com/f.e.b_luxuryclosetbackup1" className="text-primary hover:underline">@f.e.b_luxuryclosetbackup1</a></p>
+              <p className="mb-1"><strong>WhatsApp:</strong> 
+                <a href="https://wa.me/message/NP6XO5SXNXG5G1" className="text-primary hover:underline">Primary WhatsApp</a> | 
+                <a href="https://wa.me/2348088690856" className="text-primary hover:underline">Secondary WhatsApp</a>
+              </p>
+              <p><strong>Instagram:</strong> 
+                <a href="https://www.instagram.com/f.e.b_luxuryclosetbackup1" className="text-primary hover:underline">@f.e.b_luxuryclosetbackup1</a> | 
+                <a href="https://www.instagram.com/jumiescent_backup" className="text-primary hover:underline">@jumiescent_backup</a>
+              </p>
             </div>
           </section>
 
@@ -235,4 +241,4 @@ const Terms = () => {
   );
 };
 
-export default Terms; 
+export default Terms;

@@ -70,11 +70,19 @@ const Contact = () => {
                                    className="text-gray-600 hover:text-green-500 transition-colors">
                                     <FaWhatsapp className="text-2xl" />
                                 </a>
+                                <a href="https://wa.me/2348088690856" 
+                                   className="text-gray-600 hover:text-green-500 transition-colors">
+                                    <FaWhatsapp className="text-2xl" />
+                                </a>
                                 <a href="https://t.me/febluxury" 
                                    className="text-gray-600 hover:text-blue-500 transition-colors">
                                     <FaTelegram className="text-2xl" />
                                 </a>
-                                <a href="https://www.instagram.com/f.e.b_luxurycloset" 
+                                <a href="https://www.instagram.com/f.e.b_luxuryclosetbackup1" 
+                                   className="text-gray-600 hover:text-pink-500 transition-colors">
+                                    <FaInstagram className="text-2xl" />
+                                </a>
+                                <a href="https://www.instagram.com/jumiescent_backup" 
                                    className="text-gray-600 hover:text-pink-500 transition-colors">
                                     <FaInstagram className="text-2xl" />
                                 </a>

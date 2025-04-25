@@ -141,27 +141,36 @@ const Footer = () => {
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-black transition-colors retro-shadow"
-                    aria-label="Instagram"
+                    aria-label="Instagram Primary"
                 >
                     <FaInstagram size={18} />
                 </a>
                 <a 
-                    href="https://wa.me/message/NP6XO5SXNXG5G1" 
+                    href="https://www.instagram.com/jumiescent_backup" 
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-black transition-colors retro-shadow"
-                    aria-label="WhatsApp"
+                    aria-label="Instagram Secondary"
+                >
+                    <FaInstagram size={18} />
+                </a>
+                <a 
+                    href="https://wa.me/message/NP6XO5SXNXG5G1"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-black transition-colors retro-shadow"
+                    aria-label="WhatsApp Primary"
                 >
                     <FaWhatsapp size={18} />
                 </a>
                 <a 
-                    href="https://t.me/febluxury" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
+                    href="https://wa.me/2348088690856"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-black transition-colors retro-shadow"
-                    aria-label="Telegram"
+                    aria-label="WhatsApp Secondary"
                 >
-                    <FaTelegram size={18} />
+                    <FaWhatsapp size={18} />
                 </a>
             </div>
           </div>

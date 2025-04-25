@@ -65,15 +65,26 @@ const OrderConfirmation = ({ orderNumber, totalAmount, email }) => {
                     </div>
                     
                     <div className="mt-6 grid grid-cols-2 gap-3">
-                        <a
-                            href="https://wa.me/2348033825144"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex w-full items-center justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700"
-                        >
-                            <FaWhatsapp className="mr-2" />
-                            Contact on WhatsApp
-                        </a>
+                        <div className="flex flex-col gap-2">
+                            <a
+                                href="https://wa.me/message/NP6XO5SXNXG5G1"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex w-full items-center justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700"
+                            >
+                                <FaWhatsapp className="mr-2" />
+                                Primary WhatsApp
+                            </a>
+                            <a
+                                href="https://wa.me/2348088690856"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex w-full items-center justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700"
+                            >
+                                <FaWhatsapp className="mr-2" />
+                                Secondary WhatsApp
+                            </a>
+                        </div>
                         <Link
                             to="/shop"
                             className="flex w-full items-center justify-center rounded-md bg-gray-800 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-700"
