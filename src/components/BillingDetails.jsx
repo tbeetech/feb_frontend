@@ -537,17 +537,36 @@ const BillingDetails = ({ isPreOrder = false }) => {
               <div className="mt-4 bg-blue-50 p-4 rounded-md">
                 <h4 className="text-sm font-medium text-blue-800 mb-2">Estimated Delivery</h4>
                 <div className="text-sm text-blue-700">
-                  {isPreOrder ? (
-                    <>
-                      <p>Pre-order delivery: 14 working days</p>
-                      <p className="mt-1">Expected by {new Date(new Date().getTime() + (14 * 24 * 60 * 60 * 1000)).toLocaleDateString()}</p>
-                    </>
-                  ) : (
-                    <>
-                      <p>Standard delivery: 3 business days</p>
-                      <p className="mt-1">Expected by {new Date(new Date().getTime() + (3 * 24 * 60 * 60 * 1000)).toLocaleDateString()}</p>
-                    </>
-                  )}
+                  {(() => {
+                    const addBusinessDays = (date, days) => {
+                      let currentDate = new Date(date);
+                      let addedDays = 0;
+                      while (addedDays < days) {
+                        currentDate.setDate(currentDate.getDate() + 1);
+                        if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) {
+                          addedDays++;
+                        }
+                      }
+                      return currentDate;
+                    };
+
+                    const today = new Date();
+                    const deliveryDate = isPreOrder 
+                      ? addBusinessDays(today, 14)
+                      : addBusinessDays(today, 3);
+
+                    return isPreOrder ? (
+                      <>
+                        <p>Pre-order delivery: 14 working days</p>
+                        <p className="mt-1">Expected by {deliveryDate.toLocaleDateString()}</p>
+                      </>
+                    ) : (
+                      <>
+                        <p>Standard delivery: 3 business days</p>
+                        <p className="mt-1">Expected by {deliveryDate.toLocaleDateString()}</p>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             </div>

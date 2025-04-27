@@ -330,7 +330,7 @@ const SingleProduct = () => {
             return {
                 icon: "local_shipping",
                 title: "Fast Delivery",
-                message: "This item will be delivered within 74 hours (3 days) from your order date.",
+                message: "This item will be delivered within 3 business days from your order date.",
                 color: "green"
             };
         } else {

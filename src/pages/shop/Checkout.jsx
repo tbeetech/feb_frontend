@@ -327,6 +327,40 @@ const Checkout = () => {
     }
   };
   
+  // Helper function to calculate delivery date
+  const calculateDeliveryDate = (stockStatus) => {
+    const addBusinessDays = (date, days) => {
+        let currentDate = new Date(date);
+        let addedDays = 0;
+        while (addedDays < days) {
+            currentDate.setDate(currentDate.getDate() + 1);
+            // Skip weekends
+            if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) {
+                addedDays++;
+            }
+        }
+        return currentDate;
+    };
+
+    const today = new Date();
+    if (stockStatus === 'Pre Order') {
+        return addBusinessDays(today, 14); // 14 working days
+    } else {
+        return addBusinessDays(today, 3); // 3 business days
+    }
+};
+
+// Calculate expected delivery date
+const expectedDeliveryDate = calculateDeliveryDate(cartItems[0]?.stockStatus || 'In Stock');
+
+// Use expectedDeliveryDate in the component
+useEffect(() => {
+    if (location.state?.billingDetails) {
+        setBillingDetails(location.state.billingDetails);
+        setDeliveryDate(expectedDeliveryDate);
+    }
+}, [location.state, expectedDeliveryDate]);
+
   // Update the checkout flow to send the receipt via email
   const handleCheckoutComplete = async () => {
     setIsGenerating(true);

@@ -5,7 +5,33 @@ import { FaCheckCircle, FaWhatsapp } from 'react-icons/fa';
 import { MdEmail } from 'react-icons/md';
 import PropTypes from 'prop-types';
 
-const OrderConfirmation = ({ orderNumber, totalAmount, email }) => {
+const OrderConfirmation = ({ orderNumber, totalAmount, email, cartItems }) => {
+    const getDeliveryInfo = (stockStatus) => {
+        const addBusinessDays = (date, days) => {
+            let currentDate = new Date(date);
+            let addedDays = 0;
+            while (addedDays < days) {
+                currentDate.setDate(currentDate.getDate() + 1);
+                if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) {
+                    addedDays++;
+                }
+            }
+            return currentDate;
+        };
+
+        const today = new Date();
+        const deliveryDate = stockStatus === 'Pre Order' 
+            ? addBusinessDays(today, 14)
+            : addBusinessDays(today, 3);
+
+        return {
+            date: deliveryDate.toLocaleDateString(),
+            message: stockStatus === 'Pre Order'
+                ? 'Estimated delivery within 14 working days'
+                : 'Estimated delivery within 3 business days'
+        };
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -61,6 +87,20 @@ const OrderConfirmation = ({ orderNumber, totalAmount, email }) => {
                                     <li>Send payment confirmation via WhatsApp</li>
                                 </ol>
                             </div>
+
+                            <div className="mt-6 border-t border-gray-200 pt-4">
+                                <h4 className="text-sm font-medium text-gray-900">Delivery Information</h4>
+                                {cartItems.map(item => {
+                                    const delivery = getDeliveryInfo(item.stockStatus || 'In Stock');
+                                    return (
+                                        <div key={item._id} className="item-delivery">
+                                            <span>{item.name}:</span>
+                                            <p>{delivery.message}</p>
+                                            <p>Expected by: {delivery.date}</p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
                     
@@ -101,7 +141,12 @@ const OrderConfirmation = ({ orderNumber, totalAmount, email }) => {
 OrderConfirmation.propTypes = {
     orderNumber: PropTypes.string.isRequired,
     totalAmount: PropTypes.number.isRequired,
-    email: PropTypes.string.isRequired
+    email: PropTypes.string.isRequired,
+    cartItems: PropTypes.arrayOf(PropTypes.shape({
+        _id: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired,
+        stockStatus: PropTypes.string
+    })).isRequired
 };
 
 export default OrderConfirmation;
