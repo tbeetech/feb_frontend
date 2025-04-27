@@ -40,12 +40,7 @@ const MiniCart = () => {
   const handleCheckoutClick = (e) => {
     e.preventDefault();
     setShowMiniCart(false);
-    navigate('/billing-details', {
-      state: {
-        cartItems: products,
-        total: grandTotal
-      }
-    });
+    window.location.href = '/billing-details';
   };
 
   // Calculate total price - we'll use this for subtotal only

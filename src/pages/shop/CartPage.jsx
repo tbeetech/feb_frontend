@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, decrementQuantity, removeFromCart, clearCart } from "../../redux/features/cart/cartSlice";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { CiTrash, CiCirclePlus, CiCircleMinus } from "react-icons/ci";
 import { FaArrowLeft } from "react-icons/fa";
 import { getImageUrl } from "../../utils/imageUrl";
@@ -9,7 +9,6 @@ import { toast } from 'react-hot-toast';
 
 const CartPage = () => {
     const dispatch = useDispatch();
-    const navigate = useNavigate();
     const { products, deliveryFee, grandTotal } = useSelector((state) => state.cart);
     const { formatPrice, currencySymbol } = useCurrency();
 
@@ -46,13 +45,7 @@ const CartPage = () => {
             toast.error('Your cart is empty');
             return;
         }
-        navigate('/billing-details', {
-            replace: true, // Use replace to avoid back button issues
-            state: {
-                cartItems: products,
-                total: grandTotal
-            }
-        });
+        window.location.href = '/billing-details';
     };
 
     const subtotal = products.reduce((sum, item) => sum + (item.price * item.quantity), 0);

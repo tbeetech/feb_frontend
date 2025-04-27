@@ -51,13 +51,7 @@ const CartModal = ({ onClose }) => {
             return;
         }
         onClose(); // Close modal first
-        navigate('/billing-details', {
-            replace: true, // Use replace to avoid back button issues
-            state: { 
-                cartItems: products,
-                total: grandTotal
-            }
-        });
+        window.location.href = '/billing-details';
     };
 
     return (
