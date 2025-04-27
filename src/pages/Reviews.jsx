@@ -35,7 +35,7 @@ const Reviews = () => {
         }
     };
 
-    const handleLikeReview = async (reviewId) => {
+    const handleLikeReview = async (reviewId, isLiked) => {
         try {
             await axios.post(
                 `${import.meta.env.VITE_API_URL}/api/reviews/${reviewId}/like`,
@@ -46,13 +46,18 @@ const Reviews = () => {
                     }
                 }
             );
-            toast.success('Review liked successfully');
+            toast.success(isLiked ? 'Review unliked successfully' : 'Review liked successfully');
             refetch();
         } catch (error) {
-            const errorMsg = error.response?.data?.message || 'Failed to like review';
+            const errorMsg = error.response?.data?.message || 'Failed to like/unlike review';
             setError(errorMsg);
             toast.error(errorMsg);
         }
+    };
+
+    // Check if a review is liked by the current user
+    const isReviewLiked = (review) => {
+        return review.likes?.includes(user?._id);
     };
 
     if (isLoading) {
@@ -182,11 +187,13 @@ const Reviews = () => {
                                             </div>
                                             <p className="text-gray-600 mt-2">{review.comment}</p>
                                             <button
-                                                onClick={() => handleLikeReview(review._id)}
-                                                className="flex items-center space-x-1 text-gold mt-2"
+                                                onClick={() => handleLikeReview(review._id, isReviewLiked(review))}
+                                                className={`flex items-center space-x-1 ${
+                                                    isReviewLiked(review) ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
+                                                } mt-2 transition-colors`}
                                             >
                                                 <FaHeart />
-                                                <span className="text-sm">Liked</span>
+                                                <span className="text-sm">{isReviewLiked(review) ? 'Liked' : 'Like'}</span>
                                             </button>
                                         </div>
                                     </div>
@@ -200,4 +207,4 @@ const Reviews = () => {
     );
 };
 
-export default Reviews; 
+export default Reviews;

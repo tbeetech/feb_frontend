@@ -177,6 +177,7 @@ const BillingDetails = ({ isPreOrder = false }) => {
       // Navigate to checkout with billing details and delivery dates
       setTimeout(() => {
         navigate('/checkout', { 
+          replace: true,
           state: { 
             billingDetails: formData,
             cartItems: cartItems,

@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
-import { Link, useParams, useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef, useMemo } from 'react'
+import { Link, useParams } from 'react-router-dom'
 import RatingStars from '../../../components/RatingStars';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFetchProductByIdQuery, useUpdateProductRatingMutation, useFetchAllProductsQuery } from '../../../redux/features/products/productsApi';
@@ -118,7 +118,6 @@ const useRecommendationEngine = (currentProductId, productCategory) => {
 const SingleProduct = () => {
     const { id } = useParams();
     const dispatch = useDispatch();
-    const navigate = useNavigate();
     const { formatPrice, currencySymbol } = useCurrency();
     
     // Get delivery fee from Redux store for consistent calculations
@@ -134,9 +133,12 @@ const SingleProduct = () => {
 
     // Initialize image and gallery variables
     // Move this BEFORE any useEffect hooks that reference it
-    const galleryImages = singleProduct?.gallery || singleProduct?.images || [];
-    const colorVariantImages = singleProduct?.colors?.filter(c => c.imageUrl)?.map(c => c.imageUrl) || [];
-    const allImages = [singleProduct?.image, ...galleryImages, ...colorVariantImages].filter(Boolean);
+    const galleryImages = useMemo(() => {
+        const mainImage = singleProduct?.image;
+        const gallery = singleProduct?.gallery || [];
+        const colorImages = singleProduct?.colors?.filter(c => c?.imageUrl)?.map(c => c.imageUrl) || [];
+        return [mainImage, ...gallery, ...colorImages].filter(Boolean);
+    }, [singleProduct]);
     
     // Get reviews using RTK Query
     const { data: reviewsData, isLoading: isLoadingReviews } = useGetProductReviewsQuery(id);
@@ -200,50 +202,50 @@ const SingleProduct = () => {
     // Update selectedImage when currentImageIndex changes OR when allImages changes
     useEffect(() => {
         console.log("Image gallery effect running - currentImageIndex:", currentImageIndex);
-        console.log("Image gallery effect running - allImages:", allImages);
+        console.log("Image gallery effect running - allImages:", galleryImages);
         
-        if (allImages && allImages.length > 0) {
+        if (galleryImages && galleryImages.length > 0) {
             // First, ensure index is within bounds
-            const safeIndex = Math.min(currentImageIndex, allImages.length - 1);
+            const safeIndex = Math.min(currentImageIndex, galleryImages.length - 1);
             if (safeIndex !== currentImageIndex) {
                 console.log("Fixing out of bounds index:", currentImageIndex, "->", safeIndex);
                 setCurrentImageIndex(safeIndex);
             }
             
             // Set the selected image directly from the array
-            const newSelectedImage = allImages[safeIndex];
+            const newSelectedImage = galleryImages[safeIndex];
             console.log("Setting selected image to:", newSelectedImage);
             setSelectedImage(newSelectedImage);
         }
-    }, [currentImageIndex, allImages]);
+    }, [currentImageIndex, galleryImages]);
 
     // Image navigation handlers
     const goToNextImage = () => {
         console.log("Going to next image from index:", currentImageIndex);
-        if (!allImages || allImages.length === 0) return;
+        if (!galleryImages || galleryImages.length === 0) return;
         
-        const nextIndex = currentImageIndex === allImages.length - 1 ? 0 : currentImageIndex + 1;
+        const nextIndex = currentImageIndex === galleryImages.length - 1 ? 0 : currentImageIndex + 1;
         console.log("Next image index:", nextIndex);
         setCurrentImageIndex(nextIndex);
     };
 
     const goToPrevImage = () => {
         console.log("Going to previous image from index:", currentImageIndex);
-        if (!allImages || allImages.length === 0) return;
+        if (!galleryImages || galleryImages.length === 0) return;
         
-        const prevIndex = currentImageIndex === 0 ? allImages.length - 1 : currentImageIndex - 1;
+        const prevIndex = currentImageIndex === 0 ? galleryImages.length - 1 : currentImageIndex - 1;
         console.log("Previous image index:", prevIndex);
         setCurrentImageIndex(prevIndex);
     };
 
     // Set initial image only when it changes
     useEffect(() => {
-        if (singleProduct?.image && (!selectedImage || allImages.length === 1)) {
+        if (singleProduct?.image && (!selectedImage || galleryImages.length === 1)) {
             console.log("Setting initial image from product:", singleProduct.image);
             setSelectedImage(singleProduct.image);
             setCurrentImageIndex(0); // Reset to first image when product changes
         }
-    }, [singleProduct?._id, singleProduct?.image, selectedImage, allImages]);
+    }, [singleProduct?._id, singleProduct?.image, selectedImage, galleryImages]);
 
     // Set initial selected image, size, and color when product loads
     useEffect(() => {
@@ -274,7 +276,28 @@ const SingleProduct = () => {
                 hexCode: initialColor.hexCode || initialColor.name
             });
         }
-    }, [singleProduct?._id]); // Only run when product ID changes
+    }, [singleProduct, outOfStockSizes]); // Only run when product ID changes
+
+    // Update image when color changes
+    useEffect(() => {
+        if (selectedColor && typeof selectedColor === 'object') {
+            const colorObj = singleProduct?.colors?.find(c => 
+                c.name === selectedColor.name || c.hexCode === selectedColor.hexCode
+            );
+            if (colorObj?.imageUrl) {
+                setSelectedImage(colorObj.imageUrl);
+                setCurrentImageIndex(galleryImages.indexOf(colorObj.imageUrl));
+            }
+        }
+    }, [selectedColor, singleProduct?.colors, galleryImages]);
+
+    // Set initial image
+    useEffect(() => {
+        if (galleryImages.length > 0 && !selectedImage) {
+            setSelectedImage(galleryImages[0]);
+            setCurrentImageIndex(0);
+        }
+    }, [galleryImages, selectedImage]);
 
     // Animation variants
     const fadeInUp = {
@@ -435,28 +458,64 @@ const SingleProduct = () => {
         toast.success('Pre-order item added to cart successfully');
     };
 
+    const validateStockAndCart = (product, requestedQuantity = 1) => {
+        if (!product) return { valid: false, message: 'Invalid product' };
+        if (product.stockStatus === 'Out of Stock') {
+            return { valid: false, message: 'Product is out of stock' };
+        }
+        if (product.stockStatus === 'Pre Order') {
+            return { valid: true };
+        }
+        if (!product.stockQuantity || product.stockQuantity < 1) {
+            return { valid: false, message: 'Product is out of stock' };
+        }
+        if (quantity + requestedQuantity > product.stockQuantity) {
+            return { 
+                valid: false, 
+                message: `Cannot add more items. Only ${product.stockQuantity} available.`
+            };
+        }
+        return { valid: true };
+    };
+
     const handleIncrement = (product) => {
-        // Guard against null product
         if (!product) {
             console.error("Cannot increment null product");
             return;
         }
-        
-        if (!hasReachedStockLimit) {
-            // Get the color value to store - prefer the name for display
-            const colorToStore = selectedColor ? (
-                typeof selectedColor === 'object' 
-                    ? selectedColor.name  // Store the name for better display in cart
-                    : selectedColor
-            ) : null;
-                
-            const productWithSize = {
-                ...product,
-                selectedSize: selectedSize || null,
-                selectedColor: colorToStore
-            };
-            dispatch(addToCart(productWithSize));
+
+        // Validate stock and cart state
+        const validation = validateStockAndCart(product, 1);
+        if (!validation.valid) {
+            toast.error(validation.message);
+            return;
         }
+
+        // Add validation for size and color if required
+        if (product.sizes?.length > 0 && !selectedSize) {
+            toast.error('Please select a size first');
+            return;
+        }
+
+        if (product.colors?.length > 0 && !selectedColor) {
+            toast.error('Please select a color first');
+            return;
+        }
+
+        const colorToStore = selectedColor ? (
+            typeof selectedColor === 'object' 
+                ? selectedColor.name
+                : selectedColor
+        ) : null;
+
+        const productWithDetails = {
+            ...product,
+            selectedSize: selectedSize || null,
+            selectedColor: colorToStore
+        };
+
+        dispatch(addToCart(productWithDetails));
+        toast.success('Item added to cart');
     };
 
     const handleDecrement = (product) => {
@@ -465,26 +524,28 @@ const SingleProduct = () => {
             return;
         }
 
-        // If quantity is 1, this will remove the item
-        if (quantity <= 1) {
-            const productToRemove = {
-                ...product,
-                selectedSize: selectedSize || null,
-                selectedColor: selectedColor ? (typeof selectedColor === 'object' ? selectedColor.name : selectedColor) : null
-            };
-            console.log("Removing product from cart:", productToRemove);
-            dispatch(decrementQuantity(productToRemove));
-            toast.success('Item removed from cart');
+        if (quantity <= 0) {
             return;
         }
 
-        // Otherwise just decrement the quantity
-        const productToDecrement = {
+        const colorToStore = selectedColor ? (
+            typeof selectedColor === 'object' 
+                ? selectedColor.name
+                : selectedColor
+        ) : null;
+
+        const productWithDetails = {
             ...product,
             selectedSize: selectedSize || null,
-            selectedColor: selectedColor ? (typeof selectedColor === 'object' ? selectedColor.name : selectedColor) : null
+            selectedColor: colorToStore
         };
-        dispatch(decrementQuantity(productToDecrement));
+
+        if (quantity === 1) {
+            dispatch(decrementQuantity(productWithDetails));
+            toast.success('Item removed from cart');
+        } else {
+            dispatch(decrementQuantity(productWithDetails));
+        }
     };
 
     // Handler for size selection - simplified
@@ -509,26 +570,42 @@ const SingleProduct = () => {
         console.log("Selected size after update:", size);
     };
 
+    const validateColorSelection = (color) => {
+        if (!color) return false;
+        if (typeof color === 'object' && !color.name && !color.hexCode) return false;
+        if (typeof color === 'string' && color.trim() === '') return false;
+        return true;
+    };
+
     const handleColorSelect = (color, hexCode) => {
         console.log("Selected color:", color, "Hex:", hexCode);
         
-        // Find the color object - prioritize color name match
-        const colorObject = singleProduct.colors?.find(c => c.name === color) || 
-                          singleProduct.colors?.find(c => c.hexCode === hexCode);
+        // Find the color object from the product's colors array
+        const colorObject = singleProduct.colors?.find(c => 
+            c.name === color || c.hexCode === hexCode
+        );
         
-        // Always store the color name for display, but keep hex code for internal use
-        const colorName = colorObject?.name || getColorName(hexCode) || color;
-        setSelectedColor({
-            name: colorName,
-            hexCode: colorObject?.hexCode || hexCode
-        });
-        
-        // Update the selected image if there's a color-specific image
-        if (colorObject?.imageUrl) {
-            setSelectedImage(colorObject.imageUrl);
+        if (!colorObject) {
+            console.error("Invalid color selected");
+            toast.error('Please select a valid color');
+            return;
         }
         
-        // Show confirmation toast with the color name
+        const colorName = colorObject.name || getColorName(colorObject.hexCode) || color;
+        setSelectedColor({
+            name: colorName,
+            hexCode: colorObject.hexCode || hexCode,
+            imageUrl: colorObject.imageUrl // Store image URL if available
+        });
+        
+        // Update image if color has an associated image
+        if (colorObject.imageUrl) {
+            const imageIndex = galleryImages.indexOf(colorObject.imageUrl);
+            if (imageIndex !== -1) {
+                setCurrentImageIndex(imageIndex);
+            }
+        }
+        
         toast.success(`Color ${colorName} selected`, {
             id: 'color-selection-toast',
             duration: 2000
@@ -570,6 +647,27 @@ const SingleProduct = () => {
         singleProduct?.category
     );
 
+    const validateStock = (product, requestedQuantity = 1) => {
+        if (!product) return false;
+        if (product.stockStatus === 'Out of Stock') return false;
+        if (product.stockStatus === 'Pre Order') return true;
+        return product.stockQuantity >= (quantity + requestedQuantity);
+    };
+
+    const handleQuantityChange = (type, product) => {
+        if (!product) return;
+        
+        if (type === 'increment') {
+            if (!validateStock(product, 1)) {
+                toast.error('Cannot add more items. Stock limit reached.');
+                return;
+            }
+            handleIncrement(product);
+        } else {
+            handleDecrement(product);
+        }
+    };
+
     // Loading state
     if (isLoading) return (
         <div className="min-h-screen flex items-center justify-center">
@@ -602,7 +700,7 @@ const SingleProduct = () => {
     console.log('Product gallery field:', singleProduct?.gallery);
     console.log('Product images field:', singleProduct?.images); 
     console.log('Main product image:', singleProduct?.image);
-    console.log('Combined images for display:', allImages);
+    console.log('Combined images for display:', galleryImages);
     console.log('Currently selected image:', selectedImage);
     
     // Get delivery information
@@ -635,6 +733,7 @@ const SingleProduct = () => {
                         className="flex items-center text-sm lg:text-base text-white"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.7 }}
                     transition={{ delay: 0.3, duration: 0.7 }}
                 >
                     <Link to="/" className="hover:text-gray-300 transition-colors duration-300">Home</Link>
@@ -675,7 +774,7 @@ const SingleProduct = () => {
                                     />
                                     
                                     {/* Navigation arrows for image slider */}
-                                    {allImages.length > 1 && (
+                                    {galleryImages.length > 1 && (
                                         <>
                                             <button 
                                                 onClick={(e) => {
@@ -704,9 +803,9 @@ const SingleProduct = () => {
                         </div>
 
                         {/* Slider indicators */}
-                        {allImages.length > 1 && (
+                        {galleryImages.length > 1 && (
                             <div className="flex justify-center mt-4 gap-2">
-                                {allImages.map((_, index) => (
+                                {galleryImages.map((_, index) => (
                                     <button
                                         key={`indicator-${index}`}
                                         onClick={() => setCurrentImageIndex(index)}
@@ -1008,7 +1107,7 @@ const SingleProduct = () => {
                                         <span className="text-gray-700 mr-4 font-medium">Quantity:</span>
                                         <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
                                             <motion.button
-                                                onClick={() => handleDecrement(singleProduct)}
+                                                onClick={() => handleQuantityChange('decrement', singleProduct)}
                                                 className="px-5 py-3 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors text-lg font-bold"
                                                 disabled={quantity === 0}
                                                 whileTap={{ scale: 0.95 }}
@@ -1017,7 +1116,7 @@ const SingleProduct = () => {
                                             </motion.button>
                                             <span className="px-6 py-3 font-medium text-lg">{quantity}</span>
                                             <motion.button
-                                                onClick={() => handleIncrement(singleProduct)}
+                                                onClick={() => handleQuantityChange('increment', singleProduct)}
                                                 className={`px-5 py-3 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors text-lg font-bold ${hasReachedStockLimit ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                 disabled={hasReachedStockLimit}
                                                 whileTap={{ scale: 0.95 }}
@@ -1154,6 +1253,28 @@ const SingleProduct = () => {
                 </div>
             </div>
         </motion.section>
+
+        {/* Reviews Section */}
+        <section className="container mx-auto px-4 py-12">
+            <div className="max-w-4xl mx-auto">
+                <h2 className="text-2xl font-bold mb-8">Customer Reviews</h2>
+                
+                {/* Review Form */}
+                <ReviewForm 
+                    productId={id} 
+                    onReviewSubmitted={handleReviewSubmitted}
+                />
+                
+                {/* Reviews List */}
+                <div className="mt-12">
+                    <ReviewsCard 
+                        productReviews={reviewsData} 
+                        onReviewLike={handleReviewLike}
+                        isLoading={isLoadingReviews}
+                    />
+                </div>
+            </div>
+        </section>
         </motion.div>
     );
 };

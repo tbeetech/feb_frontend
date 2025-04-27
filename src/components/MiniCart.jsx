@@ -17,10 +17,36 @@ const MiniCart = () => {
   const navigate = useNavigate();
   const { formatPrice, currencySymbol } = useCurrency();
   const miniCartRef = useRef(null);
-  const [isVisible, setIsVisible] = useState(false);
   const lastAddedRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
   const [lastAddedProduct, setLastAddedProduct] = useState(null);
   const [prevProductsLength, setPrevProductsLength] = useState(0);
+  const itemCount = products.reduce((total, item) => total + item.quantity, 0);
+
+  // Toggle mini cart visibility
+  const toggleMiniCart = (e) => {
+    e.stopPropagation();
+    setShowMiniCart(!showMiniCart);
+  };
+
+  // Handle cart navigation
+  const handleCartClick = (e) => {
+    e.preventDefault();
+    setShowMiniCart(false);
+    navigate('/cart');
+  };
+
+  // Handle checkout navigation
+  const handleCheckoutClick = (e) => {
+    e.preventDefault();
+    setShowMiniCart(false);
+    navigate('/billing-details', {
+      state: {
+        cartItems: products,
+        total: grandTotal
+      }
+    });
+  };
 
   // Calculate total price - we'll use this for subtotal only
   const subtotal = total || products.reduce(
@@ -30,9 +56,6 @@ const MiniCart = () => {
   
   // Use grandTotal from Redux state instead of calculating it locally
   const totalPrice = grandTotal;
-
-  // Count total items
-  const itemCount = products.reduce((total, item) => total + item.quantity, 0);
 
   // Helper function to convert hex color to color name
   const getColorName = (colorInput) => {
@@ -170,8 +193,7 @@ const MiniCart = () => {
       {/* Cart Icon with Counter */}
       <div 
         className="relative cursor-pointer p-2"
-        onMouseEnter={() => itemCount > 0 && setShowMiniCart(true)}
-        onClick={() => navigate('/cart')}
+        onClick={toggleMiniCart}
       >
         <FaShoppingCart className="text-xl" />
         {itemCount > 0 && (
@@ -307,20 +329,18 @@ const MiniCart = () => {
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <Link 
-                      to="/cart" 
+                    <button 
+                      onClick={handleCartClick}
                       className="py-2 bg-gray-100 text-gray-800 rounded-lg text-center text-sm font-medium hover:bg-gray-200 transition-colors"
-                      onClick={() => setShowMiniCart(false)}
                     >
                       View Cart
-                    </Link>
-                    <Link 
-                      to="/checkout" 
+                    </button>
+                    <button 
+                      onClick={handleCheckoutClick}
                       className="py-2 bg-primary text-white rounded-lg text-center text-sm font-medium hover:bg-primary-dark transition-colors"
-                      onClick={() => setShowMiniCart(false)}
                     >
                       Checkout
-                    </Link>
+                    </button>
                   </div>
                 </div>
               </>

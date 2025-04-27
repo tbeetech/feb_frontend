@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const SocialContactButtons = ({ productName }) => {
     const encodedMessage = encodeURIComponent(`Hi, I'm interested in ${productName}`);
@@ -59,6 +60,10 @@ const SocialContactButtons = ({ productName }) => {
             </a>
         </div>
     );
+};
+
+SocialContactButtons.propTypes = {
+    productName: PropTypes.string.isRequired
 };
 
 export default SocialContactButtons;

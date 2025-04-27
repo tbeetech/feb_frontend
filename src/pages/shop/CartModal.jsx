@@ -1,20 +1,26 @@
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, decrementQuantity, removeFromCart, clearCart } from "../../redux/features/cart/cartSlice";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion } from 'framer-motion';
 import { CiTrash, CiCirclePlus, CiCircleMinus } from "react-icons/ci";
 import { getImageUrl } from "../../utils/imageUrl";
 import { useCurrency } from "../../components/CurrencySwitcher";
 import PropTypes from 'prop-types';
+import { toast } from 'react-hot-toast';
 
 const CartModal = ({ onClose }) => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { products, deliveryFee, grandTotal, total } = useSelector((state) => state.cart);
     const { formatPrice, currencySymbol, currencyCode } = useCurrency();
     
     const itemCount = products.reduce((sum, item) => sum + item.quantity, 0);
 
     const handleIncrement = (product) => {
+        if (product.stockQuantity && product.quantity >= product.stockQuantity) {
+            toast.error(`Sorry, only ${product.stockQuantity} items available`);
+            return;
+        }
         dispatch(addToCart(product));
     };
 
@@ -28,10 +34,30 @@ const CartModal = ({ onClose }) => {
             selectedSize: product.selectedSize,
             selectedColor: product.selectedColor
         }));
+        toast.success('Item removed from cart');
     };
 
     const handleClearCart = () => {
-        dispatch(clearCart());
+        if (window.confirm('Are you sure you want to clear your cart?')) {
+            dispatch(clearCart());
+            toast.success('Cart cleared');
+            onClose();
+        }
+    };
+
+    const handleCheckoutClick = () => {
+        if (products.length === 0) {
+            toast.error('Your cart is empty');
+            return;
+        }
+        onClose(); // Close modal first
+        navigate('/billing-details', {
+            replace: true, // Use replace to avoid back button issues
+            state: { 
+                cartItems: products,
+                total: grandTotal
+            }
+        });
     };
 
     return (
@@ -168,19 +194,15 @@ const CartModal = ({ onClose }) => {
                             </div>
                             
                             <div className="space-y-3">
-                                <Link
-                                    to="/billing-details"
-                                    onClick={() => {
-                                        onClose();
-                                    }}
-                                    state={{ 
-                                        cartItems: products,
-                                        total: grandTotal
-                                    }}
-                                    className="w-full block text-center py-3 px-4 bg-black text-white font-medium hover:bg-gray-900"
+                                <button
+                                    onClick={handleCheckoutClick}
+                                    className="w-full block text-center py-3 px-4 bg-black text-white font-medium hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={products.length === 0}
                                 >
-                                    <span className="text-white" style={{color: 'white !important'}}>Go To Checkout</span>
-                                </Link>
+                                    <span className="text-white" style={{color: 'white !important'}}>
+                                        {products.length === 0 ? 'Your Cart is Empty' : 'Go To Checkout'}
+                                    </span>
+                                </button>
                                 <button
                                     onClick={onClose}
                                     className="w-full block text-center py-3 px-4 text-black border border-gray-300 font-medium hover:bg-gray-50"

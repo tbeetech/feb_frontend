@@ -15,8 +15,13 @@ const ReviewsCard = ({ productReviews, onReviewLike, isLoading }) => {
             toast.error('Please login to like a review');
             return;
         }
-        if (onReviewLike) {
-            onReviewLike(reviewId);
+
+        try {
+            await onReviewLike(reviewId);
+            // Optimistic UI update is handled by RTK Query cache invalidation
+        } catch (error) {
+            console.error('Error liking review:', error);
+            toast.error('Failed to like review');
         }
     };
 
@@ -100,14 +105,17 @@ const ReviewsCard = ({ productReviews, onReviewLike, isLoading }) => {
                                 <div className="mt-3 flex items-center">
                                     <button
                                         onClick={() => handleLike(review._id)}
-                                        className={`flex items-center space-x-1 text-sm px-3 py-1 rounded-full ${
-                                            review.likes?.includes(user?._id)
-                                                ? 'text-white bg-black'
+                                        className={`flex items-center space-x-1 text-sm px-3 py-1 rounded-full 
+                                            ${review.likes?.includes(user?._id)
+                                                ? 'bg-black text-white'
                                                 : 'text-gray-500 hover:text-black border border-gray-200 hover:border-black'
-                                        } transition-all duration-200`}
+                                            } transition-all duration-200`}
+                                        aria-label={review.likes?.includes(user?._id) ? 'Unlike review' : 'Like review'}
                                     >
-                                        <FaThumbsUp className="h-3 w-3" />
-                                        <span className="text-xs">{review.likes?.length || 0} {review.likes?.length === 1 ? 'like' : 'likes'}</span>
+                                        <FaThumbsUp className={`h-3 w-3 ${review.likes?.includes(user?._id) ? 'text-white' : ''}`} />
+                                        <span className="text-xs">
+                                            {review.likes?.length || 0} {review.likes?.length === 1 ? 'like' : 'likes'}
+                                        </span>
                                     </button>
                                 </div>
                             </div>

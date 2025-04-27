@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, decrementQuantity, removeFromCart, clearCart } from "../../redux/features/cart/cartSlice";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CiTrash, CiCirclePlus, CiCircleMinus } from "react-icons/ci";
 import { FaArrowLeft } from "react-icons/fa";
 import { getImageUrl } from "../../utils/imageUrl";
@@ -9,6 +9,7 @@ import { toast } from 'react-hot-toast';
 
 const CartPage = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { products, deliveryFee, grandTotal } = useSelector((state) => state.cart);
     const { formatPrice, currencySymbol } = useCurrency();
 
@@ -38,6 +39,20 @@ const CartPage = () => {
             dispatch(clearCart());
             toast.success('Cart cleared successfully');
         }
+    };
+
+    const handleCheckoutClick = () => {
+        if (products.length === 0) {
+            toast.error('Your cart is empty');
+            return;
+        }
+        navigate('/billing-details', {
+            replace: true, // Use replace to avoid back button issues
+            state: {
+                cartItems: products,
+                total: grandTotal
+            }
+        });
     };
 
     const subtotal = products.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -188,17 +203,16 @@ const CartPage = () => {
                                     </div>
                                 </div>
                             </div>
-                            
-                            <Link
-                                to="/billing-details"
-                                state={{ 
-                                    cartItems: products,
-                                    total: grandTotal
-                                }}
-                                className="w-full block text-center py-3 px-4 bg-black text-white font-medium hover:bg-gray-800 rounded-md"
+
+                            <button
+                                onClick={handleCheckoutClick}
+                                className="w-full block text-center py-3 px-4 bg-black text-white font-medium hover:bg-gray-800 rounded-md transition-colors"
+                                disabled={products.length === 0}
                             >
-                                <span className="text-white" style={{color: 'white !important'}}>Proceed to Checkout</span>
-                            </Link>
+                                <span className="text-white" style={{color: 'white !important'}}>
+                                    {products.length === 0 ? 'Your Cart is Empty' : 'Proceed to Checkout'}
+                                </span>
+                            </button>
                         </div>
                     </div>
                 </div>
