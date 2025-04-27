@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+import { useState } from 'react';
 import { useSpring, animated } from '@react-spring/web';
 import { PRODUCT_COLORS } from '../constants/colorConstants';
 
-const ColorPalette = ({ colors, onColorSelect, selectedColor }) => {
+const ColorPalette = ({ onColorSelect, selectedColor }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredColor, setHoveredColor] = useState(null);
   
@@ -14,16 +15,27 @@ const ColorPalette = ({ colors, onColorSelect, selectedColor }) => {
 
   // Find the selected color object
   const getSelectedColorObject = () => {
-    // First try to find the color by value (if selectedColor is a hex value)
-    if (typeof selectedColor === 'string' && selectedColor.startsWith('#')) {
-      const foundColor = PRODUCT_COLORS.find(c => c.value === selectedColor);
-      if (foundColor) return foundColor;
+    if (!selectedColor) return { name: 'Select a color', value: '#FFFFFF' };
+    
+    // If selectedColor is an object with name and hexCode
+    if (typeof selectedColor === 'object' && selectedColor.name) {
+      return {
+        name: selectedColor.name,
+        value: selectedColor.hexCode || selectedColor.value || '#FFFFFF'
+      };
     }
     
-    // If selectedColor is a name or the hex value wasn't found
-    return PRODUCT_COLORS.find(c => c.name === selectedColor) || { name: selectedColor || 'Select a color', value: selectedColor || '#FFFFFF' };
+    // If it's a hex value, try to find the name
+    if (typeof selectedColor === 'string' && selectedColor.startsWith('#')) {
+      const foundColor = PRODUCT_COLORS.find(c => c.value.toLowerCase() === selectedColor.toLowerCase());
+      return foundColor || { name: getColorName(selectedColor), value: selectedColor };
+    }
+    
+    // If it's a name, try to find the hex value
+    const foundColor = PRODUCT_COLORS.find(c => c.name.toLowerCase() === selectedColor.toLowerCase());
+    return foundColor || { name: selectedColor, value: '#FFFFFF' };
   };
-  
+
   // Get color name or value depending on what's passed
   const getColorName = (colorInput) => {
     if (!colorInput) return 'Select a color';
@@ -44,10 +56,17 @@ const ColorPalette = ({ colors, onColorSelect, selectedColor }) => {
   };
   
   const handleColorClick = (color, e) => {
-    // Prevent default form submission
     if (e) e.preventDefault();
-    // Pass the color name rather than the hex value
-    onColorSelect(color.name);
+    
+    // Create a consistent color object structure
+    const colorObject = {
+      name: color.name,
+      hexCode: color.value
+    };
+    
+    // Pass the color object to the parent
+    onColorSelect(colorObject);
+    setIsOpen(false);
   };
 
   const handleColorHover = (color) => {
@@ -62,19 +81,12 @@ const ColorPalette = ({ colors, onColorSelect, selectedColor }) => {
   const getColorGroups = () => {
     if (!PRODUCT_COLORS || PRODUCT_COLORS.length === 0) return {};
     
-    // Create groups based on array positions (same as previous logic)
-    const basicColors = PRODUCT_COLORS.slice(0, 8);
-    const fashionColors = PRODUCT_COLORS.slice(8, 16);
-    const metallicColors = PRODUCT_COLORS.slice(16, 20);
-    const neutralColors = PRODUCT_COLORS.slice(20, 24);
-    const additionalColors = PRODUCT_COLORS.slice(24);
-    
     return {
-      basicColors,
-      fashionColors,
-      metallicColors,
-      neutralColors,
-      additionalColors
+      basicColors: PRODUCT_COLORS.slice(0, 8),
+      fashionColors: PRODUCT_COLORS.slice(8, 16),
+      metallicColors: PRODUCT_COLORS.slice(16, 20),
+      neutralColors: PRODUCT_COLORS.slice(20, 24),
+      additionalColors: PRODUCT_COLORS.slice(24)
     };
   };
   
@@ -302,4 +314,16 @@ const ColorPalette = ({ colors, onColorSelect, selectedColor }) => {
   );
 };
 
-export default ColorPalette; 
+ColorPalette.propTypes = {
+  onColorSelect: PropTypes.func.isRequired,
+  selectedColor: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.shape({
+      name: PropTypes.string,
+      hexCode: PropTypes.string,
+      value: PropTypes.string
+    })
+  ])
+};
+
+export default ColorPalette;

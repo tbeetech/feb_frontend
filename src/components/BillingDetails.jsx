@@ -10,14 +10,9 @@ const BillingDetails = ({ isPreOrder = false }) => {
   const { user } = useSelector((state) => state.auth);
   const { products, total, deliveryFee, grandTotal } = useSelector((state) => state.cart);
   
-  // Get cart items and total from location state or Redux store using useMemo
-  const cartItems = useMemo(() => 
-    location.state?.cartItems || products || [], 
-    [location.state?.cartItems, products]
-  );
-  
-  // Use grandTotal from Redux for consistency across all components
-  const cartTotal = isPreOrder ? location.state?.total || total : grandTotal;
+  // Get cart items and total from Redux store using useMemo
+  const cartItems = useMemo(() => products || [], [products]);
+  const cartTotal = grandTotal;
 
   // For debugging
   useEffect(() => {
@@ -152,29 +147,11 @@ const BillingDetails = ({ isPreOrder = false }) => {
     setIsSubmitting(true);
     
     if (validateForm()) {
-      // Calculate delivery date based on whether it's a pre-order or regular order
       const orderDate = new Date();
-      let deliveryDate;
+      const deliveryDate = new Date(orderDate);
+      deliveryDate.setDate(deliveryDate.getDate() + (isPreOrder ? 14 : 3));
       
-      if (isPreOrder) {
-        // 14 days for pre-order
-        deliveryDate = new Date(orderDate);
-        deliveryDate.setDate(deliveryDate.getDate() + 14);
-      } else {
-        // 72 hours (3 days) for regular order
-        deliveryDate = new Date(orderDate);
-        deliveryDate.setDate(deliveryDate.getDate() + 3);
-      }
-      
-      // Format dates as mm/dd/yyyy
-      const formatDate = (date) => {
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
-        const year = date.getFullYear();
-        return `${month.toString().padStart(2, '0')}/${day.toString().padStart(2, '0')}/${year}`;
-      };
-      
-      // Navigate to checkout with billing details and delivery dates
+      // Navigate to checkout with complete order details
       setTimeout(() => {
         navigate('/checkout', { 
           replace: true,
@@ -182,12 +159,14 @@ const BillingDetails = ({ isPreOrder = false }) => {
             billingDetails: formData,
             cartItems: cartItems,
             total: cartTotal,
+            subtotal: total,
+            deliveryFee,
             isPreOrder,
-            orderDate: formatDate(orderDate),
-            deliveryDate: formatDate(deliveryDate)
+            orderDate: orderDate.toISOString(),
+            deliveryDate: deliveryDate.toISOString()
           } 
         });
-      }, 800); // Small delay for better UX
+      }, 800);
     } else {
       setIsSubmitting(false);
       // Scroll to the first error
@@ -501,26 +480,76 @@ const BillingDetails = ({ isPreOrder = false }) => {
               <span className="material-icons mr-2 text-gold">receipt</span>
               Order Summary
             </h2>
-            <div className="space-y-2 mb-4">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Items ({cartItems.length}):</span>
-                <span className="font-medium">₦{total.toLocaleString()}</span>
+            <div className="space-y-4">
+              {/* Products list */}
+              <div className="divide-y divide-gray-200">
+                {cartItems.map((item, index) => (
+                  <div key={`${item._id}-${index}`} className="py-3 flex justify-between items-start">
+                    <div className="flex items-center space-x-3">
+                      <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="h-full w-full object-cover object-center"
+                        />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900">{item.name}</h3>
+                        <div className="mt-1 flex items-center text-sm text-gray-500">
+                          {item.selectedSize && <span className="mr-2">Size: {item.selectedSize}</span>}
+                          {item.selectedColor && (
+                            <span className="flex items-center">
+                              Color: 
+                              <span 
+                                className="ml-1 inline-block h-4 w-4 rounded-full border"
+                                style={{ backgroundColor: item.selectedColor }}
+                              />
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-1 text-sm text-gray-500">Qty: {item.quantity}</p>
+                      </div>
+                    </div>
+                    <p className="text-sm font-medium text-gray-900">
+                      ₦{(item.price * item.quantity).toLocaleString()}
+                    </p>
+                  </div>
+                ))}
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Shipping:</span>
-                <span className="font-medium">₦{deliveryFee.toLocaleString()}</span>
+
+              {/* Order calculations */}
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Items ({cartItems.length}):</span>
+                  <span className="font-medium">₦{total.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Shipping:</span>
+                  <span className="font-medium">₦{deliveryFee.toLocaleString()}</span>
+                </div>
+                <div className="border-t border-gray-200 my-2 pt-2 flex justify-between">
+                  <span className="font-medium">Total:</span>
+                  <span className="font-bold text-lg text-gold">₦{cartTotal.toLocaleString()}</span>
+                </div>
               </div>
-              <div className="border-t border-gray-200 my-2 pt-2 flex justify-between">
-                <span className="font-medium">Total:</span>
-                <span className="font-bold text-lg text-gold">₦{cartTotal.toLocaleString()}</span>
+
+              {/* Delivery estimate */}
+              <div className="mt-4 bg-blue-50 p-4 rounded-md">
+                <h4 className="text-sm font-medium text-blue-800 mb-2">Estimated Delivery</h4>
+                <div className="text-sm text-blue-700">
+                  {isPreOrder ? (
+                    <>
+                      <p>Pre-order delivery: 14 working days</p>
+                      <p className="mt-1">Expected by {new Date(new Date().getTime() + (14 * 24 * 60 * 60 * 1000)).toLocaleDateString()}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p>Standard delivery: 3 business days</p>
+                      <p className="mt-1">Expected by {new Date(new Date().getTime() + (3 * 24 * 60 * 60 * 1000)).toLocaleDateString()}</p>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="text-xs text-gray-500">
-              {isPreOrder ? (
-                <p>By proceeding, you agree to our pre-order terms. Items will be delivered within 14 days.</p>
-              ) : (
-                <p>Standard delivery within 3 business days. Express delivery options available at checkout.</p>
-              )}
             </div>
           </motion.div>
           

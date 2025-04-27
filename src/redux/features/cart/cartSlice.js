@@ -1,11 +1,39 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-const initialState = {
-    products: [],
-    total: 0,
-    deliveryFee: 8800, // Fixed delivery fee
-    grandTotal: 0, // Total including delivery fee
-}
+// Load initial state from localStorage if available
+const loadState = () => {
+  try {
+    const serializedState = localStorage.getItem('cartState');
+    if (serializedState === null) {
+      return {
+        products: [],
+        total: 0,
+        deliveryFee: 8800,
+        grandTotal: 0,
+      };
+    }
+    return JSON.parse(serializedState);
+  } catch (err) {
+    return {
+      products: [],
+      total: 0,
+      deliveryFee: 8800,
+      grandTotal: 0,
+    };
+  }
+};
+
+const saveState = (state) => {
+  try {
+    const serializedState = JSON.stringify(state);
+    localStorage.setItem('cartState', serializedState);
+  } catch (err) {
+    // Handle write errors
+    console.error('Error saving cart state:', err);
+  }
+};
+
+const initialState = loadState();
 
 const cartSlice = createSlice({
     name: 'cart',
@@ -47,6 +75,9 @@ const cartSlice = createSlice({
                 0
             );
             state.grandTotal = state.total + state.deliveryFee;
+            
+            // Save state to localStorage
+            saveState(state);
         },
         decrementQuantity: (state, action) => {
             const itemToDecrement = action.payload;
@@ -76,6 +107,9 @@ const cartSlice = createSlice({
                     0
                 );
                 state.grandTotal = state.total + state.deliveryFee;
+                
+                // Save state to localStorage
+                saveState(state);
             }
         },
         removeFromCart: (state, action) => {
@@ -99,11 +133,17 @@ const cartSlice = createSlice({
                 0
             );
             state.grandTotal = state.total + state.deliveryFee;
+            
+            // Save state to localStorage
+            saveState(state);
         },
         clearCart: (state) => {
             state.products = [];
             state.total = 0;
             state.grandTotal = state.deliveryFee;
+            
+            // Clear localStorage
+            localStorage.removeItem('cartState');
         }
     }
 });

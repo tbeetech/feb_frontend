@@ -51,7 +51,7 @@ const CartModal = ({ onClose }) => {
             return;
         }
         onClose(); // Close modal first
-        window.location.href = '/billing-details';
+        navigate('/billing-details');
     };
 
     return (

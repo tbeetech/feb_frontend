@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import RatingStars from '../../../components/RatingStars';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFetchProductByIdQuery, useUpdateProductRatingMutation, useFetchAllProductsQuery } from '../../../redux/features/products/productsApi';
@@ -7,7 +7,6 @@ import { useGetProductReviewsQuery, useLikeReviewMutation } from '../../../redux
 import { addToCart, decrementQuantity } from '../../../redux/features/cart/cartSlice';
 import ReviewsCard from '../reviews/ReviewsCard';
 import { motion } from 'framer-motion';
-import ImagePreviewModal from '../../../components/ImagePreviewModal';
 import SizeSelectionWheel from '../../../components/SizeSelectionWheel';
 import { toast } from 'react-hot-toast';
 import ReviewForm from '../reviews/ReviewForm';
@@ -125,7 +124,7 @@ const SingleProduct = () => {
     
     // Fetch product data
     const { data, error, isLoading } = useFetchProductByIdQuery(id);
-    const singleProduct = data?.product || {};
+    const singleProduct = useMemo(() => data?.product || {}, [data?.product]);
     
     // Log product data for debugging
     console.log('SingleProduct data from API:', data);
@@ -184,9 +183,10 @@ const SingleProduct = () => {
         quantity >= singleProduct.stockQuantity;
     
     // Calculate which sizes are out of stock
-    const outOfStockSizes = isOutOfStock ? 
-        (singleProduct?.sizes || []) : 
-        (singleProduct?.outOfStock || []);
+    const outOfStockSizes = useMemo(() => 
+        isOutOfStock ? (singleProduct?.sizes || []) : (singleProduct?.outOfStock || []),
+        [isOutOfStock, singleProduct?.sizes, singleProduct?.outOfStock]
+    );
 
     // Enhanced image states
     const [selectedImage, setSelectedImage] = useState('');
@@ -582,34 +582,26 @@ const SingleProduct = () => {
         
         // Find the color object from the product's colors array
         const colorObject = singleProduct.colors?.find(c => 
-            c.name === color || c.hexCode === hexCode
-        );
-        
-        if (!colorObject) {
-            console.error("Invalid color selected");
-            toast.error('Please select a valid color');
-            return;
-        }
+            c.name.toLowerCase() === color.toLowerCase() || 
+            c.hexCode === hexCode
+        ) || { name: color, hexCode: hexCode };
         
         const colorName = colorObject.name || getColorName(colorObject.hexCode) || color;
+        
+        // Update state with the selected color
         setSelectedColor({
             name: colorName,
             hexCode: colorObject.hexCode || hexCode,
-            imageUrl: colorObject.imageUrl // Store image URL if available
+            imageUrl: colorObject.imageUrl
         });
         
         // Update image if color has an associated image
         if (colorObject.imageUrl) {
-            const imageIndex = galleryImages.indexOf(colorObject.imageUrl);
+            const imageIndex = galleryImages.findIndex(img => img === colorObject.imageUrl);
             if (imageIndex !== -1) {
                 setCurrentImageIndex(imageIndex);
             }
         }
-        
-        toast.success(`Color ${colorName} selected`, {
-            id: 'color-selection-toast',
-            duration: 2000
-        });
     };
 
     const handleReviewSubmitted = async (updatedReviews) => {
@@ -733,7 +725,6 @@ const SingleProduct = () => {
                         className="flex items-center text-sm lg:text-base text-white"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3, duration: 0.7 }}
                     transition={{ delay: 0.3, duration: 0.7 }}
                 >
                     <Link to="/" className="hover:text-gray-300 transition-colors duration-300">Home</Link>
@@ -915,8 +906,7 @@ const SingleProduct = () => {
                                 <div className="flex items-start space-x-3">
                                     <div className="bg-blue-100 p-2 rounded-full">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                                            <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
-                                            <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1v-1h6a1 1 0 001-1v-6a1 1 0 00-.293-.707L15.293 4.793A1 1 0 0014.586 4H13V3a1 1 0 00-1-1H8a1 1 0 00-1 1v1H3z" />
+                                            <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1v-1h6a1 1 0 001-1v-6a1 1 0 00-.293-.707L15.293 4.793A1 1 0 0014.586 4H13V3a1 1 0 00-1-1H8a1 1 0 00-1 1v1H3z" />
                                         </svg>
                                     </div>
                                     <div>

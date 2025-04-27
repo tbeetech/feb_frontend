@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { FaExternalLinkAlt, FaArrowLeft, FaEnvelope } from 'react-icons/fa';
+import { FaExternalLinkAlt, FaArrowLeft, FaEnvelope, FaWhatsapp } from 'react-icons/fa';
 import { useSelector, useDispatch } from 'react-redux';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
@@ -12,25 +12,37 @@ import { motion } from 'framer-motion';
 const Checkout = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth); // Add user from Redux state
+  const location = useLocation();
+  const { user } = useSelector((state) => state.auth);
+  
+  // Get order details from navigation state
+  const billingDetails = location.state?.billingDetails;
+  const cartItems = location.state?.cartItems;
+  const cartTotal = location.state?.total;
+  const subtotal = location.state?.subtotal;
+  const { deliveryFee, grandTotal } = useSelector((state) => state.cart);
+  const isPreOrder = location.state?.isPreOrder;
+  const deliveryDate = location.state?.deliveryDate;
+
+  // Redirect if no billing details
+  useEffect(() => {
+    if (!billingDetails || !cartItems || cartItems.length === 0) {
+      toast.error("Please complete your billing information first");
+      navigate('/billing-details');
+      return;
+    }
+  }, [billingDetails, cartItems, navigate]);
+
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [errorDetails, setErrorDetails] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [pdfUrl, setPdfUrl] = useState('');
-  const location = useLocation();
-  
-  // Get cart state from Redux store
-  const cartState = useSelector((state) => state.cart);
-  const { deliveryFee, grandTotal } = cartState;
   
   // Calculate cart total price if not provided in location state
   const calculateCartTotal = (items) => {
     return items.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
   };
-  
-  // Get cart items from location state or Redux store (with priority to location state)
-  const cartItems = location.state?.cartItems || cartState.products;
   
   // Calculate the total from the cart items in real-time
   const cartItemsTotal = useMemo(() => {
@@ -38,12 +50,10 @@ const Checkout = () => {
   }, [cartItems]);
   
   // Calculate the subtotal and grand total
-  const subtotal = location.state?.subtotal || cartItemsTotal;
+  const calculatedSubtotal = subtotal || cartItemsTotal;
   // Use grandTotal from Redux if available, otherwise calculate it
-  const cartTotal = location.state?.total || grandTotal || (subtotal + deliveryFee);
+  const calculatedCartTotal = cartTotal || grandTotal || (calculatedSubtotal + deliveryFee);
   
-  const billingDetails = location.state?.billingDetails || null;
-  const deliveryDate = location.state?.deliveryDate || '';
   const receiptRef = useRef(null);
   
   // Generate a receipt number
@@ -136,7 +146,6 @@ const Checkout = () => {
       }
       
       // Expected Delivery date
-      const isPreOrder = location.state?.isPreOrder;
       const deliveryDays = isPreOrder ? 14 : 3;
       const expectedDeliveryDate = new Date(today.getTime() + deliveryDays * 24 * 60 * 60 * 1000);
       doc.text(`Expected Delivery: ${expectedDeliveryDate.toLocaleDateString()} (${isPreOrder ? '14 working days' : '3 business days'})`, margin, 50);
@@ -326,7 +335,7 @@ const Checkout = () => {
       console.log("Starting checkout completion process...");
       
       // First properly generate the PDF content
-      const result = await generateAndDownloadPDF(null, billingDetails, cartTotal, receiptNumber);
+      const result = await generateAndDownloadPDF(null, billingDetails, calculatedCartTotal, receiptNumber);
       
       if (!result) {
         console.warn("PDF generation failed, but continuing with order completion");
@@ -351,7 +360,7 @@ const Checkout = () => {
             selectedSize: item.selectedSize,
             selectedColor: item.selectedColor
           })),
-          totalAmount: cartTotal,
+          totalAmount: calculatedCartTotal,
           shippingAddress: `${billingDetails.address}, ${billingDetails.city}, ${billingDetails.state}`,
           status: 'pending',
           expectedDeliveryDate: deliveryDate,
@@ -372,7 +381,7 @@ const Checkout = () => {
       // Attempt to send the email receipt
       if (billingDetails && billingDetails.email && pdfBlob) {
         try {
-          await sendEmailReceipt(billingDetails.email, cartTotal, pdfBlob, receiptNumber);
+          await sendEmailReceipt(billingDetails.email, calculatedCartTotal, pdfBlob, receiptNumber);
           // Show notice screen
           setShowSuccessMessage(true);
           // Clear cart after successful order
@@ -481,7 +490,7 @@ const Checkout = () => {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Total Amount:</span>
-                    <span className="text-sm font-medium">₦{cartTotal.toLocaleString()}</span>
+                    <span className="text-sm font-medium">₦{calculatedCartTotal.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -554,42 +563,42 @@ const Checkout = () => {
       )}
       
       {/* Back to billing details link */}
-      <div class="mb-6">
-        <Link to="/billing-details" class="inline-flex items-center text-gray-600 hover:text-black text-sm">
-          <FaArrowLeft class="mr-2" />
+      <div className="mb-6">
+        <Link to="/billing-details" className="inline-flex items-center text-gray-600 hover:text-black text-sm">
+          <FaArrowLeft className="mr-2" />
           Back to Billing Details
         </Link>
       </div>
       
-      <h1 class="text-2xl md:text-3xl font-bold mb-6 text-center">Complete Your Order</h1>
+      <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">Complete Your Order</h1>
       
-      <div class="grid grid-cols-1 gap-8">
+      <div className="grid grid-cols-1 gap-8">
         {/* Order Summary */}
-        <div class="order-2">
-          <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h2 class="text-xl font-bold mb-4 pb-2 border-b">Order Summary</h2>
+        <div className="order-2">
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <h2 className="text-xl font-bold mb-4 pb-2 border-b">Order Summary</h2>
             
-            <div class="mb-6">
-              <div class="overflow-x-auto">
-                <table class="w-full min-w-full">
-                  <thead class="bg-gray-50">
+            <div className="mb-6">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-full">
+                  <thead className="bg-gray-50">
                     <tr>
-                      <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                      <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
-                      <th class="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                      <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                      <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                      <th className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                     </tr>
                   </thead>
-                  <tbody class="divide-y divide-gray-200">
+                  <tbody className="divide-y divide-gray-200">
                     {cartItems && cartItems.length > 0 ? (
                       cartItems.map((item, index) => (
-                        <tr key={`${item._id || index}-${index}`} class="hover:bg-gray-50">
-                          <td class="py-4 px-4">
-                            <div class="flex items-center">
-                              <div class="h-16 w-16 flex-shrink-0 mr-4 bg-gray-100 rounded-md overflow-hidden">
+                        <tr key={`${item._id || index}-${index}`} className="hover:bg-gray-50">
+                          <td className="py-4 px-4">
+                            <div className="flex items-center">
+                              <div className="h-16 w-16 flex-shrink-0 mr-4 bg-gray-100 rounded-md overflow-hidden">
                                 <img
                                   src={item.image}
                                   alt={item.name}
-                                  class="h-full w-full object-cover"
+                                  className="h-full w-full object-cover"
                                   onError={(e) => {
                                     e.target.onerror = null;
                                     e.target.src = "https://via.placeholder.com/64?text=Product";
@@ -597,33 +606,33 @@ const Checkout = () => {
                                 />
                               </div>
                               <div>
-                                <p class="text-sm font-medium text-gray-900">{item.name}</p>
-                                <p class="text-sm text-gray-500">Qty: {item.quantity}</p>
+                                <p className="text-sm font-medium text-gray-900">{item.name}</p>
+                                <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                               </div>
                             </div>
                           </td>
-                          <td class="py-4 px-4">
-                            <div class="text-sm text-gray-500">
+                          <td className="py-4 px-4">
+                            <div className="text-sm text-gray-500">
                               {item.selectedSize && <p>Size: {item.selectedSize}</p>}
                               {item.selectedColor && (
-                                <div class="flex items-center mt-1">
-                                  <span class="mr-1">Color:</span>
+                                <div className="flex items-center mt-1">
+                                  <span className="mr-1">Color:</span>
                                   <div 
-                                    class="w-4 h-4 rounded-full border border-gray-300" 
+                                    className="w-4 h-4 rounded-full border border-gray-300" 
                                     style={{ backgroundColor: item.selectedColor }}
                                   />
                                 </div>
                               )}
                             </div>
                           </td>
-                          <td class="py-4 px-4 text-sm text-right font-medium">
+                          <td className="py-4 px-4 text-sm text-right font-medium">
                             ₦{(item.price * item.quantity).toLocaleString()}
                           </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="3" class="py-4 px-4 text-center text-gray-500">
+                        <td colSpan="3" className="py-4 px-4 text-center text-gray-500">
                           No items in cart
                         </td>
                       </tr>
@@ -633,29 +642,29 @@ const Checkout = () => {
               </div>
             </div>
             
-            <div class="border-t pt-4">
-              <div class="flex justify-between py-2">
-                <span class="text-gray-600">Subtotal</span>
-                <span class="font-medium">₦{subtotal.toLocaleString()}</span>
+            <div className="border-t pt-4">
+              <div className="flex justify-between py-2">
+                <span className="text-gray-600">Subtotal</span>
+                <span className="font-medium">₦{calculatedSubtotal.toLocaleString()}</span>
               </div>
-              <div class="flex justify-between py-2">
-                <span class="text-gray-600">Shipping</span>
-                <span class="font-medium">₦{deliveryFee.toLocaleString()}</span>
+              <div className="flex justify-between py-2">
+                <span className="text-gray-600">Shipping</span>
+                <span className="font-medium">₦{deliveryFee.toLocaleString()}</span>
               </div>
-              <div class="flex justify-between py-3 border-t mt-2 text-lg font-bold">
+              <div className="flex justify-between py-3 border-t mt-2 text-lg font-bold">
                 <span>Total</span>
-                <span>₦{cartTotal.toLocaleString()}</span>
+                <span>₦{calculatedCartTotal.toLocaleString()}</span>
               </div>
             </div>
           </div>
           
           {/* Order Completion Section */}
-          <div class="bg-white rounded-lg shadow-sm p-6 mb-6" ref={receiptRef}>
-            <h2 class="text-xl font-bold mb-4 pb-2 border-b">Complete Order</h2>
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6" ref={receiptRef}>
+            <h2 className="text-xl font-bold mb-4 pb-2 border-b">Complete Order</h2>
             
-            <div class="bg-yellow-50 p-4 rounded-md mb-6 border-l-4 border-yellow-400">
-              <h3 class="text-lg font-medium text-yellow-800 mb-2">How it works:</h3>
-              <ol class="list-decimal list-inside text-sm text-gray-700 space-y-2 ml-2">
+            <div className="bg-yellow-50 p-4 rounded-md mb-6 border-l-4 border-yellow-400">
+              <h3 className="text-lg font-medium text-yellow-800 mb-2">How it works:</h3>
+              <ol className="list-decimal list-inside text-sm text-gray-700 space-y-2 ml-2">
                 <li>Click the button below to generate your payment invoice</li>
                 <li>Make a bank transfer using the account details in the email we&apos;ll send you</li>
                 <li>Forward your proof of payment as instructed in the email</li>
@@ -663,21 +672,21 @@ const Checkout = () => {
               </ol>
             </div>
             
-            <div class="mt-6 flex flex-col sm:flex-row gap-4">
+            <div className="mt-6 flex flex-col sm:flex-row gap-4">
               <button 
                 onClick={handleCheckoutComplete}
                 disabled={isGenerating}
-                class="flex items-center justify-center w-full sm:w-auto px-6 py-3 bg-black text-white border border-black rounded-md hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center w-full sm:w-auto px-6 py-3 bg-black text-white border border-black rounded-md hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isGenerating ? (
                   <>
-                    <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
-                    <span class="text-white">Processing order...</span>
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
+                    <span className="text-white">Processing order...</span>
                   </>
                 ) : (
                   <>
-                    <FaEnvelope class="mr-2 text-white" />
-                    <span class="text-white">Generate Payment Invoice & Place Order</span>
+                    <FaEnvelope className="mr-2 text-white" />
+                    <span className="text-white">Generate Payment Invoice & Place Order</span>
                   </>
                 )}
               </button>
@@ -688,9 +697,9 @@ const Checkout = () => {
                   download={`FEB_Luxury_Receipt_${receiptNumber}.pdf`} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  class="flex items-center justify-center w-full sm:w-auto px-6 py-3 bg-white text-black border border-black rounded-md hover:bg-gray-100 transition-colors"
+                  className="flex items-center justify-center w-full sm:w-auto px-6 py-3 bg-white text-black border border-black rounded-md hover:bg-gray-100 transition-colors"
                 >
-                  <FaExternalLinkAlt class="mr-2" />
+                  <FaExternalLinkAlt className="mr-2" />
                   Download Receipt
                 </a>
               )}
