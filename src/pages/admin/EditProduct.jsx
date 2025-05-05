@@ -152,13 +152,12 @@ const EditProduct = () => {
     });
   };
   
-  const handleColorSelect = (colorObject) => {
+  const handleColorSelect = (color) => {
     setColors(prev => {
-      // Check if color already exists by comparing hexCode
-      if (prev.some(c => c.hexCode === colorObject.hexCode)) {
-        return prev.filter(c => c.hexCode !== colorObject.hexCode);
+      if (prev.includes(color)) {
+        return prev.filter(c => c !== color);
       }
-      return [...prev, colorObject];
+      return [...prev, color];
     });
   };
   
@@ -187,20 +186,18 @@ const EditProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Show alert when button is clicked
-    toast.info('Processing product update...', {
-      position: "top-center",
-      autoClose: 2000,
-    });
-
     // Validate required fields
     if (!formData.name || !formData.category || !formData.price) {
       toast.error('Please fill in all required fields');
       return;
     }
 
-    // Colors are already in the correct format, no need to reformat
-    const formattedColors = colors;
+    // Format colors for submission
+    const formattedColors = colors.map(color => ({
+      name: color,
+      hexCode: color,
+      imageUrl: '' // You can add image upload for each color variant if needed
+    }));
 
     try {
       // Create the formatted product data

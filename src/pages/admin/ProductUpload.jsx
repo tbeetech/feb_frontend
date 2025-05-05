@@ -105,13 +105,12 @@ const ProductUpload = () => {
     setShowPreview(!showPreview);
   };
   
-  const handleColorSelect = (colorObject) => {
+  const handleColorSelect = (color) => {
     setColors(prev => {
-      // Check if color already exists by comparing hexCode
-      if (prev.some(c => c.hexCode === colorObject.hexCode)) {
-        return prev.filter(c => c.hexCode !== colorObject.hexCode);
+      if (prev.includes(color)) {
+        return prev.filter(c => c !== color);
       }
-      return [...prev, colorObject];
+      return [...prev, color];
     });
   };
   
@@ -138,17 +137,21 @@ const ProductUpload = () => {
       position: "top-center",
       autoClose: 2000,
     });
-
+    
     // Validate required fields
     if (!formData.name || !formData.category || !formData.price) {
       toast.error('Please fill in all required fields');
       return;
     }
 
-    // Colors are already in the correct format, no need to reformat
-    const formattedColors = colors;
+    // Format colors for submission
+    const formattedColors = colors.map(color => ({
+      name: color,
+      hexCode: color,
+      imageUrl: '' // You can add image upload for each color variant if needed
+    }));
 
-    // Ensure deliveryTimeFrame is properly structured
+    // Ensure deliveryTimeFrame is properly structured with both fields defined
     const currentDate = new Date().toISOString().split('T')[0];
     const oneWeekLater = new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0];
     
@@ -158,12 +161,14 @@ const ProductUpload = () => {
     };
 
     try {
+      // Create a structured object for submission to ensure all required fields are present
       const productDataToSubmit = {
         ...formData,
         deliveryTimeFrame: deliveryTimeFrame,
         colors: formattedColors,
         gallery: gallery,
-        images: gallery,
+        images: gallery, // Add compatibility for both fields
+        // Ensure category is always defined for subcategory validation
         category: formData.category || ''
       };
 
@@ -171,46 +176,21 @@ const ProductUpload = () => {
       
       const result = await addProduct(productDataToSubmit).unwrap();
       
-      // Primary success notification
-      toast.success('✨ Product Successfully Uploaded! ✨', {
+      toast.success('Product added successfully!', {
         position: "top-center",
-        autoClose: 5000,
+        autoClose: 3000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
         style: { 
-          backgroundColor: '#4CAF50',
+          backgroundColor: '#3f8e47', 
           color: 'white',
-          padding: '20px',
-          borderRadius: '10px',
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-          fontSize: '16px',
-          fontWeight: 'bold',
-          textAlign: 'center'
-        }
+          padding: '16px',
+          borderRadius: '8px'
+        },
+        icon: '✅'
       });
-
-      // Detailed success notification
-      setTimeout(() => {
-        toast.info(`Product Details:\n${formData.name}\nPrice: $${formData.price}\nCategory: ${formData.category}`, {
-          position: "top-right",
-          autoClose: 6000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          style: {
-            backgroundColor: '#f8f9fa',
-            color: '#2c3e50',
-            padding: '15px',
-            borderRadius: '8px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-            fontSize: '14px'
-          }
-        });
-      }, 1000);
-
       console.log("Product uploaded successfully:", result);
       
       // Clear form after successful submission
@@ -222,6 +202,7 @@ const ProductUpload = () => {
       
       // Display specific validation errors if available
       if (error.data?.details && Object.keys(error.data.details).length > 0) {
+        // Show each validation error as a separate toast
         Object.entries(error.data.details).forEach(([field, message]) => {
           toast.error(`${field}: ${message}`, {
             position: "top-center",
@@ -229,12 +210,14 @@ const ProductUpload = () => {
           });
         });
       } else {
+        // Show general error message
         toast.error(`Failed to add product: ${error.data?.message || error.message || 'Unknown error'}`, {
           position: "top-center",
           autoClose: 5000
         });
       }
       
+      // If there's a sizeType error, reset the sizeType field
       if (error.data?.details?.sizeType) {
         setFormData(prev => ({
           ...prev,
@@ -371,37 +354,41 @@ const ProductUpload = () => {
                 name="oldPrice"
                 value={formData.oldPrice}
                 onChange={handleInputChange}
-                className="form-input mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="image" className="block mb-2 font-medium">
-                Main Image URL *
-              </label>
-              <input
-                type="url"
-                id="image"
-                name="image"
-                value={formData.image}
-                onChange={handleInputChange}
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                required
-                placeholder="Enter main image URL"
+                min="0"
+                placeholder="Enter old price (if applicable)"
               />
-              {formData.image && (
-                <div className="mt-2">
-                  <img 
-                    src={formData.image} 
-                    alt="Product preview" 
-                    className="w-32 h-32 object-cover rounded-md border"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = "https://via.placeholder.com/150?text=Invalid+URL";
-                    }}
-                  />
-                </div>
-              )}
             </div>
+          </div>
+          
+          {/* Main Image URL */}
+          <div className="form-group">
+            <label htmlFor="image" className="block mb-2 font-medium">
+              Main Image URL *
+            </label>
+            <input
+              type="url"
+              id="image"
+              name="image"
+              value={formData.image}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+              required
+              placeholder="Enter main image URL"
+            />
+            {formData.image && (
+              <div className="mt-2">
+                <img 
+                  src={formData.image} 
+                  alt="Product preview" 
+                  className="w-32 h-32 object-cover rounded-md border"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "https://via.placeholder.com/150?text=Invalid+URL";
+                  }}
+                />
+              </div>
+            )}
           </div>
           
           {/* Gallery Images */}
@@ -519,7 +506,7 @@ const ProductUpload = () => {
                     required
                   />
                 </div>
-
+                
                 <div className="form-group">
                   <label htmlFor="endDate" className="block mb-2 font-medium">
                     End Date *
@@ -638,7 +625,7 @@ const ProductUpload = () => {
                       <div
                         key={index}
                         className="w-6 h-6 rounded-md border border-gray-300 cursor-pointer"
-                        style={{ backgroundColor: color.hexCode }}
+                        style={{ backgroundColor: color }}
                         onClick={(e) => {
                           e.preventDefault(); // Prevent form submission
                           handleColorSelect(color);
@@ -691,6 +678,7 @@ const ProductUpload = () => {
                     />
                   ) : (
                     <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500">
+                      No image provided
                     </div>
                   )}
                   
@@ -758,4 +746,4 @@ const ProductUpload = () => {
   );
 };
 
-export default ProductUpload;
+export default ProductUpload; 

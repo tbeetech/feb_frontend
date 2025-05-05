@@ -354,12 +354,12 @@ const Checkout = () => {
 const expectedDeliveryDate = calculateDeliveryDate(cartItems[0]?.stockStatus || 'In Stock');
 
 // Use expectedDeliveryDate in the component
-useEffect(() => {
-    if (location.state?.billingDetails) {
-        setBillingDetails(location.state.billingDetails);
-        setDeliveryDate(expectedDeliveryDate);
-    }
-}, [location.state, expectedDeliveryDate]);
+  // useEffect(() => {
+  //     if (location.state?.billingDetails) {
+  //         setBillingDetails(location.state.billingDetails);
+  //         setDeliveryDate(expectedDeliveryDate);
+  //     }
+  // }, [location.state, expectedDeliveryDate]);
 
   // Update the checkout flow to send the receipt via email
   const handleCheckoutComplete = async () => {
