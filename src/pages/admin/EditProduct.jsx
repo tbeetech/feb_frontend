@@ -153,11 +153,15 @@ const EditProduct = () => {
   };
   
   const handleColorSelect = (color) => {
+    // If color is an object with name and hexCode/value properties
+    const colorValue = typeof color === 'object' ? color.value || color.hexCode : color;
+    const colorName = typeof color === 'object' ? color.name : color;
+
     setColors(prev => {
-      if (prev.includes(color)) {
-        return prev.filter(c => c !== color);
+      if (prev.includes(colorValue)) {
+        return prev.filter(c => c !== colorValue);
       }
-      return [...prev, color];
+      return [...prev, colorValue];
     });
   };
   
@@ -193,11 +197,15 @@ const EditProduct = () => {
     }
 
     // Format colors for submission
-    const formattedColors = colors.map(color => ({
-      name: color,
-      hexCode: color,
-      imageUrl: '' // You can add image upload for each color variant if needed
-    }));
+    const formattedColors = colors.map(color => {
+      // If the color is from the predefined PRODUCT_COLORS, use its name
+      const colorObj = PRODUCT_COLORS.find(c => c.value === color);
+      return {
+        name: colorObj ? colorObj.name : color,
+        hexCode: color,
+        imageUrl: '' // You can add image upload for each color variant if needed
+      };
+    });
 
     try {
       // Create the formatted product data

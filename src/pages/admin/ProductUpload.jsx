@@ -106,11 +106,16 @@ const ProductUpload = () => {
   };
   
   const handleColorSelect = (color) => {
+    // If color is an object with name and hexCode/value properties
+    const colorValue = typeof color === 'object' ? color.value || color.hexCode : color;
+    const colorName = typeof color === 'object' ? color.name : color;
+
     setColors(prev => {
-      if (prev.includes(color)) {
-        return prev.filter(c => c !== color);
+      // Check if this color is already selected
+      if (prev.includes(colorValue)) {
+        return prev.filter(c => c !== colorValue);
       }
-      return [...prev, color];
+      return [...prev, colorValue];
     });
   };
   
@@ -132,7 +137,6 @@ const ProductUpload = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Show alert when button is clicked
     toast.info('Processing product upload...', {
       position: "top-center",
       autoClose: 2000,
@@ -145,13 +149,17 @@ const ProductUpload = () => {
     }
 
     // Format colors for submission
-    const formattedColors = colors.map(color => ({
-      name: color,
-      hexCode: color,
-      imageUrl: '' // You can add image upload for each color variant if needed
-    }));
+    const formattedColors = colors.map(color => {
+      // If the color is from the predefined PRODUCT_COLORS, use its name
+      const colorObj = PRODUCT_COLORS.find(c => c.value === color);
+      return {
+        name: colorObj ? colorObj.name : color,
+        hexCode: color,
+        imageUrl: ''
+      };
+    });
 
-    // Ensure deliveryTimeFrame is properly structured with both fields defined
+    // Ensure deliveryTimeFrame is properly structured
     const currentDate = new Date().toISOString().split('T')[0];
     const oneWeekLater = new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0];
     
@@ -746,4 +754,4 @@ const ProductUpload = () => {
   );
 };
 
-export default ProductUpload; 
+export default ProductUpload;
