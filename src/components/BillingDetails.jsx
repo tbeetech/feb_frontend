@@ -148,8 +148,6 @@ const BillingDetails = ({ isPreOrder = false }) => {
     
     if (validateForm()) {
       const orderDate = new Date();
-      const deliveryDate = new Date(orderDate);
-      deliveryDate.setDate(deliveryDate.getDate() + (isPreOrder ? 14 : 3));
       
       // Navigate to checkout with complete order details
       setTimeout(() => {
@@ -162,8 +160,7 @@ const BillingDetails = ({ isPreOrder = false }) => {
             subtotal: total,
             deliveryFee,
             isPreOrder,
-            orderDate: orderDate.toISOString(),
-            deliveryDate: deliveryDate.toISOString()
+            orderDate: orderDate.toISOString()
           } 
         });
       }, 800);
@@ -228,7 +225,7 @@ const BillingDetails = ({ isPreOrder = false }) => {
             className="mb-8 p-4 bg-gold/10 rounded-md border border-gold/20 text-center"
           >
             <p className="text-sm text-gray-700">
-              <span className="font-medium">Pre-Order Notice:</span> Items will be delivered within 14 days from the order date.
+              <span className="font-medium">Pre-Order Notice:</span> Please proceed with payment to secure your order.
             </p>
           </motion.div>
         )}
@@ -530,43 +527,6 @@ const BillingDetails = ({ isPreOrder = false }) => {
                 <div className="border-t border-gray-200 my-2 pt-2 flex justify-between">
                   <span className="font-medium">Total:</span>
                   <span className="font-bold text-lg text-gold">₦{cartTotal.toLocaleString()}</span>
-                </div>
-              </div>
-
-              {/* Delivery estimate */}
-              <div className="mt-4 bg-blue-50 p-4 rounded-md">
-                <h4 className="text-sm font-medium text-blue-800 mb-2">Estimated Delivery</h4>
-                <div className="text-sm text-blue-700">
-                  {(() => {
-                    const addBusinessDays = (date, days) => {
-                      let currentDate = new Date(date);
-                      let addedDays = 0;
-                      while (addedDays < days) {
-                        currentDate.setDate(currentDate.getDate() + 1);
-                        if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) {
-                          addedDays++;
-                        }
-                      }
-                      return currentDate;
-                    };
-
-                    const today = new Date();
-                    const deliveryDate = isPreOrder 
-                      ? addBusinessDays(today, 14)
-                      : addBusinessDays(today, 3);
-
-                    return isPreOrder ? (
-                      <>
-                        <p>Pre-order delivery: 14 working days</p>
-                        <p className="mt-1">Expected by {deliveryDate.toLocaleDateString()}</p>
-                      </>
-                    ) : (
-                      <>
-                        <p>Standard delivery: 3 business days</p>
-                        <p className="mt-1">Expected by {deliveryDate.toLocaleDateString()}</p>
-                      </>
-                    );
-                  })()}
                 </div>
               </div>
             </div>
