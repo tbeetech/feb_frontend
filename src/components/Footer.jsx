@@ -188,8 +188,8 @@ const Footer = () => {
               </div>
             </div>
             
-            <a href="https://tbeetech.com" target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-black transition-colors">
-              Designed by Tbeetech
+            <a href="https://tbeetech.github.io" target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-black transition-colors">
+              Designed by Tbeetech <span className="text-blue-600 hover:text-blue-800">portfolio</span>
             </a>
           </div>
         </div>
