@@ -1,4 +1,12 @@
-const isDevelopment = import.meta.env.MODE === 'development';
-export const baseURL = isDevelopment 
-    ? import.meta.env.VITE_API_URL
-    : import.meta.env.VITE_PRODUCTION_API_URL;
+const getBaseUrl = () => {
+    const isDevelopment = import.meta.env.MODE === 'development';
+    
+    if (isDevelopment) {
+        return 'http://localhost:5000';
+    }
+    
+    // In production, use the Vercel deployment URL
+    return 'https://feb-backend.vercel.app';
+};
+
+export const baseURL = getBaseUrl();

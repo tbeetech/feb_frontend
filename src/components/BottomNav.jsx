@@ -143,6 +143,10 @@ const BottomNav = () => {
                                 className={`flex flex-col items-center px-1 ${
                                     location.pathname === '/cart' ? 'text-black' : 'text-gray-500'
                                 }`}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setIsCartOpen(true);
+                                }}
                             >
                                 <div className="relative">
                                     <CiShoppingCart className="w-7 h-7" />

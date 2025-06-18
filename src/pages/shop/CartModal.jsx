@@ -1,18 +1,26 @@
-import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, decrementQuantity, removeFromCart, clearCart } from "../../redux/features/cart/cartSlice";
-import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from "react-router-dom";
+import { motion } from 'framer-motion';
 import { CiTrash, CiCirclePlus, CiCircleMinus } from "react-icons/ci";
 import { getImageUrl } from "../../utils/imageUrl";
 import { useCurrency } from "../../components/CurrencySwitcher";
+import PropTypes from 'prop-types';
+import { toast } from 'react-hot-toast';
 
 const CartModal = ({ onClose }) => {
     const dispatch = useDispatch();
-    const products = useSelector((state) => state.cart.products);
+    const navigate = useNavigate();
+    const { products, deliveryFee, grandTotal, total } = useSelector((state) => state.cart);
     const { formatPrice, currencySymbol, currencyCode } = useCurrency();
+    
+    const itemCount = products.reduce((sum, item) => sum + item.quantity, 0);
 
     const handleIncrement = (product) => {
+        if (product.stockQuantity && product.quantity >= product.stockQuantity) {
+            toast.error(`Sorry, only ${product.stockQuantity} items available`);
+            return;
+        }
         dispatch(addToCart(product));
     };
 
@@ -21,17 +29,30 @@ const CartModal = ({ onClose }) => {
     };
 
     const handleRemove = (product) => {
-        dispatch(removeFromCart({ _id: product._id }));
+        dispatch(removeFromCart({ 
+            _id: product._id,
+            selectedSize: product.selectedSize,
+            selectedColor: product.selectedColor
+        }));
+        toast.success('Item removed from cart');
     };
 
     const handleClearCart = () => {
-        dispatch(clearCart());
+        if (window.confirm('Are you sure you want to clear your cart?')) {
+            dispatch(clearCart());
+            toast.success('Cart cleared');
+            onClose();
+        }
     };
 
-    const total = products.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const itemCount = products.reduce((sum, item) => sum + item.quantity, 0);
-    // Shipping cost (can be adjusted based on currency)
-    const shippingCost = 24;
+    const handleCheckoutClick = () => {
+        if (products.length === 0) {
+            toast.error('Your cart is empty');
+            return;
+        }
+        onClose(); // Close modal first
+        navigate('/billing-details');
+    };
 
     return (
         <motion.div
@@ -158,28 +179,24 @@ const CartModal = ({ onClose }) => {
                                 </div>
                                 <div className="flex justify-between py-2">
                                     <span className="text-sm text-gray-600">Delivery</span>
-                                    <span className="text-sm font-medium">{currencySymbol}{formatPrice(shippingCost)}</span>
+                                    <span className="text-sm font-medium">{currencySymbol}{formatPrice(deliveryFee)}</span>
                                 </div>
                                 <div className="flex justify-between py-2 border-t border-gray-200 mt-2">
                                     <span className="text-base font-medium">Total</span>
-                                    <span className="text-base font-medium">{currencyCode} {currencySymbol}{formatPrice(total + shippingCost)}</span>
+                                    <span className="text-base font-medium">{currencyCode} {currencySymbol}{formatPrice(grandTotal)}</span>
                                 </div>
                             </div>
                             
                             <div className="space-y-3">
-                                <Link
-                                    to="/billing-details"
-                                    onClick={() => {
-                                        onClose();
-                                    }}
-                                    state={{ 
-                                        cartItems: products,
-                                        total: total + shippingCost
-                                    }}
-                                    className="w-full block text-center py-3 px-4 bg-black text-white font-medium hover:bg-gray-900"
+                                <button
+                                    onClick={handleCheckoutClick}
+                                    className="w-full block text-center py-3 px-4 bg-black text-white font-medium hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={products.length === 0}
                                 >
-                                    <span className="text-white" style={{color: 'white !important'}}>Go To Checkout</span>
-                                </Link>
+                                    <span className="text-white" style={{color: 'white !important'}}>
+                                        {products.length === 0 ? 'Your Cart is Empty' : 'Go To Checkout'}
+                                    </span>
+                                </button>
                                 <button
                                     onClick={onClose}
                                     className="w-full block text-center py-3 px-4 text-black border border-gray-300 font-medium hover:bg-gray-50"
@@ -199,6 +216,10 @@ const CartModal = ({ onClose }) => {
             </motion.div>
         </motion.div>
     );
+};
+
+CartModal.propTypes = {
+    onClose: PropTypes.func.isRequired
 };
 
 export default CartModal;

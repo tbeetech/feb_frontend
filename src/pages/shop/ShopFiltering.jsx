@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { CATEGORIES } from '../../constants/categoryConstants';
-import { CiFilter, CiCirclePlus, CiCircleMinus, CiTrash } from 'react-icons/ci';
+import { CiCirclePlus, CiCircleMinus, CiTrash, CiDeliveryTruck } from 'react-icons/ci';
 import { FaChevronDown, FaChevronRight } from 'react-icons/fa';
 
 const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, onPriceRangeChange, closeMobileFilter }) => {
     const navigate = useNavigate();
     const [expandedSections, setExpandedSections] = useState({
         categories: true,
-        price: true
+        price: true,
+        delivery: false
     });
     
     // Track which category groups are expanded
@@ -122,8 +124,13 @@ const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, o
         return subcategories.length > 0;
     };
 
+    const deliveryOptions = [
+        { value: 'in-stock', label: '3-Day Delivery', description: 'Get it in 3 business days', icon: '🚚' },
+        { value: 'pre-order', label: '14-Day Delivery', description: 'Ships in 14 working days', icon: '📦' }
+    ];
+
     const subcategories = getSubcategories(filtersState.category);
-    const hasAppliedFilters = filtersState.category !== 'all' || filtersState.subcategory || filtersState.priceRange;
+    const hasAppliedFilters = filtersState.category !== 'all' || filtersState.subcategory || filtersState.priceRange || filtersState.stockStatus;
 
     return (
         <div className="filters-container">
@@ -182,6 +189,17 @@ const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, o
                                 )?.label || 'Price Range'}
                                 <button 
                                     onClick={() => setFiltersState(prev => ({ ...prev, priceRange: '' }))}
+                                    className="ml-1 text-gray-500 hover:text-black"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        )}
+                        {filtersState.stockStatus && (
+                            <div className="inline-flex items-center px-2 py-1 bg-gray-100 text-xs">
+                                {deliveryOptions.find(option => option.value === filtersState.stockStatus)?.label || filtersState.stockStatus}
+                                <button 
+                                    onClick={() => setFiltersState(prev => ({ ...prev, stockStatus: '' }))}
                                     className="ml-1 text-gray-500 hover:text-black"
                                 >
                                     ×
@@ -287,8 +305,73 @@ const ShopFiltering = ({ filters, filtersState, setFiltersState, clearFilters, o
                 </div>
                 )}
             </div>
+
+            {/* Delivery Options Filter */}
+            <div className="filter-section mb-6">
+                <button 
+                    className="w-full flex justify-between items-center py-2 border-b border-gray-200 text-sm font-medium uppercase"
+                    onClick={() => toggleSection('delivery')}
+                >
+                    <div className="flex items-center gap-2">
+                        <CiDeliveryTruck className="w-5 h-5" />
+                        <span>Delivery Time</span>
+                    </div>
+                    {expandedSections.delivery ? 
+                        <CiCircleMinus className="w-5 h-5" /> : 
+                        <CiCirclePlus className="w-5 h-5" />
+                    }
+                </button>
+                
+                {expandedSections.delivery && (
+                    <div className="mt-3 space-y-2">
+                        {deliveryOptions.map((option) => (
+                            <div 
+                                key={option.value}
+                                onClick={() => {
+                                    setFiltersState(prev => ({
+                                        ...prev,
+                                        stockStatus: prev.stockStatus === option.value ? '' : option.value
+                                    }))
+                                }}
+                                className={`flex items-center gap-2 p-2 rounded cursor-pointer hover:bg-gray-50 ${
+                                    filtersState.stockStatus === option.value ? 'bg-gray-50 font-medium' : ''
+                                }`}
+                            >
+                                <span className="text-lg">{option.icon}</span>
+                                <div className="flex-1">
+                                    <div className="text-sm font-medium">{option.label}</div>
+                                    <div className="text-xs text-gray-500">{option.description}</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
+};
+
+ShopFiltering.propTypes = {
+    filters: PropTypes.shape({
+        categories: PropTypes.object.isRequired,
+        priceRanges: PropTypes.arrayOf(
+            PropTypes.shape({
+                label: PropTypes.string.isRequired,
+                min: PropTypes.number.isRequired,
+                max: PropTypes.number.isRequired
+            })
+        ).isRequired
+    }).isRequired,
+    filtersState: PropTypes.shape({
+        category: PropTypes.string.isRequired,
+        subcategory: PropTypes.string.isRequired,
+        priceRange: PropTypes.string.isRequired,
+        stockStatus: PropTypes.string.isRequired
+    }).isRequired,
+    setFiltersState: PropTypes.func.isRequired,
+    clearFilters: PropTypes.func.isRequired,
+    onPriceRangeChange: PropTypes.func.isRequired,
+    closeMobileFilter: PropTypes.func.isRequired
 };
 
 export default ShopFiltering;

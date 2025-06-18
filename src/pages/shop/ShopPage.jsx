@@ -4,12 +4,10 @@ import ShopFiltering from './ShopFiltering'
 import ShopHeader from './ShopHeader'
 import { useFetchAllProductsQuery } from '../../redux/features/products/productsApi'
 import { CATEGORIES } from '../../constants/categoryConstants'
-import { CiFilter, CiGrid41, CiGrid2H, CiCircleChevLeft, CiCircleChevRight } from 'react-icons/ci'
-import { FaChevronLeft, FaChevronRight, FaShoppingBag, FaTshirt, FaGem, FaShoePrints, FaTags, FaBriefcase, FaStar, FaSprayCan } from 'react-icons/fa'
+import { CiFilter, CiGrid41, CiGrid2H } from 'react-icons/ci'
+import { FaChevronLeft, FaChevronRight, FaShoppingBag, FaTshirt, FaGem, FaShoePrints, FaBriefcase, FaStar, FaSprayCan } from 'react-icons/fa'
 import ProductCardSkeleton from '../../components/ProductCardSkeleton'
-import { Link, useLocation, useSearchParams, useNavigate } from 'react-router-dom'
-import { GiNecklace, GiDress } from 'react-icons/gi'
-import toast from 'react-hot-toast'
+import { GiDress } from 'react-icons/gi'
 
 const filters = {
   categories: {
@@ -32,7 +30,8 @@ const ShopPage = () => {
   const [filtersState, setFiltersState] = useState({
     category: 'all',
     subcategory: '',
-    priceRange: ''
+    priceRange: '',
+    stockStatus: '' // Add stock status to filter state
   })
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
   const [viewMode, setViewMode] = useState('grid') // 'grid' or 'list'
@@ -40,7 +39,7 @@ const ShopPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [ProductsPerPage] = useState(12);
 
-  const { category, subcategory, priceRange } = filtersState;
+  const { category, subcategory, priceRange, stockStatus } = filtersState;
   
   // Update price range parsing logic
   let minPrice, maxPrice;
@@ -55,11 +54,18 @@ const ShopPage = () => {
     }
   }
 
+  // Map stock status to API query parameter
+  const stockStatusMap = {
+    'in-stock': 'In Stock',
+    'pre-order': 'Pre Order'
+  };
+
   const { data: { products = [], totalPages, totalProducts } ={}, error, isLoading} = useFetchAllProductsQuery({
     category: category !== 'all' ? category : '',
     subcategory: subcategory ? subcategory.replace(/\s+/g, '-').toLowerCase() : '',
     minPrice,
     maxPrice,
+    stockStatus: stockStatusMap[stockStatus] || '',
     page: currentPage,
     limit: ProductsPerPage,
   })
@@ -68,8 +74,10 @@ const ShopPage = () => {
     setFiltersState({
       category: 'all',
       subcategory: '',
-      priceRange: ''
+      priceRange: '',
+      stockStatus: ''
     })
+    setCurrentPage(1)
   }
 
   const handlePageChange = (pageNumber) => {
@@ -177,47 +185,46 @@ const ShopPage = () => {
 
   return(
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <ShopHeader products={products} />
-      
       {/* Category Slider */}
-      <div className="my-6 relative">
+      <div className="mb-6 relative">
         <button 
           onClick={() => scrollCategories(-1)}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full shadow-md p-1"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white border border-gray-200 p-2 hover:border-gray-400 transition-colors duration-200"
           aria-label="Scroll categories left"
         >
-          <FaChevronLeft className="w-4 h-4" />
+          <FaChevronLeft className="w-4 h-4 text-gray-600" />
         </button>
         
         <div 
           ref={categorySliderRef}
-          className="flex space-x-2 overflow-x-auto py-2 px-8 scrollbar-hide scroll-smooth"
+          className="flex space-x-3 overflow-x-auto py-2 px-8 scrollbar-hide scroll-smooth"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {allCategoryOptions.map((cat) => (
             <button
               key={cat.value}
               onClick={() => handleCategoryClick(cat.value)}
-              className={`flex items-center space-x-2 whitespace-nowrap px-4 py-2 rounded-full transition-colors ${
-                filtersState.category === cat.value 
-                  ? 'bg-black text-white' 
-                  : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
-              }`}
+              className={`flex items-center space-x-2 px-4 py-2 min-w-max border transition-all duration-200
+                ${category === cat.value 
+                  ? 'border-black text-black bg-white' 
+                  : 'border-gray-200 text-gray-600 hover:border-gray-400 bg-white'}`}
             >
-              <span className="flex items-center justify-center">{cat.icon}</span>
-              <span>{cat.label}</span>
+              <span className="text-current">{cat.icon}</span>
+              <span className="font-medium">{cat.label}</span>
             </button>
           ))}
         </div>
-        
+
         <button 
           onClick={() => scrollCategories(1)}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full shadow-md p-1"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white border border-gray-200 p-2 hover:border-gray-400 transition-colors duration-200"
           aria-label="Scroll categories right"
         >
-          <FaChevronRight className="w-4 h-4" />
+          <FaChevronRight className="w-4 h-4 text-gray-600" />
         </button>
       </div>
+
+      <ShopHeader products={products} />
       
       <div className="border-t border-gray-200 pt-6 pb-4">
         {/* Filtering controls */}
@@ -383,6 +390,10 @@ const ShopPage = () => {
       </div>
     </div>
   )
+}
+
+ShopPage.propTypes = {
+    // Component doesn't take any props currently
 }
 
 export default ShopPage

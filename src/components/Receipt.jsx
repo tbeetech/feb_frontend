@@ -91,9 +91,23 @@ const Receipt = ({ orderDetails }) => {
                     <h3 className="text-lg font-semibold mb-2">Shipping Address</h3>
                     <p className="text-gray-600">{orderDetails.shippingAddress}</p>
                 </div>
+
+                {/* Contact Information */}
+                <div className="mt-6 pt-6 border-t">
+                    <h3 className="text-lg font-semibold mb-2">Contact Us</h3>
+                    <div className="space-y-2 text-sm text-gray-600">
+                        <p>WhatsApp:</p>
+                        <p>- Primary: <a href="https://wa.me/message/NP6XO5SXNXG5G1" className="text-green-600 hover:underline">Click to chat</a></p>
+                        <p>- Secondary: <a href="https://wa.me/2348088690856" className="text-green-600 hover:underline">Click to chat</a></p>
+                        <p className="mt-2">Instagram:</p>
+                        <p>- <a href="https://www.instagram.com/f.e.b_luxuryclosetbackup1" className="text-pink-600 hover:underline">@f.e.b_luxuryclosetbackup1</a></p>
+                        <p>- <a href="https://www.instagram.com/jumiescent_backup" className="text-pink-600 hover:underline">@jumiescent_backup</a></p>
+                        <p className="mt-2">Email: febluxurycloset@gmail.com</p>
+                    </div>
+                </div>
             </div>
         </div>
     );
 };
 
-export default Receipt; 
+export default Receipt;

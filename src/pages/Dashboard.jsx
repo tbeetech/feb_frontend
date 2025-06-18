@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
-import { FaUser, FaShoppingBag, FaCreditCard, FaStar, FaHeart, FaBoxOpen, FaUpload } from 'react-icons/fa';
+import { FaUser, FaShoppingBag, FaStar } from 'react-icons/fa';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -10,25 +10,20 @@ const Dashboard = () => {
     const { user } = useSelector((state) => state.auth);
     const [activeTab, setActiveTab] = useState('profile');
 
-    // Define standard tabs for all users
-    const standardTabs = [
+    // Define main tabs for user dashboard
+    const tabs = [
         { id: 'profile', label: 'Profile', icon: <FaUser />, path: '/dashboard/profile' },
         { id: 'orders', label: 'Orders', icon: <FaShoppingBag />, path: '/dashboard/orders' },
-        { id: 'payments', label: 'Payments', icon: <FaCreditCard />, path: '/dashboard/payments' },
-        { id: 'reviews', label: 'My Reviews', icon: <FaStar />, path: '/dashboard/reviews' },
-        { id: 'likes', label: 'Liked Reviews', icon: <FaHeart />, path: '/dashboard/likes' }
+        { id: 'reviews', label: 'Reviews', icon: <FaStar />, path: '/dashboard/reviews' }
     ];
 
-    // Define admin-only tabs
-    const adminTabs = [
-        { id: 'manage-products', label: 'Manage Products', icon: <FaBoxOpen />, path: '/admin/manage-products' },
-        { id: 'upload-product', label: 'Upload Product', icon: <FaUpload />, path: '/admin/upload-product' }
-    ];
-
-    // Combine tabs based on user role
-    const tabs = user?.isAdmin 
-        ? [...standardTabs, ...adminTabs] 
-        : standardTabs;
+    useEffect(() => {
+        // Set active tab based on current path
+        const currentPath = location.pathname.split('/').pop();
+        if (currentPath && tabs.some(tab => tab.id === currentPath)) {
+            setActiveTab(currentPath);
+        }
+    }, [location.pathname]);
 
     const handleTabClick = (tab) => {
         setActiveTab(tab.id);
@@ -41,22 +36,21 @@ const Dashboard = () => {
                 <div className="bg-white rounded-lg shadow">
                     {/* Header */}
                     <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-                        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+                        <h1 className="text-2xl font-bold text-gray-900">My Account</h1>
                         <p className="mt-1 text-sm text-gray-500">
                             Welcome back, {user?.username}
-                            {user?.isAdmin && <span className="ml-2 text-xs bg-gold text-white px-2 py-1 rounded-full">Admin</span>}
                         </p>
                     </div>
 
                     {/* Navigation Tabs */}
-                    <div className="border-b border-gray-200 overflow-x-auto">
+                    <div className="border-b border-gray-200">
                         <nav className="-mb-px flex space-x-8 px-6" aria-label="Tabs">
                             {tabs.map((tab) => (
                                 <button
                                     key={tab.id}
                                     onClick={() => handleTabClick(tab)}
                                     className={`
-                                        group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap
+                                        group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm
                                         ${activeTab === tab.id
                                             ? 'border-gold text-gold'
                                             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -88,4 +82,4 @@ const Dashboard = () => {
     );
 };
 
-export default Dashboard; 
+export default Dashboard;

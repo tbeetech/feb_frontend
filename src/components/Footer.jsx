@@ -113,8 +113,8 @@ const Footer = () => {
           <div>
             <h4 className="text-sm font-medium uppercase mb-4">Customer Service</h4>
             <ul className="space-y-3 text-sm">
-              <li><span className="text-gray-400 cursor-not-allowed">Help & Contact</span></li>
-              <li><span className="text-gray-400 cursor-not-allowed">Shipping & Delivery</span></li>
+              <li><Link to="/contact" className="text-gray-400">Help & Contact</Link></li>
+              <li><span className="text-gray-400">Shipping & Delivery</span></li>
             </ul>
           </div>
           
@@ -141,27 +141,45 @@ const Footer = () => {
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-black transition-colors retro-shadow"
-                    aria-label="Instagram"
+                    aria-label="Instagram Primary"
                 >
                     <FaInstagram size={18} />
                 </a>
                 <a 
-                    href="https://wa.me/message/NP6XO5SXNXG5G1" 
+                    href="https://www.instagram.com/jumiescent_backup" 
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-black transition-colors retro-shadow"
-                    aria-label="WhatsApp"
+                    aria-label="Instagram Secondary"
                 >
-                    <FaWhatsapp size={18} />
+                    <FaInstagram size={18} />
                 </a>
                 <a 
-                    href="https://t.me/febluxury" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
+                    href="https://t.me/febluxury"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-black transition-colors retro-shadow"
                     aria-label="Telegram"
                 >
                     <FaTelegram size={18} />
+                </a>
+                <a 
+                    href="https://wa.me/message/NP6XO5SXNXG5G1"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-black transition-colors retro-shadow"
+                    aria-label="WhatsApp Primary"
+                >
+                    <FaWhatsapp size={18} />
+                </a>
+                <a 
+                    href="https://wa.me/2348088690856"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-200 hover:text-black transition-colors retro-shadow"
+                    aria-label="WhatsApp Secondary"
+                >
+                    <FaWhatsapp size={18} />
                 </a>
             </div>
           </div>
@@ -188,9 +206,13 @@ const Footer = () => {
               </div>
             </div>
             
+<<<<<<< HEAD
             <a href="https://tbeetech.github.io" target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-black transition-colors">
               Designed by Tbeetech <span className="text-blue-600 hover:text-blue-800">portfolio</span>
             </a>
+=======
+         
+>>>>>>> 4bc0b31d466a22bf174f6197c820bfb642140d95
           </div>
         </div>
       </div>
