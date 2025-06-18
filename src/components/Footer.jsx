@@ -206,13 +206,8 @@ const Footer = () => {
               </div>
             </div>
             
-<<<<<<< HEAD
-            <a href="https://tbeetech.github.io" target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-black transition-colors">
-              Designed by Tbeetech <span className="text-blue-600 hover:text-blue-800">portfolio</span>
-            </a>
-=======
-         
->>>>>>> 4bc0b31d466a22bf174f6197c820bfb642140d95
+              <a href="https://tbeetech.github.io" target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-black transition-colors">
+                Designed by Tbeetech <span className="text-blue-600 hover:text-blue-800">portfolio</span>              </a>
           </div>
         </div>
       </div>
