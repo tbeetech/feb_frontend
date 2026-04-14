@@ -5,7 +5,6 @@ export const reviewApi = createApi({
     reducerPath: 'reviewApi',
     baseQuery: fetchBaseQuery({
         baseUrl: `${baseURL}/api/reviews`,
-        credentials: 'include',
         prepareHeaders: (headers) => {
             // Get token from localStorage
             const token = localStorage.getItem('token');
