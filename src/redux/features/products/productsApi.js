@@ -5,7 +5,13 @@ export const productsApi = createApi({
     reducerPath: 'productsApi',
     baseQuery: fetchBaseQuery({
         baseUrl: baseURL,
-        credentials: 'include'
+        prepareHeaders: (headers) => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                headers.set('Authorization', `Bearer ${token}`);
+            }
+            return headers;
+        }
     }),
     tagTypes: ["Products", "Product"],
     endpoints: (builder) => ({

@@ -257,8 +257,7 @@ const Checkout = () => {
       formData.append('adminEmails',    JSON.stringify(['febluxurycloset@gmail.com']));
 
       await axios.post('https://feb-backend.vercel.app/api/send-receipt-email', formData, {
-        headers:        { 'Content-Type': 'multipart/form-data' },
-        withCredentials: true,
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       toast.success('Order confirmation emailed successfully');
       return true;
