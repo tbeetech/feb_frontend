@@ -10,6 +10,7 @@ import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { clearCart } from '../../redux/features/cart/cartSlice';
 import { motion } from 'framer-motion';
+import { baseURL } from '../../utils/baseURL';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -256,7 +257,7 @@ const Checkout = () => {
       formData.append('productImages', JSON.stringify(images));
       formData.append('adminEmails',    JSON.stringify(['febluxurycloset@gmail.com']));
 
-      await axios.post(`${import.meta.env.VITE_API_URL || ''}/api/send-receipt-email`, formData, {
+      await axios.post(`${baseURL}/api/send-receipt-email`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       toast.success('Order confirmation emailed successfully');
