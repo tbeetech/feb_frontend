@@ -1,18 +1,21 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react'
 import { baseURL } from '../../../utils/baseURL'
+
+// Wrap fetchBaseQuery with retry for transient server errors (e.g. 500 from cold starts)
+const baseQueryWithRetry = retry(fetchBaseQuery({
+    baseUrl: baseURL,
+    prepareHeaders: (headers) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            headers.set('Authorization', `Bearer ${token}`);
+        }
+        return headers;
+    }
+}), { maxRetries: 2 });
 
 export const productsApi = createApi({
     reducerPath: 'productsApi',
-    baseQuery: fetchBaseQuery({
-        baseUrl: baseURL,
-        prepareHeaders: (headers) => {
-            const token = localStorage.getItem('token');
-            if (token) {
-                headers.set('Authorization', `Bearer ${token}`);
-            }
-            return headers;
-        }
-    }),
+    baseQuery: baseQueryWithRetry,
     tagTypes: ["Products", "Product"],
     endpoints: (builder) => ({
         fetchAllProducts: builder.query({

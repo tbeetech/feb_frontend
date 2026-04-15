@@ -17,7 +17,7 @@ const DealsSection = () => {
   const featuredProductsRef = useRef(null);
   
   // Fetch some random products to display as deals
-  const { data } = useFetchAllProductsQuery({ 
+  const { data, error, refetch } = useFetchAllProductsQuery({ 
     limit: 6,
     sort: '-rating'
   });
