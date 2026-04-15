@@ -68,7 +68,12 @@ const TrendingProductSlider = () => {
         );
     }
 
-    if (error || products.length === 0) {
+    if (error) {
+        console.error('TrendingProductSlider: Failed to load products', error);
+        return null;
+    }
+
+    if (products.length === 0) {
         return null;
     }
 
