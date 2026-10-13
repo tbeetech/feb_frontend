@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "title": "The Art of Mindful Stitches: Why Handmade Crochet Transcends Fast Fashion",
+    "subtitle": "Artisan Philosophy",
+    "date": "14th October 2026",
+    "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/Lady_crocheting_traditional_xhosa_beanie.jpg/960px-Lady_crocheting_traditional_xhosa_beanie.jpg"
+  },
+  {
+    "id": 2,
+    "title": "From Organic Yarn Skein to Silhouette: Crafting the Kyoto Halter Top",
+    "subtitle": "Behind The Loom",
+    "date": "28th September 2026",
+    "imageUrl": "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": 3,
+    "title": "Beginner's Guide: 5 Fundamental Stitches Every Aspiring Crocheter Needs",
+    "subtitle": "Knitbi Academy",
+    "date": "15th August 2026",
+    "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/54/Hooks%2C_crochet_%28AM_1965.78.619-4%29.jpg/960px-Hooks%2C_crochet_%28AM_1965.78.619-4%29.jpg"
+  },
+  {
+    "id": 4,
+    "title": "Caring for Your Heirloom Crochet: Washing, Blocking & Preserving",
+    "subtitle": "Garment Care",
+    "date": "2nd July 2026",
+    "imageUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/Blanket_of_natural_dyed_yarn.jpg/960px-Blanket_of_natural_dyed_yarn.jpg"
+  }
+]
